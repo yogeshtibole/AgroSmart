@@ -1,0 +1,12 @@
+.yield-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.yield-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; height:220px; }
+.yield-hero { text-align:center; padding:24px 0; border-bottom:1px solid #eee; margin-bottom:20px; }
+.yield-number { font-family:'DM Serif Display',serif; font-size:56px; color:var(--green-dark); line-height:1; }
+.yield-unit { font-size:16px; color:var(--text-mid); margin-top:6px; }
+.yield-range { font-size:13px; color:var(--text-light); margin-top:4px; }
+.yield-stats { display:flex; gap:12px; }
+.ystat { background:var(--green-light); border-radius:10px; padding:12px; text-align:center; flex:1; }
+.ystat span { display:block; font-weight:700; font-size:14px; color:var(--green-dark); }
+.ystat small { font-size:11px; color:var(--text-mid); }
+.yield-note { font-size:11px; color:var(--text-light); margin-top:14px; font-style:italic; }
+@media(max-width:768px){ .yield-grid{ grid-template-columns:1fr; } }

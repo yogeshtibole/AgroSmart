@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Advisor | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='crop_advisor.css') }}">
+</head>
+<body>
+{% set active = 'crop' %}
+{% include '_sidebar.html' %}
+
+<div class="main">
+  <p class="page-title">🌱 Crop Advisor</p>
+  <p class="page-sub">Get personalized crop recommendations based on your soil and season</p>
+
+  <div class="advisor-grid">
+    <div class="card">
+      <div class="card-title">🧪 Farm Conditions</div>
+
+      <!-- Auto-fill from user profile -->
+      <label class="form-label">Soil Type</label>
+      <select class="form-select" id="soilType">
+        <option value="">Select soil type</option>
+        {% for st in ['Black Soil','Red Soil','Alluvial Soil','Laterite Soil'] %}
+          <option {% if user and user[5]==st %}selected{% endif %} value="{{ st }}">{{ st }}</option>
+        {% endfor %}
+      </select>
+
+      <label class="form-label">Growing Season</label>
+      <select class="form-select" id="season">
+        <option value="">Select season</option>
+        <option>Kharif (Jun–Oct)</option>
+        <option>Rabi (Nov–Mar)</option>
+        <option>Zaid (Mar–Jun)</option>
+      </select>
+
+      <div class="form-row">
+        <div>
+          <label class="form-label">Soil pH</label>
+          <input class="form-input" type="number" id="ph" step="0.1" placeholder="e.g. 6.5" value="{{ user[4] if user and user[4] else '' }}">
+        </div>
+        <div>
+          <label class="form-label">Annual Rainfall (mm)</label>
+          <input class="form-input" type="number" id="rainfall" placeholder="e.g. 800">
+        </div>
+      </div>
+
+      <button class="btn-green" onclick="getCrop()">🌾 Get Recommendation</button>
+    </div>
+
+    <div class="card result-panel" id="resultPanel">
+      <div class="card-title">✅ Crop Recommendations</div>
+      <div id="cropResult" class="crop-placeholder">
+        <div class="placeholder-icon">🌱</div>
+        <p>Fill in your farm conditions and click Get Recommendation</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+};
+
+var CROP_DATA = {
+  "Black Soil": {
+    "Kharif (Jun–Oct)": { crops: ["Cotton 🌿","Soybean 🫘","Sorghum 🌾"], note: "Black soil retains moisture well — ideal for Kharif crops." },
+    "Rabi (Nov–Mar)":  { crops: ["Wheat 🌾","Chickpea 🫘","Sunflower 🌻"], note: "Good winter crop options for black soil." },
+    "Zaid (Mar–Jun)":  { crops: ["Watermelon 🍉","Cucumber 🥒","Moong Dal 🫘"], note: "Short season crops work well in Zaid." }
+  },
+  "Red Soil": {
+    "Kharif (Jun–Oct)": { crops: ["Groundnut 🥜","Millets 🌾","Finger Millet"], note: "Red soil works well for drought-tolerant crops." },
+    "Rabi (Nov–Mar)":  { crops: ["Mustard 🌻","Lentils 🫘","Barley 🌾"], note: "Suitable for low-moisture winter crops." },
+    "Zaid (Mar–Jun)":  { crops: ["Sesame 🌿","Moong 🫘"], note: "Light crops recommended for summer." }
+  },
+  "Alluvial Soil": {
+    "Kharif (Jun–Oct)": { crops: ["Rice 🍚","Maize 🌽","Jute 🌿"], note: "Alluvial soil is highly fertile — great for paddy." },
+    "Rabi (Nov–Mar)":  { crops: ["Wheat 🌾","Mustard 🌻","Potato 🥔"], note: "One of the best soils for rabi crops." },
+    "Zaid (Mar–Jun)":  { crops: ["Sugarcane 🎋","Cucumber 🥒","Gourd 🫑"], note: "High yield potential in this season." }
+  },
+  "Laterite Soil": {
+    "Kharif (Jun–Oct)": { crops: ["Cashew 🌰","Coconut 🥥","Rubber 🌿"], note: "Laterite soil is acidic — suited for plantation crops." },
+    "Rabi (Nov–Mar)":  { crops: ["Tapioca 🌿","Pineapple 🍍"], note: "Tropical crops thrive in laterite soil." },
+    "Zaid (Mar–Jun)":  { crops: ["Coconut 🥥","Banana 🍌"], note: "Perennial crops are best for this soil type." }
+  }
+};
+
+function getCrop(){
+  var soil    = document.getElementById("soilType").value;
+  var season  = document.getElementById("season").value;
+  var ph      = parseFloat(document.getElementById("ph").value);
+  var rain    = parseInt(document.getElementById("rainfall").value);
+  var el      = document.getElementById("cropResult");
+
+  if(!soil || !season){
+    el.innerHTML = '<div class="result-box warning"><strong>⚠️ Please select Soil Type and Season.</strong></div>';
+    return;
+  }
+
+  var data = CROP_DATA[soil] && CROP_DATA[soil][season];
+  var phNote = "";
+  if(ph){
+    if(ph < 5.5) phNote = "⚠️ Soil is very acidic (pH "+ ph +"). Consider lime application.";
+    else if(ph > 8) phNote = "⚠️ Soil is alkaline (pH "+ ph +"). Consider gypsum treatment.";
+    else phNote = "✅ Soil pH ("+ ph +") is in suitable range.";
+  }
+
+  if(data){
+    var phHtml = phNote ? '<p style="margin-top:8px">'+phNote+'</p>' : '';
+    var rainHtml = (rain && rain < 400) ? '<p style="margin-top:8px">💧 Low rainfall area — consider irrigation planning.</p>' : '';
+    var chipsHtml = data.crops.map(function(c){ return '<div class="crop-chip">'+c+'</div>'; }).join('');
+    el.innerHTML =
+      '<div class="crop-cards">'+chipsHtml+'</div>'+
+      '<div class="result-box" style="margin-top:16px">'+
+        '<strong>💡 Advice</strong>'+
+        '<p>'+data.note+'</p>'+
+        phHtml+rainHtml+
+      '</div>';
+  } else {
+    var elsePhHtml = phNote ? '<p style="margin-top:8px">'+phNote+'</p>' : '';
+    el.innerHTML = '<div class="result-box"><strong>🌾 General Recommendation</strong><p>Maize, Pulses — suitable under mixed soil conditions.</p>'+elsePhHtml+'</div>';  }
+}
+</script>
+</body>
+</html>

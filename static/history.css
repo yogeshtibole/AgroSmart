@@ -1,0 +1,27 @@
+.tabs { display:flex; gap:6px; border-bottom:2px solid #e8eee8; margin-bottom:20px; }
+.tab { background:none; border:none; cursor:pointer; padding:10px 20px; font-size:13px; font-weight:600; color:#888; border-bottom:3px solid transparent; margin-bottom:-2px; font-family:inherit; transition:all .2s; }
+.tab:hover { color:var(--green-mid); }
+.tab.active { color:var(--green-mid); border-bottom-color:var(--green-mid); }
+.timeline { display:flex; flex-direction:column; gap:10px; }
+.tl-item { display:flex; align-items:center; gap:14px; background:var(--white); padding:14px 18px; border-radius:12px; border:1px solid #e8eee8; }
+.tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.tl-dot.login { background:#4caf50; }
+.tl-dot.action { background:#ff9800; }
+.tl-body { flex:1; }
+.tl-label { font-size:14px; font-weight:600; color:var(--text); }
+.tl-time { font-size:12px; color:var(--text-light); margin-top:2px; }
+.tl-badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.badge-login { background:#e8f5e9; color:#2e7d32; }
+.badge-action { background:#fff3e0; color:#e65100; }
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-light); background:var(--white); border-radius:14px; border:1px dashed #ddd; }
+
+.tabs-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+.tabs-row .tabs { border-bottom:none; margin-bottom:0; }
+.del-all-btn { padding:8px 16px; background:#ffebee; border:1.5px solid #ffcdd2; border-radius:8px; color:#c62828; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .2s; }
+.del-all-btn:hover { background:#ffcdd2; }
+.section-delete-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.del-section-btn { padding:6px 14px; background:#fff3e0; border:1.5px solid #ffe082; border-radius:8px; color:#e65100; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .2s; }
+.del-section-btn:hover { background:#ffe082; }
+.tl-item { transition:opacity .3s; }
+.del-item-btn { background:none; border:none; color:#ccc; font-size:14px; cursor:pointer; padding:4px 8px; border-radius:6px; flex-shrink:0; transition:color .2s, background .2s; }
+.del-item-btn:hover { color:#e53935; background:#ffebee; }

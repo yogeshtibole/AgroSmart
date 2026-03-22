@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irrigation | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='irrigation.css') }}">
+</head>
+<body>
+{% set active = 'irrigation' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">💧 Smart Irrigation Advisor</p>
+  <p class="page-sub">Calculate irrigation needs based on soil moisture and weather</p>
+
+  <div class="irr-grid">
+    <div class="card">
+      <div class="card-title">🌱 Input Parameters</div>
+
+      <label class="form-label">Crop Type</label>
+      <select class="form-select" id="crop">
+        <option>Wheat</option><option>Rice</option><option>Maize</option>
+        <option>Cotton</option><option>Sugarcane</option><option>Soybean</option>
+      </select>
+
+      <label class="form-label">Soil Moisture (%)</label>
+      <input class="form-input" type="number" id="moisture" placeholder="e.g. 45" min="0" max="100">
+      <div class="moisture-bar-wrap"><div class="moisture-bar" id="moistureBar"></div></div>
+
+      <label class="form-label">Weather Condition</label>
+      <select class="form-select" id="weather">
+        <option value="Dry">☀️ Dry / Hot</option>
+        <option value="Normal">⛅ Normal</option>
+        <option value="Rainy">🌧 Rainy</option>
+      </select>
+
+      <label class="form-label">Farm Size (acres)</label>
+      <input class="form-input" type="number" id="farmSize" placeholder="e.g. 2" value="{{ user[3] if user and user[3] else '' }}">
+
+      <button class="btn-green" onclick="checkIrrigation()">💦 Check Irrigation Need</button>
+    </div>
+
+    <div class="card" id="resultCard">
+      <div class="card-title">✅ Recommendation</div>
+      <div class="irr-placeholder">
+        <div style="font-size:48px;margin-bottom:12px">💧</div>
+        <p style="color:var(--text-light);font-size:14px">Enter values to get irrigation advice</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+  document.getElementById("moisture").addEventListener("input", updateBar);
+};
+
+function updateBar(){
+  var val = parseInt(document.getElementById("moisture").value) || 0;
+  var bar = document.getElementById("moistureBar");
+  var pct = Math.min(100, Math.max(0, val));
+  bar.style.width = pct + "%";
+  bar.style.background = pct < 30 ? "#e53935" : pct < 60 ? "#ff9800" : "#4caf50";
+}
+
+function checkIrrigation(){
+  var crop     = document.getElementById("crop").value;
+  var moisture = parseInt(document.getElementById("moisture").value);
+  var weather  = document.getElementById("weather").value;
+  var farmSize = parseFloat(document.getElementById("farmSize").value) || 1;
+  var card     = document.getElementById("resultCard");
+
+  if(isNaN(moisture)){ alert("Enter soil moisture value"); return; }
+
+  var title, msg, cls, litres;
+  if(moisture < 30){
+    title="🚨 Urgent Irrigation Required"; cls="danger";
+    msg="Soil is critically dry. Irrigate immediately to prevent crop stress.";
+    litres=(farmSize * 2500).toFixed(0);
+  } else if(moisture <= 50 && weather==="Dry"){
+    title="⚠️ Light Irrigation Recommended"; cls="warning";
+    msg="Moderate soil moisture with dry weather. Light irrigation advised.";
+    litres=(farmSize * 1200).toFixed(0);
+  } else if(moisture <= 60 && weather!=="Rainy"){
+    title="💧 Monitor and Irrigate if Needed"; cls="info";
+    msg="Soil moisture is acceptable. Irrigate if no rain in next 2 days.";
+    litres=(farmSize * 800).toFixed(0);
+  } else if(weather==="Rainy"){
+    title="✅ No Irrigation Needed"; cls="success";
+    msg="Rain expected or currently raining. Skip irrigation to avoid waterlogging.";
+    litres=0;
+  } else {
+    title="✅ Soil Moisture Sufficient"; cls="success";
+    msg="Soil has adequate moisture. No irrigation needed today.";
+    litres=0;
+  }
+
+  var litresHtml = litres > 0 ? '<div class="istat"><span>'+litres+'L</span><small>Est. Water Needed</small></div>' : '';
+  card.innerHTML =
+    '<div class="card-title">✅ Recommendation</div>'+
+    '<div class="result-box '+cls+'" style="margin-bottom:16px">'+
+      '<strong>'+title+'</strong>'+
+      '<p style="margin-top:6px">'+msg+'</p>'+
+    '</div>'+
+    '<div class="irr-stats">'+
+      '<div class="istat"><span>'+crop+'</span><small>Crop</small></div>'+
+      '<div class="istat"><span>'+moisture+'%</span><small>Moisture</small></div>'+
+      '<div class="istat"><span>'+weather+'</span><small>Weather</small></div>'+
+      litresHtml+
+    '</div>';
+}
+</script>
+</body>
+</html>

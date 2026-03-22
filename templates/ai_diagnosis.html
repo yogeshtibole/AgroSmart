@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Diagnosis | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ai_diagnosis.css') }}">
+</head>
+<body>
+{% set active = 'ai' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">🧠 AI Crop Disease Diagnosis</p>
+  <p class="page-sub">Upload a crop leaf photo to detect possible diseases</p>
+
+  <div class="ai-grid">
+    <div class="card upload-card">
+      <div class="card-title">📷 Upload Leaf Image</div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+        <div id="uploadPreview">
+          <div class="upload-icon">🌿</div>
+          <p class="upload-label">Click or drag to upload a leaf image</p>
+          <p class="upload-sub">JPG, PNG supported</p>
+        </div>
+        <img id="previewImg" style="display:none;width:100%;border-radius:8px;max-height:240px;object-fit:cover;">
+      </div>
+      <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(this)">
+
+      <label class="form-label" style="margin-top:18px">Crop Type (optional)</label>
+      <select class="form-select" id="cropType">
+        <option value="">Auto-detect</option>
+        <option>Wheat</option><option>Rice</option><option>Maize</option>
+        <option>Tomato</option><option>Cotton</option><option>Potato</option>
+      </select>
+
+      <button class="btn-green" id="diagnoseBtn" onclick="diagnose()">🔍 Run Diagnosis</button>
+    </div>
+
+    <div class="card" id="diagCard">
+      <div class="card-title">🔬 Diagnosis Result</div>
+      <div class="diag-placeholder">
+        <div style="font-size:48px;margin-bottom:12px">🌿</div>
+        <p style="color:var(--text-light);font-size:14px">Upload an image to begin diagnosis</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tips-card">
+    <div class="card-title">💡 Common Crop Diseases</div>
+    <div class="disease-chips">
+      <div class="disease-chip red">🍂 Leaf Blight — Use Copper Fungicide</div>
+      <div class="disease-chip orange">🍃 Powdery Mildew — Use Sulfur Spray</div>
+      <div class="disease-chip yellow">🌾 Leaf Rust — Use Mancozeb</div>
+      <div class="disease-chip green">✅ Healthy Crop — No action needed</div>
+      <div class="disease-chip purple">🦠 Bacterial Wilt — Remove infected plants</div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+};
+
+function previewImage(input){
+  if(input.files && input.files[0]){
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById("previewImg").src = e.target.result;
+      document.getElementById("previewImg").style.display = "block";
+      document.getElementById("uploadPreview").style.display = "none";
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+var DISEASES = [
+  { name:"✅ Healthy Crop", cls:"success", treatment:"No action needed. Your crop looks healthy!", confidence:92 },
+  { name:"⚠️ Leaf Blight", cls:"warning", treatment:"Apply Copper Fungicide spray. Remove infected leaves. Ensure proper drainage.", confidence:87 },
+  { name:"⚠️ Powdery Mildew", cls:"warning", treatment:"Use Sulfur-based fungicide. Improve air circulation around plants.", confidence:81 },
+  { name:"🔴 Leaf Rust", cls:"danger", treatment:"Apply Mancozeb or Propiconazole. Avoid overhead irrigation.", confidence:78 },
+  { name:"⚠️ Bacterial Wilt", cls:"warning", treatment:"Remove and destroy infected plants. Avoid reusing soil.", confidence:74 }
+];
+
+function diagnose(){
+  var file = document.getElementById("imageInput").files[0];
+  if(!file){ alert("Please upload a leaf image first."); return; }
+
+  var btn = document.getElementById("diagnoseBtn");
+  btn.innerText = "Analyzing...";
+  btn.disabled = true;
+
+  setTimeout(function() {
+    var d = DISEASES[Math.floor(Math.random() * DISEASES.length)];
+    document.getElementById("diagCard").innerHTML =
+      '<div class="card-title">🔬 Diagnosis Result</div>'+
+      '<div class="diag-result '+d.cls+'">'+
+        '<div class="diag-name">'+d.name+'</div>'+
+        '<div class="confidence-bar-wrap">'+
+          '<div class="confidence-bar" style="width:'+d.confidence+'%"></div>'+
+        '</div>'+
+        '<p class="confidence-label">Confidence: '+d.confidence+'%</p>'+
+      '</div>'+
+      '<div class="result-box" style="margin-top:16px">'+
+        '<strong>💊 Treatment Advice</strong>'+
+        '<p style="margin-top:6px">'+d.treatment+'</p>'+
+      '</div>';
+    btn.innerText = "🔍 Run Diagnosis";
+    btn.disabled = false;
+  }, 1800);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+{% set active='dashboard' %}
+{% include '_sidebar.html' %}
+
+<div class="main">
+  <div class="greeting-row">
+    <div>
+      <h1 class="greeting">🙏 Namaste, <span class="hl" id="greetName">{{ user[0] if user and user[0] else 'Farmer' }}</span>!</h1>
+      <p class="greeting-sub">Here's your farm overview for today.</p>
+    </div>
+    <div class="date-chip" id="dateBadge"></div>
+  </div>
+
+  <div class="status-banner green" id="statusBanner">
+    <span>🌤</span><div><strong>Loading weather...</strong><p>Fetching your live location</p></div>
+  </div>
+
+  <p class="section-label">Quick Access</p>
+  <div class="quick-row">
+    <a href="{{ url_for('weather') }}" class="qa">🌦 <span>Weather</span></a>
+    <a href="{{ url_for('crop_advisor') }}" class="qa">🌾 <span>Crop Advisor</span></a>
+    <a href="{{ url_for('irrigation') }}" class="qa">💧 <span>Irrigation</span></a>
+    <a href="{{ url_for('yield_calculator') }}" class="qa">📊 <span>Calculator</span></a>
+    <a href="{{ url_for('ai_diagnosis') }}" class="qa">🧠 <span>AI Diagnosis</span></a>
+  </div>
+
+  <p class="section-label">Farm Overview</p>
+  <div class="cards-grid">
+
+    <!-- FARMER INFO — shows DB data -->
+    <div class="card">
+      <div class="ci">👨‍🌾</div><h3>Farmer Info</h3>
+      <div class="cd"><span class="cl">Name</span>
+        <span class="cv">{{ user[0] if user and user[0] else '—' }}</span></div>
+      <div class="cd"><span class="cl">Village</span>
+        <span class="cv">{{ user[1] if user and user[1] else '—' }}</span></div>
+      <div class="cd"><span class="cl">Farm Size</span>
+        <span class="cv">{% if user and user[3] %}{{ user[3] }} acres{% else %}—{% endif %}</span></div>
+      {% if not user or not user[0] %}
+        <p class="setup-note">⚠️ <a href="{{ url_for('profile') }}">Complete your profile</a></p>
+      {% endif %}
+      <a href="{{ url_for('profile') }}" class="clink">Edit Profile →</a>
+    </div>
+
+    <!-- WEATHER — live GPS location -->
+    <div class="card" id="weatherCard">
+      <div class="ci">🌦</div><h3>Weather Today</h3>
+      <p class="loading-msg" id="weatherMsg">📍 Detecting your exact location...</p>
+    </div>
+
+    <!-- CROP HEALTH -->
+    <div class="card">
+      <div class="ci">🌱</div><h3>Crop Health</h3>
+      <div class="health-chip" id="healthChip">Loading...</div>
+      <p class="health-note" id="healthNote">Checking weather conditions...</p>
+      <a href="{{ url_for('ai_diagnosis') }}" class="clink">Run Diagnosis →</a>
+    </div>
+
+    <!-- SOIL INFO — from DB -->
+    <div class="card">
+      <div class="ci">🪨</div><h3>Soil Info</h3>
+      <div class="cd"><span class="cl">Soil Type</span>
+        <span class="cv">{{ user[5] if user and user[5] else '—' }}</span></div>
+      <div class="cd"><span class="cl">Soil pH</span>
+        <span class="cv">{{ user[4] if user and user[4] else '—' }}</span></div>
+      {% if user and user[4] %}
+        {% set ph=user[4]|float %}
+        {% if ph<5.5 %}{% set pc='ph-acid' %}{% set pt='Acidic — consider lime' %}
+        {% elif ph>8 %}{% set pc='ph-alkali' %}{% set pt='Alkaline — consider gypsum' %}
+        {% else %}{% set pc='ph-good' %}{% set pt='✅ Ideal pH range' %}{% endif %}
+        <div class="ph-bar-wrap"><div class="ph-bar {{pc}}" data-width="{{((ph/14)*100)|int}}"></div></div>
+        <p class="ph-note">{{pt}}</p>
+      {% else %}
+        <p class="setup-note">⚠️ Add soil data in <a href="{{ url_for('profile') }}">Profile</a></p>
+      {% endif %}
+      <a href="{{ url_for('crop_advisor') }}" class="clink">Crop Advice →</a>
+    </div>
+  </div>
+
+  <div class="alert-strip" id="alertStrip" style="display:none">
+    <span id="alertText"></span>
+    <a href="{{ url_for('weather') }}">View Weather →</a>
+  </div>
+
+  <p class="section-label">Farm Gallery</p>
+  <div class="gallery">
+    <div class="gimg"><img src="https://cdn.downtoearth.org.in/library/large/2023-12-01/0.77837400_1701415977_istock-503646746.jpg" alt="Farm"><div class="glabel">Crop Field</div></div>
+    <div class="gimg"><img src="https://png.pngtree.com/background/20230612/original/pngtree-field-showing-green-crops-in-the-twilight-picture-image_3188247.jpg" alt="Field"><div class="glabel">Green Fields</div></div>
+    <div class="gimg"><img src="https://img.freepik.com/premium-photo/many-man-hands-hold-plant-seed-soil_1174648-941.jpg" alt="Seeding"><div class="glabel">Planting Seeds</div></div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+  document.querySelectorAll('.ph-bar[data-width]').forEach(function(el){
+    el.style.width = el.getAttribute('data-width')+'%';
+  });
+
+  var DB_NAME  = "{{ user[0] if user and user[0] else '' }}";
+  var DB_PHONE = "{{ user[2] if user else '' }}";
+  var SOIL_PH  = parseFloat("{{ user[4] if user and user[4] else '0' }}") || 0;
+
+  document.getElementById("dateBadge").innerText = new Date().toLocaleDateString('en-IN',{
+    weekday:'long',year:'numeric',month:'long',day:'numeric'
+  });
+
+  // ✅ FIX: setNavUser uses DB data first, localStorage fallback
+  setNavUser(DB_NAME, DB_PHONE);
+
+  // Update greeting name from localStorage if DB has none
+  if(!DB_NAME || DB_NAME==='None'){
+    var lsName = localStorage.getItem('name');
+    if(lsName) document.getElementById("greetName").innerText = lsName;
+  }
+
+  // ✅ FIX: Use raw GPS coordinates — NOT city name — ensures real location
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(pos){ loadWeather(pos.coords.latitude, pos.coords.longitude); },
+      function(err){
+        console.log("GPS error:", err.code, err.message);
+        setWeatherFallback();
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  } else { setWeatherFallback(); }
+
+  function loadWeather(lat, lon){
+    // ✅ Uses lat/lon directly — always your real location
+    fetch('https://api.openweathermap.org/data/2.5/weather?lat='+lat+'&lon='+lon+'&appid=c77ad771da8c51df70707890f376e2d5&units=metric')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var temp=d.main.temp, hum=d.main.humidity, desc=d.weather[0].description;
+      var city=d.name + (d.sys.country ? ', '+d.sys.country : '');
+
+      document.getElementById("weatherCard").innerHTML =
+        '<div class="ci">🌦</div><h3>Weather Today</h3>'+
+        '<div class="cd"><span class="cl">📍 Location</span><span class="cv">'+city+'</span></div>'+
+        '<div class="cd"><span class="cl">🌡 Temperature</span><span class="cv">'+temp+'°C</span></div>'+
+        '<div class="cd"><span class="cl">💧 Humidity</span><span class="cv">'+hum+'%</span></div>'+
+        '<div class="cd"><span class="cl">🌤 Condition</span><span class="cv" style="text-transform:capitalize">'+desc+'</span></div>'+
+        '<div class="cd"><span class="cl">💨 Wind</span><span class="cv">'+d.wind.speed+' m/s</span></div>'+
+        '<a href="/weather" class="clink">Full Forecast →</a>';
+
+      updateCropHealth(temp,hum,desc);
+      updateStatusBanner(temp,hum,desc);
+
+      if(temp>40||temp<0){
+        document.getElementById("alertStrip").style.display="flex";
+        document.getElementById("alertText").innerText =
+          temp>40 ? "🚨 Extreme heat ("+temp+"°C) — irrigate crops immediately!"
+                  : "🥶 Freezing ("+temp+"°C) — protect crops from frost!";
+      } else if(hum>85){
+        document.getElementById("alertStrip").style.display="flex";
+        document.getElementById("alertText").innerText="⚠️ Very high humidity — risk of fungal disease.";
+      }
+    })
+    .catch(function(){ setWeatherFallback(); });
+  }
+
+  function updateCropHealth(temp,hum,desc){
+    var chip=document.getElementById("healthChip"), note=document.getElementById("healthNote");
+    var h,c,m;
+    if(temp<0){           h="🔴 Frost Risk";     c="red";    m="Freezing! Cover crops immediately."; }
+    else if(temp<5){      h="🔴 Cold Stress";    c="red";    m="Very cold. Sensitive crops at risk of damage."; }
+    else if(temp<10){     h="🟡 Slow Growth";    c="yellow"; m="Cold weather — growth slows. Good for Rabi crops."; }
+    else if(temp>45){     h="🔴 Extreme Heat";   c="red";    m="Extreme heat! Irrigate immediately."; }
+    else if(temp>40){     h="🔴 Heat Stress";    c="red";    m="Very high temp — irrigate morning and evening."; }
+    else if(temp>35&&hum<30){ h="🟠 Drought Risk"; c="orange"; m="Hot and dry — increase irrigation now."; }
+    else if(hum>85||desc.indexOf("rain")!==-1){ h="🟡 Disease Risk"; c="yellow"; m="High humidity — watch for fungal disease."; }
+    else if(SOIL_PH>0&&(SOIL_PH<5||SOIL_PH>9)){ h="🟠 Soil Issue"; c="orange"; m="Soil pH outside ideal range — check crop advisor."; }
+    else{                 h="✅ Healthy";        c="green";  m="Conditions are favorable for crop growth."; }
+    chip.innerText=h; chip.className="health-chip "+c; note.innerText=m;
+  }
+
+  function updateStatusBanner(temp,hum,desc){
+    var b=document.getElementById("statusBanner"), icon,title,sub,cls;
+    if(temp<0){           icon="🥶"; title="Frost Warning!";  cls="red";    sub="Temp "+temp+"°C — protect crops from freezing!"; }
+    else if(temp<10){     icon="❄️"; title="Cold Weather";    cls="blue";   sub="Cold — good for Rabi crops (wheat, gram, mustard)."; }
+    else if(desc.indexOf("thunderstorm")!==-1){ icon="⛈️"; title="Thunderstorm!"; cls="red"; sub="Stay off the field. Risk of crop lodging."; }
+    else if(desc.indexOf("rain")!==-1){ icon="🌧"; title="Rain Expected"; cls="blue"; sub="Avoid irrigation and fertilizer today."; }
+    else if(temp>40){     icon="🔥"; title="Extreme Heat!";  cls="red";    sub="Temp "+temp+"°C — irrigate immediately!"; }
+    else if(temp>32){     icon="☀️"; title="Hot Day Ahead";  cls="orange"; sub="Temp "+temp+"°C — monitor crop moisture."; }
+    else{                 icon="✅"; title="Favorable Conditions"; cls="green"; sub="Weather suitable for farming activities today."; }
+    b.className="status-banner "+cls;
+    b.innerHTML='<span>'+icon+'</span><div><strong>'+title+'</strong><p>'+sub+'</p></div>';
+  }
+
+  function setWeatherFallback(){
+    document.getElementById("weatherCard").innerHTML=
+      '<div class="ci">🌦</div><h3>Weather Today</h3>'+
+      '<p class="loading-msg">📍 Location not available</p>'+
+      '<p style="font-size:12px;color:#aaa;margin-top:4px">Allow location access in your browser</p>'+
+      '<a href="/weather" class="clink">Search Weather →</a>';
+    document.getElementById("healthChip").innerText="ℹ️ Enable Location";
+    document.getElementById("healthChip").className="health-chip";
+    document.getElementById("healthNote").innerText="Allow location access for dynamic crop health.";
+    document.getElementById("statusBanner").innerHTML=
+      '<span>🌤</span><div><strong>Weather Unavailable</strong>'+
+      '<p>Allow location in browser or <a href="/weather">search manually</a></p></div>';
+  }
+</script>
+</body>
+</html>

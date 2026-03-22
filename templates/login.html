@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSmart — Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="left-inner">
+    <div class="logo-mark"><div class="logo-leaf">🌾</div></div>
+    <h1 class="brand-name">AgroSmart</h1>
+    <p class="brand-tagline">Intelligent Farming,<br><em>for every farmer.</em></p>
+    <div class="features-list">
+      <div class="feature-item"><span class="feat-icon">🌦</span><div><strong>Live Weather</strong><p>Real-time forecasts for your farm</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🌱</span><div><strong>Crop Advisor</strong><p>AI-powered recommendations</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🧠</span><div><strong>Disease Diagnosis</strong><p>Detect crop disease early</p></div></div>
+      <div class="feature-item"><span class="feat-icon">💧</span><div><strong>Smart Irrigation</strong><p>Optimize water usage</p></div></div>
+    </div>
+    <div class="left-footer">Trusted by farmers across India 🇮🇳</div>
+  </div>
+  <div class="deco deco-1"></div><div class="deco deco-2"></div><div class="deco deco-3"></div>
+</div>
+
+<div class="right-panel">
+  <div class="right-inner">
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login',this)">Returning Farmer</button>
+      <button class="tab" onclick="switchTab('register',this)">New Here?</button>
+    </div>
+
+    <!-- LOGIN TAB -->
+    <div id="tab-login" class="form-panel active">
+      <div class="form-header"><h2>Welcome back 👋</h2><p>Enter your mobile number to continue</p></div>
+      <div class="input-group">
+        <label>Mobile Number</label>
+        <div class="input-wrap">
+          <span class="input-prefix">+91</span>
+          <input type="tel" id="login_mobile" placeholder="98765 43210" maxlength="10">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="loginUser()">
+        <span>Login to Dashboard</span><span class="btn-arrow">→</span>
+      </button>
+      <p class="form-note">No account? <a href="#" onclick="switchTabByName('register')">Create your profile →</a></p>
+    </div>
+
+    <!-- REGISTER TAB -->
+    <div id="tab-register" class="form-panel">
+      <div class="form-header"><h2>Set up your farm 🌾</h2><p>Takes less than a minute</p></div>
+      <div class="input-grid">
+        <div class="input-group full">
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="e.g. Ramesh Patil">
+        </div>
+        <div class="input-group full">
+          <label>Mobile Number <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-prefix">+91</span>
+            <input type="tel" id="phone" placeholder="98765 43210" maxlength="10" required>
+          </div>
+        </div>
+        <div class="input-group full">
+          <label>Village / Location</label>
+          <input type="text" id="location" placeholder="e.g. Nashik, Maharashtra">
+        </div>
+        <div class="input-group half">
+          <label>Farm Size (acres)</label>
+          <input type="number" id="farmSize" placeholder="0" min="0">
+        </div>
+        <div class="input-group half">
+          <label>Soil pH</label>
+          <input type="number" id="soilPh" placeholder="7.0" step="0.1" min="0" max="14">
+        </div>
+        <div class="input-group full">
+          <label>Soil Type</label>
+          <select id="soilType">
+            <option value="">Select soil type</option>
+            <option value="Black Soil">Black Soil</option>
+            <option value="Red Soil">Red Soil</option>
+            <option value="Alluvial Soil">Alluvial Soil</option>
+            <option value="Laterite Soil">Laterite Soil</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="createProfile()">
+        <span>Create Profile & Enter</span><span class="btn-arrow">→</span>
+      </button>
+      <p class="form-note">Already registered? <a href="#" onclick="switchTabByName('login')">Login →</a></p>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p id="loadingMsg">Please wait...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name, btn){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.form-panel').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+function switchTabByName(name){
+  switchTab(name, name==='login'
+    ? document.querySelector('.tab:first-child')
+    : document.querySelector('.tab:last-child'));
+}
+function showLoading(msg){
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('loadingMsg').innerText = msg || 'Please wait...';
+}
+function hideLoading(){
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// ── RETURNING FARMER LOGIN ──────────────────────────────────────────────────
+function loginUser(){
+  var mobile = document.getElementById('login_mobile').value.trim();
+  if(!mobile){ shake('login_mobile'); return; }
+
+  showLoading('Logging in...');
+  fetch('/simple_login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({mobile: mobile})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status === 'success'){
+      // ✅ Save everything returned from DB into localStorage
+      // This ensures nav shows real name even before dashboard loads
+      localStorage.setItem('phone',    d.phone     || mobile);
+      localStorage.setItem('name',     d.name      || '');
+      localStorage.setItem('location', d.location  || '');
+      localStorage.setItem('farmSize', d.farm_size || '');
+      localStorage.setItem('soilPh',   d.soil_ph   || '');
+      localStorage.setItem('soilType', d.soil_type || '');
+      window.location.href = "{{ url_for('dashboard') }}";
+    } else {
+      hideLoading();
+      alert('Login failed. Please try again.');
+    }
+  })
+  .catch(function(){ hideLoading(); alert('Something went wrong. Try again.'); });
+}
+
+// ── NEW REGISTRATION ────────────────────────────────────────────────────────
+function createProfile(){
+  var phone = document.getElementById('phone').value.trim();
+  if(!phone){ shake('phone'); return; }
+
+  var name     = document.getElementById('name').value.trim();
+  var location = document.getElementById('location').value.trim();
+  var farmSize = document.getElementById('farmSize').value;
+  var soilPh   = document.getElementById('soilPh').value;
+  var soilType = document.getElementById('soilType').value;
+
+  showLoading('Creating your profile...');
+
+  // Step 1: Create session (login)
+  fetch('/simple_login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({mobile: phone})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status !== 'success'){ throw new Error('Login failed'); }
+    showLoading('Saving farm details...');
+
+    // Step 2: Save profile to DB
+    // X-Requested-With tells Flask to return JSON instead of redirecting
+    return fetch('/save_profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: new URLSearchParams({
+        name:      name,
+        location:  location,
+        phone:     phone,
+        farm_size: farmSize,
+        soil_ph:   soilPh,
+        soil_type: soilType
+      })
+    });
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(saved){
+    // ✅ Step 3: Update localStorage with data CONFIRMED saved in DB
+    // Use the returned values from DB (not just what user typed)
+    localStorage.setItem('phone',    phone);
+    localStorage.setItem('name',     saved.name      || name);
+    localStorage.setItem('location', saved.location  || location);
+    localStorage.setItem('farmSize', saved.farm_size || farmSize);
+    localStorage.setItem('soilPh',   saved.soil_ph   || soilPh);
+    localStorage.setItem('soilType', saved.soil_type || soilType);
+    window.location.href = "{{ url_for('dashboard') }}";
+  })
+  .catch(function(err){
+    console.error('createProfile error:', err);
+    hideLoading();
+    alert('Something went wrong. Try again.');
+  });
+}
+
+function shake(id){
+  var el = document.getElementById(id);
+  el.classList.add('shake');
+  el.focus();
+  setTimeout(function(){ el.classList.remove('shake'); }, 500);
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    if(document.getElementById('tab-login').classList.contains('active')) loginUser();
+    else createProfile();
+  }
+});
+</script>
+</body>
+</html>

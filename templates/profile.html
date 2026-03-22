@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+</head>
+<body>
+{% set active='profile' %}
+{% include '_sidebar.html' %}
+
+<div class="main">
+  <p class="page-title">👨‍🌾 My Profile</p>
+  <p class="page-sub">Your farm details and account information</p>
+
+  {% with messages=get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat,msg in messages %}
+      <div class="flash flash-{{cat}}">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <!-- ✅ Success/error message shown after AJAX save -->
+  <div id="saveMsg" style="display:none" class="flash flash-success">✅ Profile saved successfully!</div>
+  <div id="saveErr" style="display:none" class="flash flash-danger">❌ Something went wrong. Please try again.</div>
+
+  <div class="profile-grid">
+
+    <!-- VIEW CARD — shows data from DB via Flask -->
+    <div class="card profile-view">
+      <div class="avatar-section">
+        <div class="avatar-wrap">
+          {% if user and user[6] %}
+            <img id="avatarImg" src="{{ url_for('static', filename=user[6]) }}" class="avatar-img" alt="Profile">
+          {% else %}
+            <div class="avatar" id="avatarInitial">
+              {{ (user[0] or 'F')[0].upper() if user and user[0] else 'F' }}
+            </div>
+          {% endif %}
+          <label class="avatar-change" for="picInput" title="Change photo">📷</label>
+        </div>
+        <div>
+          <h2 id="viewName">{{ user[0] if user and user[0] else 'Farmer' }}</h2>
+          <p class="phone-tag">📱 {{ user[2] if user else '—' }}</p>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">📍 Location</span>
+          <span class="info-value" id="viewLocation">{{ user[1] if user and user[1] else '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">🌾 Farm Size</span>
+          <span class="info-value" id="viewFarmSize">
+            {% if user and user[3] %}{{ user[3] }} acres{% else %}—{% endif %}
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">🧪 Soil pH</span>
+          <span class="info-value" id="viewSoilPh">{{ user[4] if user and user[4] else '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">🪨 Soil Type</span>
+          <span class="info-value" id="viewSoilType">{{ user[5] if user and user[5] else '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT FORM -->
+    <div class="card">
+      <div class="card-title">✏️ Edit Profile</div>
+
+      <!-- ✅ enctype needed for file upload -->
+      <form id="profileForm" method="POST" action="{{ url_for('save_profile') }}"
+            enctype="multipart/form-data">
+
+        <input type="file" id="picInput" name="profile_pic" accept="image/*"
+               style="display:none" onchange="previewPic(this)">
+
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" id="inputName" name="name"
+               value="{{ user[0] if user and user[0] else '' }}"
+               placeholder="Enter your name">
+
+        <label class="form-label">Village / Location</label>
+        <input class="form-input" type="text" id="inputLocation" name="location"
+               value="{{ user[1] if user and user[1] else '' }}"
+               placeholder="e.g. Nashik, Maharashtra">
+
+        <div class="form-row">
+          <div>
+            <label class="form-label">Farm Size (acres)</label>
+            <input class="form-input" type="number" id="inputFarmSize" name="farm_size"
+                   step="0.1" value="{{ user[3] if user and user[3] else '' }}" placeholder="0">
+          </div>
+          <div>
+            <label class="form-label">Soil pH</label>
+            <input class="form-input" type="number" id="inputSoilPh" name="soil_ph"
+                   step="0.1" min="0" max="14"
+                   value="{{ user[4] if user and user[4] else '' }}" placeholder="7.0">
+          </div>
+        </div>
+
+        <label class="form-label">Soil Type</label>
+        <select class="form-select" id="inputSoilType" name="soil_type">
+          <option value="">Select soil type</option>
+          <!-- ✅ explicit value on each option ensures correct value is submitted -->
+          <option value="Black Soil"   {% if user and user[5]=='Black Soil'   %}selected{% endif %}>Black Soil</option>
+          <option value="Red Soil"     {% if user and user[5]=='Red Soil'     %}selected{% endif %}>Red Soil</option>
+          <option value="Alluvial Soil"{% if user and user[5]=='Alluvial Soil'%}selected{% endif %}>Alluvial Soil</option>
+          <option value="Laterite Soil"{% if user and user[5]=='Laterite Soil'%}selected{% endif %}>Laterite Soil</option>
+        </select>
+
+        <label class="form-label">Profile Picture</label>
+        <div class="pic-upload-row">
+          <button type="button" class="btn-outline-sm"
+                  onclick="document.getElementById('picInput').click()">
+            📷 Choose Photo
+          </button>
+          <span class="pic-name" id="picName">No file chosen</span>
+        </div>
+
+        <!-- ✅ Save via AJAX so view card updates instantly without page reload -->
+        <button class="btn-green" type="button" id="saveBtn" onclick="saveProfile()">
+          💾 Save Changes
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+// ✅ Set nav user from DB data (most reliable source)
+var DB_NAME  = "{{ user[0] if user and user[0] else '' }}";
+var DB_PHONE = "{{ user[2] if user else '' }}";
+setNavUser(DB_NAME, DB_PHONE);
+
+// ── Profile picture preview ──────────────────────────────────────────────────
+function previewPic(input){
+  if(input.files && input.files[0]){
+    document.getElementById("picName").innerText = input.files[0].name;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var wrap = document.querySelector('.avatar-wrap');
+      var old  = wrap.querySelector('.avatar') || wrap.querySelector('.avatar-img');
+      if(old) old.remove();
+      var img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'avatar-img';
+      img.id = 'avatarImg';
+      wrap.insertBefore(img, wrap.querySelector('.avatar-change'));
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ── Save profile via AJAX ─────────────────────────────────────────────────────
+// Using FormData so the file upload also works
+function saveProfile(){
+  var btn = document.getElementById('saveBtn');
+  btn.innerText = '⏳ Saving...';
+  btn.disabled  = true;
+
+  var formData = new FormData(document.getElementById('profileForm'));
+
+  fetch('/save_profile', {
+    method:  'POST',
+    headers: {'X-Requested-With': 'XMLHttpRequest'},
+    // ✅ NO Content-Type header — browser sets it automatically with boundary for FormData
+    body: formData
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    btn.innerText = '💾 Save Changes';
+    btn.disabled  = false;
+
+    if(d.status === 'success'){
+      // ✅ Update the VIEW CARD instantly without page reload
+      var name     = document.getElementById('inputName').value.trim();
+      var location = document.getElementById('inputLocation').value.trim();
+      var farmSize = document.getElementById('inputFarmSize').value;
+      var soilPh   = document.getElementById('inputSoilPh').value;
+      var soilType = document.getElementById('inputSoilType').value;
+
+      // Update view card left side
+      var viewName = document.getElementById('viewName');
+      if(viewName) viewName.innerText = name || 'Farmer';
+      document.getElementById('viewLocation').innerText = location || '—';
+      document.getElementById('viewFarmSize').innerText = farmSize ? farmSize+' acres' : '—';
+      document.getElementById('viewSoilPh').innerText   = soilPh   || '—';
+      document.getElementById('viewSoilType').innerText = soilType || '—';
+
+      // Update avatar initial letter
+      var avatarInitial = document.getElementById('avatarInitial');
+      if(avatarInitial && name){
+        avatarInitial.innerText = name[0].toUpperCase();
+      }
+
+      // ✅ Update localStorage so navbar shows new name immediately
+      localStorage.setItem('name',     d.name      || name);
+      localStorage.setItem('location', d.location  || location);
+      localStorage.setItem('farmSize', d.farm_size || farmSize);
+      localStorage.setItem('soilPh',   d.soil_ph   || soilPh);
+      localStorage.setItem('soilType', d.soil_type || soilType);
+
+      // Update nav pill name right away
+      setNavUser(d.name || name, DB_PHONE);
+
+      // Show success message
+      var msg = document.getElementById('saveMsg');
+      msg.style.display = 'block';
+      setTimeout(function(){ msg.style.display = 'none'; }, 3000);
+    } else {
+      document.getElementById('saveErr').style.display = 'block';
+      setTimeout(function(){ document.getElementById('saveErr').style.display='none'; }, 3000);
+    }
+  })
+  .catch(function(err){
+    console.error('Save error:', err);
+    btn.innerText = '💾 Save Changes';
+    btn.disabled  = false;
+    document.getElementById('saveErr').style.display = 'block';
+    setTimeout(function(){ document.getElementById('saveErr').style.display='none'; }, 3000);
+  });
+}
+</script>
+</body>
+</html>
