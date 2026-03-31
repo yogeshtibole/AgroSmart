@@ -401,3 +401,17 @@ select { cursor: pointer; }
   .right-panel { width: 100%; padding: 30px 20px 50px; }
   .input-group.half { width: 100%; }
 }
+
+/* Simple password input styling */
+.opt-label { font-size:11px; color:#aaa; font-weight:400; }
+.login-error-box { margin-top:8px; padding:10px 14px; background:#ffebee; border-radius:9px; font-size:13px; color:#c62828; border:1px solid #ffcdd2; }
+#tab-login .input-group input[type="password"],
+#tab-register .input-group input[type="password"] {
+  width:100%; padding:11px 14px; border:1.5px solid #dde8df;
+  border-radius:9px; font-family:inherit; font-size:14px;
+  color:#1a1a1a; background:#fff; outline:none; transition:border-color .2s;
+}
+#tab-login .input-group input[type="password"]:focus,
+#tab-register .input-group input[type="password"]:focus {
+  border-color:#4caf50; box-shadow:0 0 0 3px rgba(76,175,80,.1);
+}

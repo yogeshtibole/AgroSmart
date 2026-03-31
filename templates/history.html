@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>History | AgroSmart</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
@@ -10,18 +10,17 @@
 <body>
 {% set active='history' %}
 {% include '_sidebar.html' %}
-
 <div class="main">
-  <p class="page-title">🕒 History</p>
-  <p class="page-sub">Your login records and activity in one place</p>
+  <p class="page-title">🕒 Activity History</p>
+  <p class="page-sub">Complete record of all your logins and page activities</p>
 
   <div class="tabs-row">
     <div class="tabs">
       <button class="tab active" onclick="switchTab('all',this)">All</button>
-      <button class="tab" onclick="switchTab('logins',this)">Logins</button>
-      <button class="tab" onclick="switchTab('actions',this)">Activity</button>
+      <button class="tab" onclick="switchTab('logins',this)">🔑 Logins</button>
+      <button class="tab" onclick="switchTab('actions',this)">⚡ Activity</button>
     </div>
-    <button class="del-all-btn" onclick="confirmDeleteAll()">🗑 Clear All History</button>
+    <button class="del-all-btn" onclick="confirmDeleteAll()">🗑 Clear All</button>
   </div>
 
   <!-- ALL TAB -->
@@ -39,8 +38,7 @@
             <p class="tl-label">🔑 Logged in</p>
             <p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p>
           </div>
-          <span class="tl-badge badge-login">Login</span>
-          <!-- ✅ FIX: use data-id and data-type instead of Jinja inside onclick -->
+          <span class="tl-badge badge-login">login</span>
           <button class="del-item-btn" data-id="{{ log[0] }}" data-type="login" title="Delete">✕</button>
         </div>
         {% endfor %}
@@ -48,10 +46,10 @@
         <div class="tl-item">
           <div class="tl-dot action"></div>
           <div class="tl-body">
-            <p class="tl-label">⚡ {{ act[1] }}</p>
+            <p class="tl-label">{{ page_icon(act[3]) }} {{ act[1] }}</p>
             <p class="tl-time">{{ act[2].strftime('%d %b %Y, %I:%M %p') }}</p>
           </div>
-          <span class="tl-badge badge-action">Activity</span>
+          <span class="tl-badge badge-page-{{ act[3] or 'general' }}">{{ act[3] or 'general' }}</span>
           <button class="del-item-btn" data-id="{{ act[0] }}" data-type="activity" title="Delete">✕</button>
         </div>
         {% endfor %}
@@ -64,114 +62,73 @@
   <!-- LOGINS TAB -->
   <div id="tab-logins" class="tab-content" style="display:none">
     {% if login_history %}
-      <div class="section-delete-row">
-        <button class="del-section-btn" onclick="confirmDelete('all_logins')">🗑 Clear All Logins</button>
-      </div>
+      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_logins')">🗑 Clear All Logins</button></div>
       <div class="timeline">
         {% for log in login_history %}
         <div class="tl-item">
           <div class="tl-dot login"></div>
-          <div class="tl-body">
-            <p class="tl-label">🔑 Logged in</p>
-            <p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p>
-          </div>
-          <span class="tl-badge badge-login">Login</span>
+          <div class="tl-body"><p class="tl-label">🔑 Logged in</p><p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p></div>
+          <span class="tl-badge badge-login">login</span>
           <button class="del-item-btn" data-id="{{ log[0] }}" data-type="login" title="Delete">✕</button>
         </div>
         {% endfor %}
       </div>
-    {% else %}
-      <div class="empty-state"><p>No login records</p></div>
-    {% endif %}
+    {% else %}<div class="empty-state"><p>No login records</p></div>{% endif %}
   </div>
 
   <!-- ACTIVITY TAB -->
   <div id="tab-actions" class="tab-content" style="display:none">
     {% if activity %}
-      <div class="section-delete-row">
-        <button class="del-section-btn" onclick="confirmDelete('all_activity')">🗑 Clear All Activity</button>
-      </div>
+      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_activity')">🗑 Clear All Activity</button></div>
       <div class="timeline">
         {% for act in activity %}
         <div class="tl-item">
           <div class="tl-dot action"></div>
           <div class="tl-body">
-            <p class="tl-label">⚡ {{ act[1] }}</p>
+            <p class="tl-label">{{ page_icon(act[3]) }} {{ act[1] }}</p>
             <p class="tl-time">{{ act[2].strftime('%d %b %Y, %I:%M %p') }}</p>
           </div>
-          <span class="tl-badge badge-action">Activity</span>
+          <span class="tl-badge badge-page-{{ act[3] or 'general' }}">{{ act[3] or 'general' }}</span>
           <button class="del-item-btn" data-id="{{ act[0] }}" data-type="activity" title="Delete">✕</button>
         </div>
         {% endfor %}
       </div>
-    {% else %}
-      <div class="empty-state"><p>No activity yet</p></div>
-    {% endif %}
+    {% else %}<div class="empty-state"><p>No activity yet</p></div>{% endif %}
   </div>
-
 </div>
 
 <script src="{{ url_for('static', filename='shared.js') }}"></script>
 <script>
 window.onload = function(){
-  setNavUser(
-    "{{ user[0] if user and user[0] else '' }}",
-    "{{ user[2] if user else '' }}"
-  );
-
-  // ✅ FIX: attach click handlers via JS using data-id / data-type
-  // This avoids putting Jinja expressions inside onclick="" which breaks the JS linter
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
   document.querySelectorAll('.del-item-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var id   = this.getAttribute('data-id');
-      var type = this.getAttribute('data-type');
-      deleteItem(id, type, this);
+      deleteItem(this.getAttribute('data-id'), this.getAttribute('data-type'), this);
     });
   });
 };
-
-function switchTab(name, btn){
-  document.querySelectorAll('.tab-content').forEach(function(t){ t.style.display='none'; });
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  document.getElementById('tab-'+name).style.display = 'block';
-  btn.classList.add('active');
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-content').forEach(function(t){t.style.display='none';});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+name).style.display='block'; btn.classList.add('active');
 }
-
-function deleteItem(id, type, btnEl){
+function deleteItem(id,type,btnEl){
   if(!confirm('Delete this record?')) return;
-  fetch('/delete_history', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({id: id, type: type})
-  })
-  .then(function(r){ return r.json(); })
+  fetch('/delete_history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,type:type})})
+  .then(function(r){return r.json();})
   .then(function(d){
-    if(d.status === 'success'){
-      // Find and remove the parent tl-item row with fade
-      var row = btnEl.closest('.tl-item');
-      if(row){
-        row.style.opacity = '0';
-        row.style.transition = 'opacity 0.3s';
-        setTimeout(function(){ row.remove(); }, 320);
-      }
+    if(d.status==='success'){
+      var row=btnEl.closest('.tl-item');
+      if(row){row.style.opacity='0';row.style.transition='opacity 0.3s';setTimeout(function(){row.remove();},320);}
     }
   });
 }
-
 function confirmDelete(mode){
-  var msg = mode === 'all_logins'   ? 'Clear all login records?' :
-            mode === 'all_activity' ? 'Clear all activity records?' :
-                                      'Clear ALL history (logins + activity)?';
+  var msg=mode==='all_logins'?'Clear all login records?':mode==='all_activity'?'Clear all activity?':'Clear ALL history?';
   if(!confirm(msg)) return;
-  fetch('/delete_history', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({mode: mode})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){ if(d.status === 'success') window.location.reload(); });
+  fetch('/delete_history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:mode})})
+  .then(function(r){return r.json();}).then(function(d){if(d.status==='success') window.location.reload();});
 }
-
 function confirmDeleteAll(){ confirmDelete('all'); }
 </script>
 </body>

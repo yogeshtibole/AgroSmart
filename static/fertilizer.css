@@ -1,0 +1,54 @@
+.lang-bar { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.lang-label { font-size:13px; font-weight:600; color:var(--text-mid); }
+.lang-btn {
+  padding:6px 16px; border-radius:20px; border:1.5px solid var(--border);
+  background:var(--white); font-family:inherit; font-size:13px; font-weight:600;
+  cursor:pointer; color:var(--text-mid); transition:all .2s;
+}
+.lang-btn:hover { border-color:var(--green); color:var(--green); }
+.lang-btn.active { background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+.fert-grid { display:grid; grid-template-columns:300px 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:768px){ .fert-grid{ grid-template-columns:1fr; } }
+
+.fert-placeholder { display:flex; flex-direction:column; align-items:center;
+  justify-content:center; min-height:260px; }
+
+.npk-result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:18px 0; }
+@media(max-width:600px){ .npk-result-grid{ grid-template-columns:1fr; } }
+
+.fert-card { border-radius:12px; padding:18px; text-align:center; }
+.fert-sym  { font-size:32px; font-weight:800; margin-bottom:4px; }
+.fert-name { font-size:12px; font-weight:600; color:#555; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.fert-qty  { font-size:26px; font-weight:700; color:#222; }
+.fert-qty span { font-size:14px; font-weight:500; color:#666; }
+.fert-product { font-size:12px; color:#555; margin-top:6px; }
+.fert-product small { display:block; font-size:11px; color:#888; margin-top:2px; }
+
+.ph-alert { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:10px; }
+.ph-alert.warning { background:#fff8e1; border:1px solid #ffe082; color:#5d4037; }
+.ph-alert.info    { background:#e8f5e9; border:1px solid #c8e6c9; color:#2e7d32; }
+
+.schedule-box { background:#f4f7f4; border-radius:10px; padding:16px; margin-top:4px; }
+.sch-title { font-size:13px; font-weight:700; color:var(--green-dark); margin-bottom:10px; }
+.sch-step { font-size:13px; color:var(--text); padding:8px 12px; border-left:3px solid var(--green);
+  margin-bottom:8px; background:#fff; border-radius:0 8px 8px 0; }
+.sch-step:last-child { margin-bottom:0; }
+
+.fert-disclaimer { font-size:11px; color:#aaa; margin-top:12px; }
+
+/* NPK guide */
+.ref-card { margin-top:20px; }
+.npk-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:4px; }
+@media(max-width:600px){ .npk-grid{ grid-template-columns:1fr; } }
+.npk-col { border-radius:10px; padding:16px; }
+.npk-col.n { background:#e8f5e9; }
+.npk-col.p { background:#e3f2fd; }
+.npk-col.k { background:#fff3e0; }
+.npk-symbol { font-size:28px; font-weight:800; margin-bottom:4px; }
+.npk-col.n .npk-symbol { color:#2e7d32; }
+.npk-col.p .npk-symbol { color:#1565c0; }
+.npk-col.k .npk-symbol { color:#e65100; }
+.npk-name    { font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
+.npk-role    { font-size:12px; color:#555; margin-bottom:8px; line-height:1.5; }
+.npk-sources { font-size:11px; color:#777; line-height:1.5; }

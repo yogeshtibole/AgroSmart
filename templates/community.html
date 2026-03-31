@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Community | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='community.css') }}">
+</head>
+<body>
+{% set active='community' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">🤝 Farmer Community</p>
+  <p class="page-sub">Connect with farmers, share tips, post photos, and grow together</p>
+
+  <!-- SEARCH BAR -->
+  <div class="comm-search-bar">
+    <span>🔍</span>
+    <input type="text" id="commSearchInput"
+      placeholder="Search farmers by name or mobile number..."
+      value="{{ search_query or '' }}"
+      oninput="liveSearch(this.value)"
+      onkeydown="if(event.key==='Enter')doSearch()">
+    <button onclick="doSearch()">Search</button>
+  </div>
+
+  <!-- SEARCH RESULTS -->
+  {% if search_results %}
+  <div class="comm-search-section">
+    <p class="section-label">Search Results for "{{ search_query }}"</p>
+    <div class="farmers-row">
+      {% for f in search_results %}
+      <a href="{{ url_for('farmer_profile', farmer_phone=f[0]) }}" class="farmer-card">
+        <div class="fc-avatar">{{ (f[1] or 'F')[0].upper() }}</div>
+        <p class="fc-name">{{ f[1] or 'Farmer' }}</p>
+        <p class="fc-loc">{{ f[2] or '—' }}</p>
+        <p class="fc-meta">{{ f[4] or 0 }} posts · {{ f[5] or 0 }} followers</p>
+        <div class="fc-follow-btn">View Profile</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- SUGGESTED FARMERS -->
+  {% if farmers_list and not search_results %}
+  <div class="comm-search-section">
+    <p class="section-label">👨‍🌾 Farmers to Connect With</p>
+    <div class="farmers-row">
+      {% for f in farmers_list %}
+      <a href="{{ url_for('farmer_profile', farmer_phone=f[0]) }}" class="farmer-card">
+        {% if f[3] %}
+          <img src="{{ url_for('static', filename=f[3]) }}" class="fc-avatar-img" alt="Profile">
+        {% else %}
+          <div class="fc-avatar">{{ (f[1] or 'F')[0].upper() }}</div>
+        {% endif %}
+        <p class="fc-name">{{ f[1] or 'Farmer' }}</p>
+        <p class="fc-loc">📍 {{ f[2] or '—' }}</p>
+        <p class="fc-meta">{{ f[4] or 0 }} posts · {{ f[5] or 0 }} followers</p>
+        <div class="fc-follow-btn">View Profile</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="comm-layout">
+    <!-- POST COMPOSER -->
+    <div class="card composer-card">
+      <div class="card-title">📢 Share with the Community</div>
+      <div class="cat-row" id="catRow">
+        <button class="cat-btn active" data-cat="general" onclick="setCat('general',this)">💬 General</button>
+        <button class="cat-btn" data-cat="disease" onclick="setCat('disease',this)">🦠 Disease</button>
+        <button class="cat-btn" data-cat="weather" onclick="setCat('weather',this)">🌦 Weather</button>
+        <button class="cat-btn" data-cat="market" onclick="setCat('market',this)">🏪 Market</button>
+        <button class="cat-btn" data-cat="tips" onclick="setCat('tips',this)">💡 Tips</button>
+        <button class="cat-btn" data-cat="govt" onclick="setCat('govt',this)">🏛 Govt Scheme</button>
+      </div>
+      <label class="form-label">Title</label>
+      <input class="form-input" type="text" id="postTitle" maxlength="250" placeholder="What's your question or tip?">
+      <label class="form-label">Message</label>
+      <textarea class="form-input post-area" id="postBody" rows="4" placeholder="Describe your question, problem, or farming tip..."></textarea>
+      <label class="form-label">Photo (optional)</label>
+      <div class="img-upload-row">
+        <label for="postImgInput" class="img-upload-btn">📷 Add Photo</label>
+        <input type="file" id="postImgInput" accept="image/*" style="display:none" onchange="previewPostImg(this)">
+        <span id="postImgName" style="font-size:12px;color:#aaa">No photo selected</span>
+      </div>
+      <img id="postImgPreview" src="" style="display:none;max-height:180px;border-radius:10px;margin-top:10px;object-fit:cover;width:100%">
+      <button class="btn-green" id="postBtn" onclick="submitPost()" style="width:100%;justify-content:center">📢 Post to Community</button>
+      <div id="postMsg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" onclick="filterPosts('all',this)">All</button>
+      <button class="filter-btn" onclick="filterPosts('general',this)">💬 General</button>
+      <button class="filter-btn" onclick="filterPosts('disease',this)">🦠 Disease</button>
+      <button class="filter-btn" onclick="filterPosts('weather',this)">🌦 Weather</button>
+      <button class="filter-btn" onclick="filterPosts('market',this)">🏪 Market</button>
+      <button class="filter-btn" onclick="filterPosts('tips',this)">💡 Tips</button>
+      <button class="filter-btn" onclick="filterPosts('govt',this)">🏛 Govt</button>
+    </div>
+
+    <!-- POSTS FEED -->
+    <div id="postsList">
+      {% if posts %}
+        {% for p in posts %}
+        {# ✅ Fix: store all dynamic values in data-* attributes — no Jinja inside JS strings #}
+        <div class="post-card"
+             data-cat="{{ p[5] }}"
+             data-id="{{ p[0] }}"
+             data-phone="{{ p[1] }}"
+             data-author="{{ p[2] or 'Farmer' }}"
+             data-title="{{ p[3]|replace('"','') }}"
+             id="p-{{ p[0] }}">
+          <div class="post-top">
+            <a href="{{ url_for('farmer_profile', farmer_phone=p[1]) }}" class="post-author-link">
+              {% if p[10] %}
+                <img src="{{ url_for('static', filename=p[10]) }}" class="post-avatar-img" alt="Profile">
+              {% else %}
+                <div class="post-avatar">{{ (p[2] or 'F')[0].upper() }}</div>
+              {% endif %}
+              <div class="post-meta">
+                <span class="post-author">{{ p[2] or 'Anonymous Farmer' }}</span>
+                <span class="post-time">{{ p[7].strftime('%d %b %Y, %I:%M %p') if p[7] else '' }}</span>
+              </div>
+            </a>
+            <div class="post-top-right">
+              <div class="cat-badge cat-{{ p[5] }}">{{ p[5].title() }}</div>
+              {% if p[1] == user[2] %}
+              {# ✅ Fix: use data-id from parent, no Jinja in onclick #}
+              <button class="del-post-btn js-delete-post" title="Delete post">🗑️</button>
+              {% endif %}
+            </div>
+          </div>
+          <div class="post-title">{{ p[3] }}</div>
+          <div class="post-body">{{ p[4][:300] }}{% if p[4]|length > 300 %}…{% endif %}</div>
+          {% if p[8] %}
+          <img src="{{ url_for('static', filename=p[8]) }}" class="post-image js-open-img" alt="Post image">
+          {% endif %}
+          <div class="post-footer">
+            {# ✅ Fix: like button uses data-id, no Jinja in onclick #}
+            <button class="like-btn js-like-btn {% if p[11] %}liked{% endif %}" id="like-{{ p[0] }}">
+              {{ '❤️' if p[11] else '🤍' }} <span class="like-count">{{ p[6] }}</span>
+            </button>
+            <a href="{{ url_for('community_thread', post_id=p[0]) }}" class="reply-btn">
+              💬 {{ p[9] }} Replies
+            </a>
+            {# ✅ Fix: share + message use data attributes #}
+            <button class="share-btn js-share-btn">🔗 Share</button>
+            <button class="msg-btn js-msg-btn" title="Message this farmer">✉️</button>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="card empty-comm">
+          <div style="font-size:48px;margin-bottom:12px">🌾</div>
+          <p>No posts yet. Be the first to share!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE VIEWER MODAL -->
+<div id="imgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;align-items:center;justify-content:center;cursor:zoom-out" onclick="this.style.display='none'">
+  <img id="imgModalSrc" src="" style="max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain">
+</div>
+
+<!-- DM MODAL -->
+<div id="msgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;width:380px;max-width:95vw;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.2)">
+    <div style="background:linear-gradient(135deg,#1a3d22,#2d6a3f);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="color:#fff;font-size:14px;font-weight:700" id="msgTitle">Message Farmer</div>
+      <button onclick="document.getElementById('msgModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">×</button>
+    </div>
+    <div id="msgThread" style="padding:14px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#f9fdf9"></div>
+    <div style="padding:12px;border-top:1px solid #eee;display:flex;gap:8px">
+      <input id="msgInput" type="text" placeholder="Type a message..." class="form-input" style="margin:0;flex:1" onkeydown="if(event.key==='Enter')sendDM()">
+      <button onclick="sendDM()" class="btn-green" style="margin:0;padding:10px 16px">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+// ✅ Store current user phone in a JS variable from Jinja — safe, outside strings
+var ME = "{{ user[2] if user else '' }}";
+var currentMsgTo = '';
+var CAT = 'general';
+
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", ME);
+
+  // ✅ Fix: attach all event listeners via JS using data-* attributes
+  // This avoids ALL Jinja-inside-JS-string problems
+
+  // Like buttons
+  document.querySelectorAll('.js-like-btn').forEach(function(btn){
+    var card = btn.closest('.post-card');
+    btn.addEventListener('click', function(){ likePost(card.dataset.id, btn); });
+  });
+
+  // Delete buttons
+  document.querySelectorAll('.js-delete-post').forEach(function(btn){
+    var card = btn.closest('.post-card');
+    btn.addEventListener('click', function(){ deletePost(card.dataset.id); });
+  });
+
+  // Share buttons
+  document.querySelectorAll('.js-share-btn').forEach(function(btn){
+    var card = btn.closest('.post-card');
+    btn.addEventListener('click', function(){ sharePost(card.dataset.id, card.dataset.title); });
+  });
+
+  // Message buttons
+  document.querySelectorAll('.js-msg-btn').forEach(function(btn){
+    var card = btn.closest('.post-card');
+    btn.addEventListener('click', function(){ openMsg(card.dataset.phone, card.dataset.author); });
+  });
+
+  // Image open
+  document.querySelectorAll('.js-open-img').forEach(function(img){
+    img.addEventListener('click', function(){ openImg(this.src); });
+  });
+};
+
+function setCat(cat, btn){
+  CAT = cat;
+  document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function filterPosts(cat, btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.post-card').forEach(function(p){
+    p.style.display = (cat === 'all' || p.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+
+function previewPostImg(input){
+  if(input.files && input.files[0]){
+    document.getElementById('postImgName').innerText = input.files[0].name;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var prev = document.getElementById('postImgPreview');
+      prev.src = e.target.result; prev.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function submitPost(){
+  var title = document.getElementById('postTitle').value.trim();
+  var body  = document.getElementById('postBody').value.trim();
+  if(!title || !body){ showPostMsg('⚠️ Title and message required','warning'); return; }
+  document.getElementById('postBtn').disabled = true;
+  var fd = new FormData();
+  fd.append('title', title); fd.append('body', body); fd.append('category', CAT);
+  var imgInput = document.getElementById('postImgInput');
+  if(imgInput.files[0]) fd.append('image', imgInput.files[0]);
+  fetch('/community/post', {method:'POST', body:fd})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    document.getElementById('postBtn').disabled = false;
+    if(d.status === 'success'){
+      showPostMsg('✅ Posted!', 'success');
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postBody').value  = '';
+      document.getElementById('postImgPreview').style.display = 'none';
+      setTimeout(function(){ location.reload(); }, 800);
+    } else {
+      showPostMsg('❌ ' + (d.msg || 'Error'), 'error');
+    }
+  }).catch(function(){
+    document.getElementById('postBtn').disabled = false;
+    showPostMsg('❌ Network error','error');
+  });
+}
+
+function showPostMsg(text, type){
+  var m = document.getElementById('postMsg');
+  m.style.display = 'block'; m.textContent = text;
+  m.style.background = type==='success'?'#e8f5e9': type==='warning'?'#fff8e1':'#ffebee';
+  m.style.border = '1px solid '+(type==='success'?'#c8e6c9':type==='warning'?'#ffe082':'#ffcdd2');
+  m.style.color   = type==='success'?'#2e7d32': type==='warning'?'#5d4037':'#c62828';
+  setTimeout(function(){ m.style.display='none'; }, 3000);
+}
+
+function likePost(id, btn){
+  fetch('/community/like', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({post_id:id})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status === 'success'){
+      btn.innerHTML = (d.liked ? '❤️' : '🤍') + ' <span class="like-count">' + d.likes + '</span>';
+      if(d.liked) btn.classList.add('liked'); else btn.classList.remove('liked');
+    }
+  });
+}
+
+function sharePost(id, title){
+  fetch('/community/share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({post_id:id})});
+  var url = window.location.origin + '/community/post/' + id;
+  if(navigator.share){ navigator.share({title:'AgroSmart: '+title, url:url}); }
+  else { navigator.clipboard.writeText(url).then(function(){ alert('Link copied!'); }); }
+}
+
+function deletePost(id){
+  if(!confirm('Delete this post? This cannot be undone.')) return;
+  fetch('/community/delete_post', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({post_id:id})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.status === 'success'){
+      var el = document.getElementById('p-'+id);
+      if(el) el.remove();
+    }
+  });
+}
+
+function openImg(src){
+  var m = document.getElementById('imgModal');
+  m.style.display = 'flex';
+  document.getElementById('imgModalSrc').src = src;
+}
+
+function openMsg(phone, name){
+  currentMsgTo = phone;
+  document.getElementById('msgTitle').innerText = '✉️ Message ' + name;
+  document.getElementById('msgModal').style.display = 'flex';
+  loadThread(phone);
+}
+
+function loadThread(phone){
+  var t = document.getElementById('msgThread');
+  t.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center">Loading...</p>';
+  fetch('/community/messages/' + phone)
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d.messages || !d.messages.length){
+      t.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center">No messages yet. Say hello!</p>';
+      return;
+    }
+    t.innerHTML = d.messages.map(function(m){
+      var isMe = m.from === ME;
+      return '<div style="max-width:80%;align-self:'+(isMe?'flex-end':'flex-start')+
+             ';background:'+(isMe?'#1a3d22':'#f4f7f4')+
+             ';color:'+(isMe?'#fff':'#333')+
+             ';border-radius:12px;padding:8px 12px;font-size:13px">'+m.text+'</div>';
+    }).join('');
+    t.scrollTop = t.scrollHeight;
+  });
+}
+
+function sendDM(){
+  var inp = document.getElementById('msgInput');
+  var msg = inp.value.trim();
+  if(!msg || !currentMsgTo) return;
+  fetch('/community/message', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({to:currentMsgTo, message:msg})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if(d.status==='success'){ inp.value=''; loadThread(currentMsgTo); } });
+}
+
+// LIVE SEARCH — triggers after 5 or more characters
+var liveSearchTimeout;
+function liveSearch(q){
+  clearTimeout(liveSearchTimeout);
+  if(q.trim().split(/\s+/).filter(function(w){return w.length>0;}).join('').length < 5) return;
+  liveSearchTimeout = setTimeout(function(){ doSearch(q); }, 600);
+}
+function doSearch(q){
+  var val = q || document.getElementById('commSearchInput').value.trim();
+  if(val) window.location.href = '/community?q=' + encodeURIComponent(val);
+}
+</script>
+</body>
+</html>

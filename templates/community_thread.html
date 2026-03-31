@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Community Thread | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='community.css') }}">
+</head>
+<body>
+{% set active='community' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <a href="{{ url_for('community') }}" class="back-link">← Back to Community</a>
+
+  <!-- Original post -->
+  <div class="card thread-post">
+    <div class="post-top">
+      <div class="post-avatar big">{{ (post[2] or 'F')[0].upper() }}</div>
+      <div class="post-meta">
+        <span class="post-author">{{ post[2] or 'Anonymous Farmer' }}</span>
+        <span class="post-time">{{ post[7].strftime('%d %b %Y, %I:%M %p') if post[7] else '' }}</span>
+      </div>
+      <div class="cat-badge cat-{{ post[5] }}">{{ post[5].title() }}</div>
+    </div>
+    <div class="post-title big-title">{{ post[3] }}</div>
+    <div class="post-body-full">{{ post[4] }}</div>
+    <div class="post-footer">
+      <button class="like-btn" onclick="likePost('{{ post[0] }}',this)">
+        👍 <span class="like-count">{{ post[6] }}</span> Likes
+      </button>
+    </div>
+  </div>
+
+  <!-- Replies -->
+  <div class="replies-section">
+    <div class="replies-title">💬 {{ replies|length }} Repl{{ 'y' if replies|length==1 else 'ies' }}</div>
+
+    {% for r in replies %}
+    <div class="reply-card">
+      <div class="post-top">
+        <div class="post-avatar sm">{{ (r[2] or 'F')[0].upper() }}</div>
+        <div class="post-meta">
+          <span class="post-author">{{ r[2] or 'Anonymous Farmer' }}</span>
+          <span class="post-time">{{ r[4].strftime('%d %b %Y, %I:%M %p') if r[4] else '' }}</span>
+        </div>
+      </div>
+      <div class="reply-body">{{ r[3] }}</div>
+    </div>
+    {% endfor %}
+
+    {% if not replies %}
+    <div class="no-replies">No replies yet. Be the first to answer!</div>
+    {% endif %}
+
+    <!-- Reply box -->
+    <div class="card reply-composer">
+      <div class="card-title">✍️ Write a Reply</div>
+      <textarea class="form-input" id="replyBody" rows="4"
+                placeholder="Share your experience or answer..."></textarea>
+      <button class="btn-green" id="replyBtn" onclick="submitReply('{{ post[0] }}')">💬 Post Reply</button>
+      <div id="replyMsg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+};
+function submitReply(postId){
+  var body=document.getElementById('replyBody').value.trim();
+  if(!body){showR('⚠️ Write your reply first.','warning');return;}
+  document.getElementById('replyBtn').disabled=true;
+  fetch('/community/reply',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({post_id:postId,body})})
+  .then(r=>r.json()).then(d=>{
+    document.getElementById('replyBtn').disabled=false;
+    if(d.status==='success'){showR('✅ Reply posted!','success');setTimeout(()=>location.reload(),800);}
+    else showR('❌ '+(d.msg||'Error'),'error');
+  });
+}
+function showR(text,type){
+  var m=document.getElementById('replyMsg'); m.style.display='block'; m.textContent=text;
+  m.style.background=type==='success'?'#e8f5e9':type==='warning'?'#fff8e1':'#ffebee';
+  m.style.color=type==='success'?'#2e7d32':type==='warning'?'#5d4037':'#c62828';
+}
+function likePost(id,btn){
+  fetch('/community/like',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:id})})
+  .then(r=>r.json()).then(d=>{ if(d.status==='success'){btn.querySelector('.like-count').textContent=d.likes;btn.disabled=true;btn.style.color='#2e7d32';}});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Crop Diary | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='crop_diary.css') }}">
+</head>
+<body>
+{% set active='diary' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">📝 Crop Diary & Field Notes</p>
+  <p class="page-sub">Record daily observations, treatments, weather events — your farm's memory</p>
+
+  <!-- Lang bar -->
+  <div class="lang-bar">
+    <span class="lang-label">🌍</span>
+    <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
+  </div>
+
+  <div class="diary-layout">
+    <!-- Add note panel -->
+    <div class="card add-card">
+      <div class="card-title">✏️ <span data-k="add_note">Add Field Note</span></div>
+
+      <label class="form-label" data-k="title_lbl">Title (optional)</label>
+      <input class="form-input" type="text" id="noteTitle" placeholder="e.g. Applied Urea, Noticed pest...">
+
+      <label class="form-label" data-k="crop_lbl">Crop</label>
+      <select class="form-select" id="noteCrop">
+        <option value="">— Any / General —</option>
+        <option>Wheat</option><option>Rice</option><option>Cotton</option>
+        <option>Maize</option><option>Soybean</option><option>Tomato</option>
+        <option>Onion</option><option>Sugarcane</option><option>Gram</option>
+      </select>
+
+      <label class="form-label" data-k="date_lbl">Date</label>
+      <input class="form-input" type="date" id="noteDate">
+
+      <label class="form-label" data-k="mood_lbl">Field Condition</label>
+      <div class="mood-row">
+        <button class="mood-btn good active" onclick="setMood('good',this)" title="Good">😊 Good</button>
+        <button class="mood-btn warning" onclick="setMood('warning',this)" title="Concern">😐 Concern</button>
+        <button class="mood-btn bad" onclick="setMood('bad',this)" title="Problem">😟 Problem</button>
+      </div>
+
+      <label class="form-label" data-k="note_lbl">Note <span style="color:#e53935">*</span></label>
+      <textarea class="form-input note-area" id="noteText" rows="5"
+                placeholder="Describe what you observed, applied, or noticed in the field..."></textarea>
+
+      <button class="btn-green" id="saveBtn" onclick="saveNote()">💾 <span data-k="save_note">Save Note</span></button>
+      <div id="saveMsg" style="display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:13px;"></div>
+    </div>
+
+    <!-- Notes list -->
+    <div class="notes-col">
+      <div class="notes-header">
+        <span class="card-title" style="margin-bottom:0">📋 <span data-k="my_notes">My Field Notes</span></span>
+        <span class="notes-count">{{ notes|length }} note{{ 's' if notes|length != 1 }}</span>
+      </div>
+
+      {% if notes %}
+        <div class="notes-list" id="notesList">
+          {% for n in notes %}
+          <div class="note-card mood-{{ n[4] }}" id="nc-{{ n[0] }}">
+            <div class="nc-top">
+              <div>
+                <div class="nc-title">{{ n[1] or 'Field Note' }}</div>
+                {% if n[2] %}<div class="nc-crop">🌾 {{ n[2] }}</div>{% endif %}
+              </div>
+              <div class="nc-right">
+                <div class="nc-date">{{ n[5].strftime('%d %b %Y') if n[5] else '' }}</div>
+                <div class="mood-dot {{ n[4] }}"></div>
+              </div>
+            </div>
+            <div class="nc-body">{{ n[3] }}</div>
+            <button class="nc-del" onclick="deleteNote('{{ n[0] }}')">🗑 Delete</button>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="card empty-diary" id="emptyDiary">
+          <div style="font-size:48px;margin-bottom:12px">📓</div>
+          <p data-k="no_notes">No notes yet. Add your first field observation!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+  document.getElementById('noteDate').value = new Date().toISOString().split('T')[0];
+};
+
+var MOOD = 'good';
+var S = {
+  en:{add_note:"Add Field Note",title_lbl:"Title (optional)",crop_lbl:"Crop",date_lbl:"Date",
+      mood_lbl:"Field Condition",note_lbl:"Note",save_note:"Save Note",my_notes:"My Field Notes",
+      no_notes:"No notes yet. Add your first field observation!"},
+  hi:{add_note:"खेत का नोट जोड़ें",title_lbl:"शीर्षक (वैकल्पिक)",crop_lbl:"फसल",date_lbl:"तारीख",
+      mood_lbl:"खेत की स्थिति",note_lbl:"नोट",save_note:"नोट सहेजें",my_notes:"मेरे खेत के नोट",
+      no_notes:"अभी कोई नोट नहीं। अपना पहला खेत अवलोकन जोड़ें!"},
+  mr:{add_note:"शेतातील नोंद जोडा",title_lbl:"शीर्षक (पर्यायी)",crop_lbl:"पीक",date_lbl:"तारीख",
+      mood_lbl:"शेताची स्थिती",note_lbl:"नोंद",save_note:"नोंद जतन करा",my_notes:"माझ्या शेतातील नोंदी",
+      no_notes:"अद्याप कोणत्याही नोंदी नाहीत. पहिले शेत निरीक्षण जोडा!"}
+};
+function setLang(lang,btn){
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.querySelectorAll('[data-k]').forEach(el=>{ var k=el.getAttribute('data-k'); if(S[lang]&&S[lang][k]) el.textContent=S[lang][k]; });
+}
+
+function setMood(mood, btn){
+  MOOD = mood;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function saveNote(){
+  var title = document.getElementById('noteTitle').value.trim();
+  var crop  = document.getElementById('noteCrop').value;
+  var date  = document.getElementById('noteDate').value;
+  var note  = document.getElementById('noteText').value.trim();
+  var msg   = document.getElementById('saveMsg');
+  if(!note){ showMsg('⚠️ Please write a note before saving.','warning'); return; }
+  document.getElementById('saveBtn').disabled=true;
+  fetch('/crop_diary/add',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title,crop,note,mood:MOOD,date})})
+  .then(r=>r.json()).then(d=>{
+    document.getElementById('saveBtn').disabled=false;
+    if(d.status==='success'){
+      showMsg('✅ Note saved!','success');
+      document.getElementById('noteTitle').value='';
+      document.getElementById('noteText').value='';
+      setTimeout(()=>location.reload(), 900);
+    } else { showMsg('❌ '+(d.msg||'Error saving'), 'error'); }
+  }).catch(()=>{ document.getElementById('saveBtn').disabled=false; showMsg('❌ Network error','error'); });
+}
+
+function showMsg(text, type){
+  var m = document.getElementById('saveMsg');
+  m.style.display='block';
+  m.textContent=text;
+  m.style.background = type==='success'?'#e8f5e9':type==='warning'?'#fff8e1':'#ffebee';
+  m.style.border = '1px solid '+(type==='success'?'#c8e6c9':type==='warning'?'#ffe082':'#ffcdd2');
+  m.style.color  = type==='success'?'#2e7d32':type==='warning'?'#5d4037':'#c62828';
+  setTimeout(()=>m.style.display='none', 3000);
+}
+
+function deleteNote(id){
+  if(!confirm('Delete this note?')) return;
+  fetch('/crop_diary/delete',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id})})
+  .then(r=>r.json()).then(d=>{
+    if(d.status==='success'){
+      var el = document.getElementById('nc-'+id);
+      if(el) el.style.cssText='opacity:0;height:0;overflow:hidden;transition:all .3s';
+      setTimeout(()=>el&&el.remove(),350);
+    }
+  });
+}
+</script>
+</body>
+</html>

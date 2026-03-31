@@ -1,72 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Weather | AgroSmart</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='weather.css') }}">
 </head>
 <body>
-{% set active = 'weather' %}
+{% set active='weather' %}
 {% include '_sidebar.html' %}
-
 <div class="main">
   <p class="page-title">🌦 Weather Forecast</p>
-  <p class="page-sub">Live weather data and farming advice for your location</p>
+  <p class="page-sub">Search your city to get live weather and farming advice</p>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}{% for cat, msg in messages %}
+  {% with messages=get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat,msg in messages %}
       <div class="flash flash-{{cat}}">{{ msg }}</div>
     {% endfor %}{% endif %}
   {% endwith %}
 
-  <!-- SEARCH BAR -->
+  <!-- SEARCH BAR ONLY — no auto location -->
   <div class="card search-card">
     <form method="POST" class="search-row">
       <input class="form-input" type="text" name="city" id="cityInput"
-             placeholder="Search city e.g. Pune, Mumbai, Delhi...">
-      <button class="btn-green" type="submit" style="margin-top:0;">🔍 Search</button>
-      <button class="btn-outline" type="button" onclick="autoLocation()">📍 My Location</button>
+             placeholder="Search city e.g. Pune, Nashik, Mumbai..." value="{{ request.form.get('city','') }}">
+      <button class="btn-green" type="submit" style="margin-top:0">🔍 Search</button>
     </form>
   </div>
 
-  <!-- ✅ LIVE LOCATION WEATHER (auto-loaded via JS) -->
-  <div id="autoWeatherCard" style="display:none">
-    <p class="live-label">📍 Your Current Location</p>
-    <div class="weather-hero" id="autoHeroBox">
-      <div class="weather-hero-left">
-        <p class="weather-city" id="autoCity">—</p>
-        <p class="weather-temp" id="autoTemp">—°C</p>
-        <p class="weather-desc" id="autoDesc">—</p>
-      </div>
-      <div class="weather-hero-right">
-        <img id="autoIcon" src="" alt="weather" class="weather-icon">
-        <div class="weather-stats-row">
-          <div class="wstat"><span id="autoHumidity">—</span><small>Humidity</small></div>
-          <div class="wstat"><span id="autoWind">—</span><small>Wind</small></div>
-          <div class="wstat"><span id="autoFeels">—</span><small>Feels Like</small></div>
-        </div>
-      </div>
-    </div>
-    <div id="autoAdviceBox" class="advice-box success">
-      <strong>🌱 Farming Advice</strong>
-      <p id="autoAdviceText">Loading advice...</p>
-    </div>
-  </div>
-
-  <!-- LOCATION DENIED MESSAGE -->
-  <div id="locationDenied" style="display:none">
-    <div class="advice-box warning">
-      <strong>📍 Location access denied</strong>
-      <p>Please allow location access in your browser, or search for your city manually above.</p>
-    </div>
-  </div>
-
-  <!-- ✅ SERVER WEATHER (from manual city search) -->
   {% if weather %}
-  <p class="live-label" style="margin-top:24px">🔍 Search Result: {{ weather.city }}</p>
+  <!-- WEATHER RESULT -->
   <div class="weather-hero">
     <div class="weather-hero-left">
       <p class="weather-city">📍 {{ weather.city }}</p>
@@ -86,134 +50,33 @@
     <strong>🌱 Farming Advice</strong>
     <p>{{ weather.advice }}</p>
   </div>
-  {% endif %}
 
+  {% else %}
+  <!-- QUICK CITY BUTTONS when no search yet -->
+  <div class="weather-tip-card">
+    <div style="font-size:48px;margin-bottom:12px">🌾</div>
+    <h3>Search your city above</h3>
+    <p>Get live weather data and crop-specific farming advice for any city in India.</p>
+    <div class="quick-cities">
+      <button onclick="searchCity('Pune')">Pune</button>
+      <button onclick="searchCity('Nashik')">Nashik</button>
+      <button onclick="searchCity('Nagpur')">Nagpur</button>
+      <button onclick="searchCity('Mumbai')">Mumbai</button>
+      <button onclick="searchCity('Aurangabad')">Aurangabad</button>
+      <button onclick="searchCity('Delhi')">Delhi</button>
+      <button onclick="searchCity('Kolhapur')">Kolhapur</button>
+      <button onclick="searchCity('Solapur')">Solapur</button>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <script src="{{ url_for('static', filename='shared.js') }}"></script>
 <script>
-window.onload = function(){
-  setNavUser(
-    "{{ user[0] if user and user[0] else '' }}",
-    "{{ user[2] if user else '' }}"
-  );
-  // ✅ Auto-load live location weather on page open
-  autoLocation();
-};
-
-// ✅ FIX: Dynamic live location — NOT static city
-function autoLocation(){
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      function(pos){
-        fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude);
-      },
-      function(){
-        document.getElementById("locationDenied").style.display = "block";
-      }
-    );
-  } else {
-    document.getElementById("locationDenied").style.display = "block";
-  }
-}
-
-function fetchWeatherByCoords(lat, lon){
-  fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=c77ad771da8c51df70707890f376e2d5&units=metric')
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    document.getElementById("autoWeatherCard").style.display = "block";
-    document.getElementById("autoCity").innerText    = "📍 " + d.name + ", " + d.sys.country;
-    document.getElementById("autoTemp").innerText    = d.main.temp + "°C";
-    document.getElementById("autoDesc").innerText    = d.weather[0].description;
-    document.getElementById("autoIcon").src          = "http://openweathermap.org/img/wn/" + d.weather[0].icon + "@2x.png";
-    document.getElementById("autoHumidity").innerText = d.main.humidity + "%";
-    document.getElementById("autoWind").innerText    = d.wind.speed + " m/s";
-    document.getElementById("autoFeels").innerText   = d.main.feels_like + "°C";
-    document.getElementById("cityInput").value       = d.name;
-
-    // ✅ FIX: Complete weather advice covering all conditions
-    var advice = getWeatherAdvice(d.main.temp, d.main.humidity, d.weather[0].description);
-    var ab = document.getElementById("autoAdviceBox");
-    ab.className = "advice-box " + advice.cls;
-    ab.innerHTML = "<strong>🌱 Farming Advice</strong><p>" + advice.text + "</p>";
-
-    // Apply hero box color based on condition
-    var hero = document.getElementById("autoHeroBox");
-    if(d.main.temp < 5)        hero.style.background = "linear-gradient(135deg,#1a237e,#283593)";
-    else if(d.main.temp > 38)  hero.style.background = "linear-gradient(135deg,#b71c1c,#c62828)";
-    else if(d.main.temp > 30)  hero.style.background = "linear-gradient(135deg,#e65100,#ef6c00)";
-    else                       hero.style.background = "linear-gradient(135deg,#1a3d22,#2d6a3f)";
-  })
-  .catch(function(e){
-    console.log("Weather error:", e);
-    document.getElementById("locationDenied").style.display = "block";
-  });
-}
-
-// ✅ FIX: Complete farming advice — includes cold, freezing, fog, snow, thunderstorm etc.
-function getWeatherAdvice(temp, humidity, desc){
-  var d = desc.toLowerCase();
-
-  // Freezing / very cold
-  if(temp < 0){
-    return { cls:"danger", text:"🥶 Freezing temperatures! Protect crops with covers or mulch immediately. Risk of frost damage — avoid irrigation as water may freeze on plants." };
-  }
-  if(temp < 5){
-    return { cls:"danger", text:"❄️ Very cold weather. High risk of frost damage for sensitive crops. Cover seedlings. Avoid evening watering. Good time to plan next season." };
-  }
-  if(temp < 10){
-    return { cls:"info", text:"🌨️ Cold weather. Crop growth will slow. Suitable for cold-tolerant crops: spinach, mustard, wheat. Reduce irrigation as soil stays moist longer." };
-  }
-  if(temp < 15){
-    return { cls:"info", text:"🌡️ Cool conditions. Excellent for Rabi crops (wheat, gram, mustard). Reduce irrigation frequency. Good time for soil preparation." };
-  }
-
-  // Special weather conditions
-  if(d.indexOf("thunderstorm") !== -1 || d.indexOf("thunder") !== -1){
-    return { cls:"danger", text:"⛈️ Thunderstorm alert! Stay out of the field. Risk of crop lodging (crops falling over). Ensure proper drainage to prevent waterlogging." };
-  }
-  if(d.indexOf("snow") !== -1){
-    return { cls:"danger", text:"❄️ Snowfall! Protect crops immediately with covers. Heavy snow can damage crop structures and greenhouses." };
-  }
-  if(d.indexOf("fog") !== -1 || d.indexOf("mist") !== -1 || d.indexOf("haze") !== -1){
-    return { cls:"warning", text:"🌫️ Foggy/misty conditions. Risk of fungal disease increases. Apply preventive fungicide spray. Avoid field work until fog clears." };
-  }
-  if(d.indexOf("drizzle") !== -1){
-    return { cls:"info", text:"🌦️ Light drizzle. Skip irrigation today — crops are getting moisture. Good conditions for transplanting seedlings." };
-  }
-  if(d.indexOf("rain") !== -1){
-    return { cls:"info", text:"🌧️ Rain expected/occurring. Do NOT irrigate today. Avoid pesticide and fertilizer application — it will wash away. Ensure field drainage is clear." };
-  }
-
-  // Humidity-based
-  if(humidity > 90){
-    return { cls:"danger", text:"💧 Extremely high humidity! Very high risk of fungal diseases (blight, mildew, rust). Apply fungicide immediately. Improve air circulation around crops." };
-  }
-  if(humidity > 80){
-    return { cls:"warning", text:"💦 High humidity. Monitor crops closely for fungal disease. Reduce irrigation. Avoid pesticide spraying as it won't dry properly." };
-  }
-
-  // Heat-based
-  if(temp > 45){
-    return { cls:"danger", text:"🔥 Extreme heat wave! Crops at very high risk of wilting. Irrigate immediately in early morning or late evening. Use shade nets for sensitive crops." };
-  }
-  if(temp > 40){
-    return { cls:"danger", text:"🥵 Very high temperature! Irrigate morning and evening. Avoid field work from 12pm–4pm. Risk of heat stress in vegetables and fruits." };
-  }
-  if(temp > 35){
-    return { cls:"warning", text:"🌡️ High temperature. Increase irrigation frequency. Monitor soil moisture daily. Good for cotton and sorghum but stressful for wheat and vegetables." };
-  }
-  if(temp > 30){
-    return { cls:"warning", text:"☀️ Warm conditions. Good for Kharif crops (rice, maize, cotton). Maintain regular irrigation. Check for increased pest activity." };
-  }
-
-  // Dry conditions
-  if(humidity < 20){
-    return { cls:"warning", text:"🏜️ Very low humidity and dry air. Risk of drought stress. Increase irrigation. Mulch around plants to retain soil moisture." };
-  }
-
-  // Ideal
-  return { cls:"success", text:"✅ Ideal farming conditions today! Temperature and humidity are suitable for most crops. Good time for sowing, transplanting, or applying fertilizer." };
+setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+function searchCity(city){
+  document.getElementById('cityInput').value = city;
+  document.querySelector('form').submit();
 }
 </script>
 </body>

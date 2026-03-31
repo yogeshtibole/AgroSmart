@@ -25,3 +25,14 @@
 .tl-item { transition:opacity .3s; }
 .del-item-btn { background:none; border:none; color:#ccc; font-size:14px; cursor:pointer; padding:4px 8px; border-radius:6px; flex-shrink:0; transition:color .2s, background .2s; }
 .del-item-btn:hover { color:#e53935; background:#ffebee; }
+
+/* Page-specific badge colors */
+.badge-page-dashboard     { background:#e8f5e9; color:#2e7d32; }
+.badge-page-weather       { background:#e3f2fd; color:#1565c0; }
+.badge-page-crop_advisor  { background:#f3e5f5; color:#6a1b9a; }
+.badge-page-irrigation    { background:#e0f2f1; color:#00695c; }
+.badge-page-yield_calculator { background:#fff8e1; color:#f57f17; }
+.badge-page-ai_diagnosis  { background:#fce4ec; color:#880e4f; }
+.badge-page-profile       { background:#fff3e0; color:#e65100; }
+.badge-page-login         { background:#f5f5f5; color:#616161; }
+.badge-page-general       { background:#f5f5f5; color:#616161; }

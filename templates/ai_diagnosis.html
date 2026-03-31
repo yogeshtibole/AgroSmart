@@ -1,60 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>AI Diagnosis | AgroSmart</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='ai_diagnosis.css') }}">
+  <style>
+    .ai-powered-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:linear-gradient(135deg,#1a3d22,#2d6a3f); color:#fff;
+      font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px;
+      letter-spacing:.5px; margin-bottom:16px;
+    }
+    .ai-pulse { width:7px; height:7px; background:#4caf50; border-radius:50%;
+      animation:pulse 1.5s infinite; }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+    .thinking-anim { padding:24px; text-align:center; }
+    .thinking-dots span {
+      display:inline-block; width:9px; height:9px; border-radius:50%;
+      background:var(--green); margin:0 4px; animation:bounce .9s infinite;
+    }
+    .thinking-dots span:nth-child(2){animation-delay:.2s}
+    .thinking-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+    .ai-response { font-size:14px; line-height:1.85; color:var(--text); }
+    .ai-response strong { color:var(--green-dark); }
+
+    .sev-row { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 16px; }
+    .sev-badge { padding:5px 15px; border-radius:20px; font-size:12px; font-weight:700; }
+    .sev-badge.healthy { background:#e8f5e9; color:#2e7d32; }
+    .sev-badge.low     { background:#fff8e1; color:#f57f17; }
+    .sev-badge.medium  { background:#fff3e0; color:#e65100; }
+    .sev-badge.high    { background:#ffebee; color:#c62828; }
+
+    .symptom-checks { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .sym-check {
+      display:flex; align-items:center; gap:6px; padding:7px 12px;
+      border:1.5px solid var(--border); border-radius:8px; cursor:pointer;
+      font-size:13px; user-select:none; transition:all .15s;
+    }
+    .sym-check input { cursor:pointer; accent-color:var(--green); }
+    .sym-check.selected { background:var(--green-light); border-color:var(--green); color:var(--green-dark); }
+
+    .hist-item {
+      background:#f9fdf9; border:1px solid var(--border); border-radius:10px;
+      padding:12px 16px; margin-bottom:8px; display:flex; justify-content:space-between;
+      align-items:center; cursor:pointer; transition:box-shadow .15s;
+    }
+    .hist-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.1); }
+
+    .lang-bar { display:flex; align-items:center; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+    .lang-label { font-size:13px; font-weight:600; color:var(--text-mid); }
+    .lang-btn {
+      padding:5px 14px; border-radius:20px; border:1.5px solid var(--border);
+      background:var(--white); font-family:inherit; font-size:12px; font-weight:600;
+      cursor:pointer; color:var(--text-mid); transition:all .2s;
+    }
+    .lang-btn.active { background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+    .save-diary-btn {
+      display:none; margin-top:14px; padding:9px 18px;
+      border:1.5px solid var(--green); border-radius:8px; background:var(--green-light);
+      color:var(--green-dark); font-family:inherit; font-size:13px; font-weight:600;
+      cursor:pointer; transition:all .15s; width:100%;
+    }
+    .save-diary-btn:hover { background:var(--green); color:#fff; }
+  </style>
 </head>
 <body>
-{% set active = 'ai' %}
+{% set active='ai' %}
 {% include '_sidebar.html' %}
 <div class="main">
   <p class="page-title">🧠 AI Crop Disease Diagnosis</p>
-  <p class="page-sub">Upload a crop leaf photo to detect possible diseases</p>
+  <p class="page-sub">Real Claude AI analysis — not just a lookup table. Identify diseases, get treatment advice.</p>
+
+  <div class="lang-bar">
+    <span class="lang-label">🌍 Response in:</span>
+    <button class="lang-btn active" onclick="setLang('English',this)">English</button>
+    <button class="lang-btn" onclick="setLang('Hindi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('Marathi',this)">मराठी</button>
+  </div>
 
   <div class="ai-grid">
+    <!-- INPUT PANEL -->
     <div class="card upload-card">
-      <div class="card-title">📷 Upload Leaf Image</div>
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+      <div class="ai-powered-badge"><div class="ai-pulse"></div> Powered by Claude AI</div>
+      <div class="card-title">📋 Describe Your Crop Problem</div>
+
+      <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
         <div id="uploadPreview">
           <div class="upload-icon">🌿</div>
-          <p class="upload-label">Click or drag to upload a leaf image</p>
-          <p class="upload-sub">JPG, PNG supported</p>
+          <p class="upload-label">Click to upload leaf photo (optional)</p>
+          <p class="upload-sub">JPG / PNG — AI will analyze the image</p>
         </div>
-        <img id="previewImg" style="display:none;width:100%;border-radius:8px;max-height:240px;object-fit:cover;">
+        <img id="previewImg" style="display:none;width:100%;border-radius:8px;max-height:220px;object-fit:cover;">
       </div>
-      <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(this)">
+      <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png,image/webp"
+             style="display:none" onchange="previewImage(this)">
+      <div id="fileError" style="display:none;margin-top:10px;padding:10px;background:#ffebee;border:1px solid #ffcdd2;border-radius:8px;font-size:13px;color:#c62828"></div>
 
-      <label class="form-label" style="margin-top:18px">Crop Type (optional)</label>
+      <label class="form-label" style="margin-top:18px">Crop Type <span style="color:#e53935">*</span></label>
       <select class="form-select" id="cropType">
-        <option value="">Auto-detect</option>
+        <option value="">— Select crop —</option>
         <option>Wheat</option><option>Rice</option><option>Maize</option>
         <option>Tomato</option><option>Cotton</option><option>Potato</option>
+        <option>Soybean</option><option>Onion</option><option>Sugarcane</option>
+        <option>Gram / Chickpea</option><option>Groundnut</option><option>Other</option>
       </select>
 
-      <button class="btn-green" id="diagnoseBtn" onclick="diagnose()">🔍 Run Diagnosis</button>
+      <label class="form-label">Symptoms Observed <span style="color:#e53935">*</span></label>
+      <div class="symptom-checks" id="symptomChecks">
+        <label class="sym-check"><input type="checkbox" value="yellow spots or yellowing leaves" onchange="toggleSym(this)"> 🟡 Yellow spots</label>
+        <label class="sym-check"><input type="checkbox" value="brown or dead patches" onchange="toggleSym(this)"> 🟤 Brown patches</label>
+        <label class="sym-check"><input type="checkbox" value="white powdery coating" onchange="toggleSym(this)"> ⬜ White powder</label>
+        <label class="sym-check"><input type="checkbox" value="wilting or drooping" onchange="toggleSym(this)"> 🥀 Wilting</label>
+        <label class="sym-check"><input type="checkbox" value="black spots on leaves" onchange="toggleSym(this)"> ⚫ Black spots</label>
+        <label class="sym-check"><input type="checkbox" value="leaf curling or twisting" onchange="toggleSym(this)"> 🔄 Leaf curling</label>
+        <label class="sym-check"><input type="checkbox" value="holes in leaves from insects" onchange="toggleSym(this)"> 🕳️ Holes in leaves</label>
+        <label class="sym-check"><input type="checkbox" value="stunted or slow growth" onchange="toggleSym(this)"> 📉 Stunted growth</label>
+        <label class="sym-check"><input type="checkbox" value="rotting stem or roots" onchange="toggleSym(this)"> 🦠 Stem/root rot</label>
+        <label class="sym-check"><input type="checkbox" value="plant appears healthy for routine check" onchange="toggleSym(this)"> ✅ Looks healthy</label>
+      </div>
+
+      <label class="form-label" style="margin-top:14px">Extra Details (optional)</label>
+      <textarea class="form-input" id="extraDetails" rows="3" style="resize:vertical"
+        placeholder="e.g. 'Problem started 5 days ago after rain', 'Only bottom leaves affected', 'Entire field or just corners?'"></textarea>
+
+      <button class="btn-green" id="diagnoseBtn" onclick="diagnose()" style="width:100%;margin-top:16px">
+        🔍 Run AI Diagnosis
+      </button>
     </div>
 
+    <!-- RESULT PANEL -->
     <div class="card" id="diagCard">
-      <div class="card-title">🔬 Diagnosis Result</div>
+      <div class="card-title">🔬 AI Diagnosis Result</div>
       <div class="diag-placeholder">
-        <div style="font-size:48px;margin-bottom:12px">🌿</div>
-        <p style="color:var(--text-light);font-size:14px">Upload an image to begin diagnosis</p>
+        <div style="font-size:52px;margin-bottom:14px">🌿</div>
+        <p style="color:var(--text-light);font-size:14px;text-align:center;line-height:1.7">
+          Select your crop, check the symptoms you see,<br>and click <strong>Run AI Diagnosis</strong>.<br>
+          <span style="font-size:12px;color:#bbb">Claude AI will give you a detailed expert analysis.</span>
+        </p>
       </div>
     </div>
   </div>
 
-  <div class="card tips-card">
-    <div class="card-title">💡 Common Crop Diseases</div>
+  <!-- History section -->
+  <div class="card" id="histSection" style="display:none;margin-top:20px">
+    <div class="card-title">🕒 Recent Diagnoses (this session)</div>
+    <div id="histList"></div>
+  </div>
+
+  <!-- Reference strip -->
+  <div class="card tips-card" style="margin-top:20px">
+    <div class="card-title">💡 Common Crop Diseases Quick Reference</div>
     <div class="disease-chips">
-      <div class="disease-chip red">🍂 Leaf Blight — Use Copper Fungicide</div>
-      <div class="disease-chip orange">🍃 Powdery Mildew — Use Sulfur Spray</div>
-      <div class="disease-chip yellow">🌾 Leaf Rust — Use Mancozeb</div>
-      <div class="disease-chip green">✅ Healthy Crop — No action needed</div>
-      <div class="disease-chip purple">🦠 Bacterial Wilt — Remove infected plants</div>
+      <div class="disease-chip red">🍂 Leaf Blight — Copper Fungicide</div>
+      <div class="disease-chip orange">🍃 Powdery Mildew — Sulfur Spray</div>
+      <div class="disease-chip yellow">🌾 Leaf Rust — Mancozeb</div>
+      <div class="disease-chip green">✅ Healthy — No action needed</div>
+      <div class="disease-chip purple">🦠 Bacterial Wilt — Remove plants</div>
+      <div class="disease-chip red">🐛 Fall Armyworm — Spinosad</div>
+      <div class="disease-chip orange">🎋 Sugarcane Borer — Chlorpyrifos</div>
     </div>
+    <p style="font-size:12px;color:#e65100;margin-top:12px;padding:10px;background:#fff3e0;border-radius:8px">
+      ⚠️ AI recommendations are educational guidance. For severe crop losses, consult your local Krishi Sevak or KVK centre.
+    </p>
   </div>
 </div>
 
@@ -64,52 +177,262 @@ window.onload = function(){
   setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
 };
 
-function previewImage(input){
-  if(input.files && input.files[0]){
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById("previewImg").src = e.target.result;
-      document.getElementById("previewImg").style.display = "block";
-      document.getElementById("uploadPreview").style.display = "none";
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
+var LANG = 'English';
+var diagHistory = [];
+
+function setLang(lang, btn){
+  LANG = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
-var DISEASES = [
-  { name:"✅ Healthy Crop", cls:"success", treatment:"No action needed. Your crop looks healthy!", confidence:92 },
-  { name:"⚠️ Leaf Blight", cls:"warning", treatment:"Apply Copper Fungicide spray. Remove infected leaves. Ensure proper drainage.", confidence:87 },
-  { name:"⚠️ Powdery Mildew", cls:"warning", treatment:"Use Sulfur-based fungicide. Improve air circulation around plants.", confidence:81 },
-  { name:"🔴 Leaf Rust", cls:"danger", treatment:"Apply Mancozeb or Propiconazole. Avoid overhead irrigation.", confidence:78 },
-  { name:"⚠️ Bacterial Wilt", cls:"warning", treatment:"Remove and destroy infected plants. Avoid reusing soil.", confidence:74 }
-];
+function toggleSym(cb){
+  cb.closest('.sym-check').classList.toggle('selected', cb.checked);
+}
 
-function diagnose(){
-  var file = document.getElementById("imageInput").files[0];
-  if(!file){ alert("Please upload a leaf image first."); return; }
+function triggerUpload(){ document.getElementById('imageInput').click(); }
 
-  var btn = document.getElementById("diagnoseBtn");
-  btn.innerText = "Analyzing...";
-  btn.disabled = true;
+function previewImage(input){
+  var errEl = document.getElementById('fileError');
+  errEl.style.display = 'none';
+  if(!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if(['image/jpeg','image/jpg','image/png','image/webp'].indexOf(file.type) === -1){
+    errEl.style.display='block'; errEl.textContent='❌ Only JPG and PNG images allowed.';
+    input.value=''; return;
+  }
+  if(file.size > 5*1024*1024){
+    errEl.style.display='block'; errEl.textContent='❌ File too large. Max 5MB.';
+    input.value=''; return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('previewImg').style.display = 'block';
+    document.getElementById('uploadPreview').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
 
-  setTimeout(function() {
-    var d = DISEASES[Math.floor(Math.random() * DISEASES.length)];
-    document.getElementById("diagCard").innerHTML =
-      '<div class="card-title">🔬 Diagnosis Result</div>'+
-      '<div class="diag-result '+d.cls+'">'+
-        '<div class="diag-name">'+d.name+'</div>'+
-        '<div class="confidence-bar-wrap">'+
-          '<div class="confidence-bar" style="width:'+d.confidence+'%"></div>'+
-        '</div>'+
-        '<p class="confidence-label">Confidence: '+d.confidence+'%</p>'+
+function getCheckedSymptoms(){
+  var syms = [];
+  document.querySelectorAll('#symptomChecks input:checked').forEach(function(cb){ syms.push(cb.value); });
+  return syms;
+}
+
+function fileToBase64(file){
+  return new Promise(function(res,rej){
+    var r = new FileReader();
+    r.onload = function(e){ res(e.target.result); };
+    r.onerror = function(){ rej(new Error('Read failed')); };
+    r.readAsDataURL(file);
+  });
+}
+
+async function diagnose(){
+  var crop     = document.getElementById('cropType').value;
+  var symptoms = getCheckedSymptoms();
+  var extra    = document.getElementById('extraDetails').value.trim();
+  var imgFile  = document.getElementById('imageInput').files[0];
+  var errEl    = document.getElementById('fileError');
+  errEl.style.display = 'none';
+
+  if(!crop){ errEl.style.display='block'; errEl.textContent='❌ Please select a crop type.'; return; }
+  if(symptoms.length === 0){ errEl.style.display='block'; errEl.textContent='❌ Please check at least one symptom.'; return; }
+
+  var btn = document.getElementById('diagnoseBtn');
+  btn.disabled = true; btn.textContent = '🧠 Claude AI is analyzing...';
+
+  // Show thinking state
+  document.getElementById('diagCard').innerHTML =
+    '<div class="card-title">🔬 AI Diagnosis Result</div>'+
+    '<div class="thinking-anim">'+
+      '<div style="font-size:36px;margin-bottom:16px">🌿</div>'+
+      '<div class="thinking-dots"><span></span><span></span><span></span></div>'+
+      '<p style="margin-top:14px;font-size:14px;color:var(--text-mid);font-weight:600">Claude AI is analyzing your crop…</p>'+
+      '<p style="font-size:12px;color:#aaa;margin-top:6px">Checking disease patterns, severity, and treatment options</p>'+
+    '</div>';
+
+  var symptomStr = symptoms.join(', ');
+  var prompt =
+`You are an expert agricultural scientist and plant pathologist with deep knowledge of Indian farming, crops, and crop diseases. A farmer needs your expert diagnosis.
+
+CROP: ${crop}
+SYMPTOMS: ${symptomStr}
+${extra ? 'ADDITIONAL CONTEXT: ' + extra : ''}
+
+Respond ONLY in ${LANG}. Be specific, practical, and use farmer-friendly language. Avoid very technical jargon.
+
+Use this exact format (keep the bold headers):
+
+**🔬 DIAGNOSIS:**
+[Name the most likely disease, pest, or condition]
+
+**📊 CONFIDENCE LEVEL:** [High / Medium / Low]
+**⚠️ SEVERITY:** [Healthy / Low / Medium / High]
+
+**🔍 WHAT IS HAPPENING:**
+[2-3 sentences: what is causing this, how it spreads, why now]
+
+**💊 IMMEDIATE ACTION — Do This TODAY:**
+1. [Specific step]
+2. [Specific step]
+3. [Specific step]
+
+**🧪 TREATMENT RECOMMENDATION:**
+- Best product: [Specific chemical/organic product name available in India, with dosage per acre]
+- How to apply: [Spray/drench/dust — specific instructions]
+- How many times: [Frequency]
+- Precautions: [Safety tip]
+
+**🌾 PREVENTION NEXT SEASON:**
+[2 brief tips to prevent recurrence]
+
+**💰 APPROX. TREATMENT COST:** [Rough INR cost per acre]
+
+End with one motivating sentence for the farmer.`;
+
+  try {
+    var messages;
+    if(imgFile){
+      var b64 = await fileToBase64(imgFile);
+      messages = [{
+        role:"user",
+        content:[
+          { type:"image", source:{ type:"base64", media_type: imgFile.type, data: b64.split(',')[1] }},
+          { type:"text", text: prompt + "\n\n[A photo of the affected crop has been uploaded. Please incorporate visual observations from the image into your diagnosis.]" }
+        ]
+      }];
+    } else {
+      messages = [{ role:"user", content: prompt }];
+    }
+
+    var resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-5-20251022", max_tokens:1000, messages })
+    });
+
+    var data = await resp.json();
+    if(data.error){ throw new Error(data.error.message); }
+    var text = data.content && data.content[0] ? data.content[0].text : 'No response received.';
+
+    // Determine severity from response
+    var sev = 'medium';
+    var sevText = text.toLowerCase();
+    if(/severity.*?:\s*(healthy)/i.test(text)) sev = 'healthy';
+    else if(/severity.*?:\s*(high)/i.test(text)) sev = 'high';
+    else if(/severity.*?:\s*(low)/i.test(text))  sev = 'low';
+
+    var sevLabels = {healthy:'✅ Healthy',low:'🟡 Low Severity',medium:'🟠 Medium Severity',high:'🔴 High Severity'};
+
+    document.getElementById('diagCard').innerHTML =
+      '<div class="card-title">🔬 AI Diagnosis Result</div>'+
+      '<div class="sev-row">'+
+        '<span class="sev-badge '+sev+'">'+sevLabels[sev]+'</span>'+
+        '<span style="font-size:11px;color:#aaa;margin:auto 0;">'+crop+' · '+symptoms.length+' symptom'+(symptoms.length>1?'s':'')+' · '+LANG+'</span>'+
       '</div>'+
-      '<div class="result-box" style="margin-top:16px">'+
-        '<strong>💊 Treatment Advice</strong>'+
-        '<p style="margin-top:6px">'+d.treatment+'</p>'+
-      '</div>';
-    btn.innerText = "🔍 Run Diagnosis";
-    btn.disabled = false;
-  }, 1800);
+      '<div class="ai-response">'+formatResponse(text)+'</div>'+
+      '<button class="save-diary-btn" style="display:block" onclick="saveToDiary(\''+crop.replace(/'/g,'')+'\')" >📝 Save This Diagnosis to Crop Diary</button>';
+
+    addToHistory(crop, symptomStr, sev, text);
+
+  } catch(err){
+    // Offline fallback: rule-based diagnosis when API is unavailable
+    var fallback = getOfflineDiagnosis(crop, symptoms);
+    document.getElementById('diagCard').innerHTML =
+      '<div class="card-title">🔬 Diagnosis Result <span style="font-size:11px;font-weight:400;color:#e65100">(Offline Mode)</span></div>'+
+      '<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px 14px;font-size:12px;color:#795548;margin-bottom:14px">'+
+        '⚡ Running in offline mode — AI server not reachable. Showing rule-based advice.'+
+      '</div>'+
+      '<div class="sev-row"><span class="sev-badge '+fallback.sev+'">'+fallback.sevLabel+'</span></div>'+
+      '<div class="ai-response">'+formatResponse(fallback.text)+'</div>';
+    addToHistory(crop, symptomStr, fallback.sev, fallback.text);
+  }
+
+  btn.disabled = false; btn.textContent = '🔍 Run AI Diagnosis';
+}
+
+function formatResponse(text){
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^(\d+\. )/gm, '<br>$1')
+    .replace(/^(- )/gm, '&nbsp;&nbsp;• ')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function saveToDiary(crop){
+  var text = document.querySelector('.ai-response') ? document.querySelector('.ai-response').innerText : '';
+  var today = new Date().toISOString().split('T')[0];
+  fetch('/crop_diary/add',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ title:'AI Diagnosis: '+crop, crop: crop, note: text.substring(0,1000), mood:'warning', date: today })
+  }).then(r=>r.json()).then(d=>{
+    if(d.status==='success') alert('✅ Diagnosis saved to your Crop Diary!');
+  });
+}
+
+function addToHistory(crop, symptoms, sev, text){
+  var now = new Date();
+  var t = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  diagHistory.unshift({crop, symptoms, sev, text, time:t});
+  if(diagHistory.length > 5) diagHistory.pop();
+  renderHistory();
+}
+
+function renderHistory(){
+  var sec  = document.getElementById('histSection');
+  var list = document.getElementById('histList');
+  if(diagHistory.length === 0){ sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  var sevL = {healthy:'✅ Healthy',low:'Low',medium:'Medium',high:'High'};
+  list.innerHTML = diagHistory.map(function(h,i){
+    return '<div class="hist-item" onclick="viewHistory('+i+')">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:700;color:var(--text)">'+h.crop+'</div>'+
+        '<div style="font-size:12px;color:var(--text-light);margin-top:2px">'+h.symptoms.split(',').slice(0,2).join(', ')+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div class="sev-badge '+h.sev+'" style="font-size:11px;padding:3px 10px">'+sevL[h.sev]+'</div>'+
+        '<div style="font-size:11px;color:#bbb;margin-top:4px">'+h.time+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function viewHistory(i){
+  var h = diagHistory[i];
+  var sevL = {healthy:'✅ Healthy',low:'🟡 Low',medium:'🟠 Medium',high:'🔴 High'};
+  document.getElementById('diagCard').innerHTML =
+    '<div class="card-title">🔬 AI Diagnosis Result <span style="font-size:11px;font-weight:400;color:#aaa">(from history)</span></div>'+
+    '<div class="sev-row"><span class="sev-badge '+h.sev+'">'+sevL[h.sev]+' Severity</span></div>'+
+    '<div class="ai-response">'+formatResponse(h.text)+'</div>';
+  window.scrollTo({top:document.getElementById('diagCard').offsetTop - 80, behavior:'smooth'});
+}
+
+function getOfflineDiagnosis(crop, symptoms){
+  var sev = 'medium', sevLabel = '🟠 Medium Severity';
+  var sym = symptoms.join(' ').toLowerCase();
+  if(sym.indexOf('healthy') !== -1){ sev='healthy'; sevLabel='✅ Healthy'; }
+  else if(sym.indexOf('wilting') !== -1 || sym.indexOf('rot') !== -1){ sev='high'; sevLabel='🔴 High Severity'; }
+  else if(sym.indexOf('yellow') !== -1 || sym.indexOf('powder') !== -1){ sev='medium'; sevLabel='🟠 Medium Severity'; }
+  else if(sym.indexOf('hole') !== -1 || sym.indexOf('curl') !== -1){ sev='low'; sevLabel='🟡 Low Severity'; }
+
+  var diseaseMap = {
+    'yellow': '**🔬 DIAGNOSIS:**\nLeaf Yellowing / Nitrogen Deficiency or Early Blight\n\n**📊 CONFIDENCE LEVEL:** Medium\n**⚠️ SEVERITY:** Medium\n\n**🔍 WHAT IS HAPPENING:**\nYellow spots usually indicate either nutrient deficiency (especially nitrogen) or early stages of fungal disease like Early Blight. It spreads through spores in humid conditions.\n\n**💊 IMMEDIATE ACTION — Do This TODAY:**\n1. Check if yellowing starts from lower/older leaves (nitrogen deficiency) or shows ring patterns (fungal)\n2. Remove and destroy heavily infected leaves\n3. Improve air circulation around plants\n\n**🧪 TREATMENT RECOMMENDATION:**\n- Best product: Mancozeb 75% WP (for fungal) or Urea spray (for nitrogen)\n- How to apply: Spray diluted solution on leaves\n- How many times: Every 7–10 days, 2–3 times\n- Precautions: Wear gloves; avoid spraying in hot afternoon\n\n**🌾 PREVENTION NEXT SEASON:**\nUse certified disease-free seeds. Rotate crops every season.\n\n**💰 APPROX. TREATMENT COST:** ₹300–600 per acre\n\nYour attention to your crop shows you are a dedicated farmer — keep observing!',
+    'powder': '**🔬 DIAGNOSIS:**\nPowdery Mildew (Fungal Disease)\n\n**📊 CONFIDENCE LEVEL:** High\n**⚠️ SEVERITY:** Medium\n\n**🔍 WHAT IS HAPPENING:**\nPowdery Mildew is a fungal infection causing white/grey powdery coating on leaves. It thrives in dry conditions with low humidity nights.\n\n**💊 IMMEDIATE ACTION — Do This TODAY:**\n1. Remove visibly infected leaves immediately\n2. Avoid overhead watering\n3. Increase plant spacing for airflow\n\n**🧪 TREATMENT RECOMMENDATION:**\n- Best product: Sulphur 80% WP or Carbendazim\n- How to apply: Dust or spray on affected areas\n- How many times: Every 5–7 days for 2–3 rounds\n- Precautions: Avoid application at temperatures above 35°C\n\n**🌾 PREVENTION NEXT SEASON:**\nPlant resistant varieties. Space crops adequately.\n\n**💰 APPROX. TREATMENT COST:** ₹200–400 per acre\n\nEarly detection like yours prevents major losses — great job!',
+    'wilt': '**🔬 DIAGNOSIS:**\nWilting — Possible Root Rot or Water Stress\n\n**📊 CONFIDENCE LEVEL:** Medium\n**⚠️ SEVERITY:** High\n\n**🔍 WHAT IS HAPPENING:**\nWilting can be caused by root rot (Fusarium/Pythium) or inadequate watering. Root rot blocks water uptake even in moist soil.\n\n**💊 IMMEDIATE ACTION — Do This TODAY:**\n1. Check soil moisture — not too wet, not too dry\n2. Gently dig up one plant to inspect roots (healthy = white, rotten = brown/black)\n3. Improve drainage if soil is waterlogged\n\n**🧪 TREATMENT RECOMMENDATION:**\n- Best product: Copper Oxychloride drench or Trichoderma powder\n- How to apply: Soil drench near root zone\n- How many times: 2 times, 10 days apart\n- Precautions: Do not over-irrigate after treatment\n\n**🌾 PREVENTION NEXT SEASON:**\nAvoid water stagnation. Use well-drained soil.\n\n**💰 APPROX. TREATMENT COST:** ₹400–800 per acre\n\nAct quickly — you can still save your crop with fast action!'
+  };
+
+  var text = diseaseMap['wilt'];
+  if(sym.indexOf('yellow') !== -1 || sym.indexOf('brown') !== -1) text = diseaseMap['yellow'];
+  if(sym.indexOf('powder') !== -1 || sym.indexOf('white') !== -1) text = diseaseMap['powder'];
+  if(sym.indexOf('wilt') !== -1 || sym.indexOf('rot') !== -1) text = diseaseMap['wilt'];
+  if(sev === 'healthy') text = '**🔬 DIAGNOSIS:**\nNo disease detected\n\n**📊 CONFIDENCE LEVEL:** High\n**⚠️ SEVERITY:** Healthy\n\n**🔍 WHAT IS HAPPENING:**\nYour '+crop+' appears to be in good health based on the symptoms you described. Continue your regular care routine.\n\n**💊 IMMEDIATE ACTION:**\n1. Continue regular watering schedule\n2. Monitor weekly for any new symptoms\n3. Apply balanced fertilizer as per season\n\n**🌾 PREVENTION:**\nMaintain crop hygiene. Remove weeds regularly.\n\n**💰 APPROX. COST:** Routine maintenance ₹100–200/acre\n\nExcellent farming! Your crop is thriving. Keep it up! 🌾';
+
+  return { sev: sev, sevLabel: sevLabel, text: text };
 }
 </script>
 </body>

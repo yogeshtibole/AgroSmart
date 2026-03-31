@@ -55,3 +55,10 @@
   color: var(--green-mid);
   margin-bottom: 10px;
 }
+
+.weather-tip-card { background:var(--white); border-radius:14px; border:1px solid #e8eee8; padding:40px 28px; text-align:center; margin-top:20px; }
+.weather-tip-card h3 { font-size:18px; font-weight:700; margin-bottom:8px; }
+.weather-tip-card p { font-size:14px; color:var(--text-mid); margin-bottom:20px; }
+.quick-cities { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.quick-cities button { padding:8px 18px; border:1.5px solid var(--border); border-radius:20px; background:var(--white); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:var(--green-dark); transition:all .2s; }
+.quick-cities button:hover { background:var(--green-dark); color:#fff; border-color:var(--green-dark); }

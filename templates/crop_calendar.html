@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Crop Calendar | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='crop_calendar.css') }}">
+<style>
+.saved-entry { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f2f2f2; }
+.saved-entry:last-child { border-bottom:none; }
+.se-info { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+.se-crop { font-weight:700;font-size:14px; }
+.se-region { font-size:12px;color:var(--text-mid); }
+.se-del { background:none;border:1.5px solid #ffcdd2;color:#e53935;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s; }
+.se-del:hover { background:#ffebee; }
+</style>
+</head>
+<body>
+{% set active='crop_calendar' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">📅 Crop Calendar & Sowing Planner</p>
+  <p class="page-sub">AI-powered month-by-month guide for your crops — when to sow, spray, harvest</p>
+
+  <!-- Language selector -->
+  <div class="lang-bar">
+    <span class="lang-label">🌍 Language:</span>
+    <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
+  </div>
+
+  <div class="cal-grid">
+    <!-- Selector card -->
+    <div class="card sel-card">
+      <div class="card-title">🌾 <span data-k="select_crop">Select Your Crop & Region</span></div>
+
+      <label class="form-label" data-k="crop_type">Crop Type</label>
+      <select class="form-select" id="cropSel">
+        <option value="wheat">🌾 Wheat (गेहूँ / गहू)</option>
+        <option value="rice">🍚 Rice (धान / भात)</option>
+        <option value="cotton">🌿 Cotton (कपास / कापूस)</option>
+        <option value="maize">🌽 Maize (मक्का / मका)</option>
+        <option value="soybean">🫘 Soybean (सोयाबीन)</option>
+        <option value="tomato">🍅 Tomato (टमाटर / टोमॅटो)</option>
+        <option value="onion">🧅 Onion (प्याज / कांदा)</option>
+        <option value="sugarcane">🎋 Sugarcane (गन्ना / ऊस)</option>
+        <option value="gram">🫘 Gram / Chickpea (चना / हरभरा)</option>
+      </select>
+
+      <label class="form-label" data-k="region">Region / State</label>
+      <select class="form-select" id="regionSel">
+        <option value="maharashtra">Maharashtra / Vidarbha</option>
+        <option value="punjab">Punjab / Haryana</option>
+        <option value="up">Uttar Pradesh / Bihar</option>
+        <option value="mp">Madhya Pradesh / Chhattisgarh</option>
+        <option value="gujarat">Gujarat / Rajasthan</option>
+        <option value="south">Karnataka / AP / Telangana</option>
+      </select>
+
+      <label class="form-label" data-k="soil_type">Soil Type</label>
+      <select class="form-select" id="soilSel">
+        <option value="" {% if not user or not user[5] %}selected{% endif %}>— Select —</option>
+        {% for s in ['Black Soil','Red Soil','Alluvial Soil','Laterite Soil'] %}
+          <option {% if user and user[5]==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+
+      <button class="btn-green" onclick="generateCalendar()">📅 <span data-k="generate">Generate Calendar</span></button>
+
+      <div class="tip-box" id="quickTip" style="display:none"></div>
+    </div>
+
+    <!-- Calendar output -->
+    <div class="card cal-output" id="calOutput">
+      <div class="cal-placeholder">
+        <div style="font-size:52px;margin-bottom:12px">📅</div>
+        <p data-k="select_to_view">Select a crop and click Generate Calendar</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Season overview strip -->
+  <div class="season-strip" id="seasonStrip" style="display:none">
+    <div class="season-card kharif">
+      <div class="sc-title">☀️ <span data-k="kharif">Kharif</span></div>
+      <div class="sc-months" data-k="kharif_months">Jun – Oct</div>
+      <div class="sc-desc" data-k="kharif_desc">Monsoon crops: Rice, Cotton, Maize, Soybean</div>
+    </div>
+    <div class="season-card rabi">
+      <div class="sc-title">❄️ <span data-k="rabi">Rabi</span></div>
+      <div class="sc-months" data-k="rabi_months">Nov – Mar</div>
+      <div class="sc-desc" data-k="rabi_desc">Winter crops: Wheat, Gram, Mustard</div>
+    </div>
+    <div class="season-card zaid">
+      <div class="sc-title">🌸 <span data-k="zaid">Zaid</span></div>
+      <div class="sc-months" data-k="zaid_months">Mar – Jun</div>
+      <div class="sc-desc" data-k="zaid_desc">Summer crops: Watermelon, Mung, Vegetables</div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+  setLang('en', document.querySelector('.lang-btn'));
+};
+
+var LANG = 'en';
+var STRINGS = {
+  en: {
+    select_crop:"Select Your Crop & Region", crop_type:"Crop Type", region:"Region / State",
+    soil_type:"Soil Type", generate:"Generate Calendar", select_to_view:"Select a crop and click Generate Calendar",
+    kharif:"Kharif", rabi:"Rabi", zaid:"Zaid",
+    kharif_months:"Jun – Oct", rabi_months:"Nov – Mar", zaid_months:"Mar – Jun",
+    kharif_desc:"Monsoon crops: Rice, Cotton, Maize, Soybean",
+    rabi_desc:"Winter crops: Wheat, Gram, Mustard",
+    zaid_desc:"Summer crops: Watermelon, Mung, Vegetables",
+  },
+  hi: {
+    select_crop:"अपनी फसल और क्षेत्र चुनें", crop_type:"फसल का प्रकार", region:"राज्य / क्षेत्र",
+    soil_type:"मिट्टी का प्रकार", generate:"कैलेंडर बनाएं", select_to_view:"फसल चुनें और कैलेंडर बनाएं",
+    kharif:"खरीफ", rabi:"रबी", zaid:"जायद",
+    kharif_months:"जून – अक्तूबर", rabi_months:"नवम्बर – मार्च", zaid_months:"मार्च – जून",
+    kharif_desc:"मानसून फसलें: धान, कपास, मक्का, सोयाबीन",
+    rabi_desc:"रबी फसलें: गेहूँ, चना, सरसों",
+    zaid_desc:"ग्रीष्म फसलें: तरबूज, मूंग, सब्जियाँ",
+  },
+  mr: {
+    select_crop:"तुमची पीक आणि प्रदेश निवडा", crop_type:"पिकाचा प्रकार", region:"राज्य / प्रदेश",
+    soil_type:"मातीचा प्रकार", generate:"कॅलेंडर तयार करा", select_to_view:"पीक निवडा आणि कॅलेंडर तयार करा",
+    kharif:"खरीप", rabi:"रब्बी", zaid:"उन्हाळी",
+    kharif_months:"जून – ऑक्टोबर", rabi_months:"नोव्हेंबर – मार्च", zaid_months:"मार्च – जून",
+    kharif_desc:"पावसाळी पिके: भात, कापूस, मका, सोयाबीन",
+    rabi_desc:"हिवाळी पिके: गहू, हरभरा, मोहरी",
+    zaid_desc:"उन्हाळी पिके: टरबूज, मूग, भाजीपाला",
+  }
+};
+
+function setLang(lang, btn) {
+  LANG = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  var s = STRINGS[lang];
+  document.querySelectorAll('[data-k]').forEach(el => {
+    var k = el.getAttribute('data-k');
+    if (s[k]) el.textContent = s[k];
+  });
+}
+
+// Calendar data per crop
+var CAL_DATA = {
+  wheat: {
+    season:"Rabi", color:"#1a3d22",
+    months: [
+      {m:"October",    acts:["🌱 Land preparation – deep ploughing","💧 Pre-sowing irrigation","🧪 Apply basal fertilizer (DAP)"]},
+      {m:"November",   acts:["🌾 Sowing time! Use certified seeds","🪣 First irrigation after 3 weeks","🌿 Weed control starts"]},
+      {m:"December",   acts:["💉 Spray for aphids if needed","💧 Crown root irrigation","📋 Monitor for yellow rust disease"]},
+      {m:"January",    acts:["🧪 Top-dress Urea (1st dose)","💧 Tillering irrigation","🌡️ Watch for frost damage"]},
+      {m:"February",   acts:["🧪 Top-dress Urea (2nd dose)","💧 Boot stage irrigation","🌾 Flowering begins – critical water"]},
+      {m:"March",      acts:["💧 Grain filling irrigation","🔍 Scout for rust/blight","⛔ Stop irrigation 2 weeks before harvest"]},
+      {m:"April",      acts:["🌾 Harvesting time!","🏪 Dry grain to 12% moisture","📦 Store in clean bags"]},
+    ]
+  },
+  rice: {
+    season:"Kharif", color:"#006a4e",
+    months: [
+      {m:"May",        acts:["🌱 Nursery preparation","💧 Flood nursery beds","🧪 Apply basal NPK in nursery"]},
+      {m:"June",       acts:["🌾 Transplanting – 25-30 day seedlings","💧 Maintain 2-5cm water in field","🌿 Weed control 1st round"]},
+      {m:"July",       acts:["🧪 1st top-dress Urea","💧 Intermittent flooding technique","🔍 Watch for blast disease"]},
+      {m:"August",     acts:["🧪 2nd top-dress Urea","🌿 2nd weeding","🐛 Scout for stem borer – spray if needed"]},
+      {m:"September",  acts:["💧 Critical: panicle initiation water","🔍 Monitor for sheath blight","⚗️ Spray Tricyclazole if blast seen"]},
+      {m:"October",    acts:["💧 Drain field 15 days before harvest","🌾 Harvest when 80% grains turn golden","🔄 Thresh immediately to avoid losses"]},
+    ]
+  },
+  cotton: {
+    season:"Kharif", color:"#4a235a",
+    months: [
+      {m:"April",      acts:["🌱 Field preparation – deep tillage","🧪 Soil testing & FYM application","🛒 Arrange certified Bt cotton seed"]},
+      {m:"May",        acts:["🌾 Sowing starts (Maharashtra: 15 May+)","💧 Pre-sowing irrigation if needed","🌿 Maintain 90×60cm spacing"]},
+      {m:"June",       acts:["🌿 Thinning – keep 1 plant/hill","💧 First irrigation at squaring","🌱 Gap filling in first 15 days"]},
+      {m:"July",       acts:["🧪 Apply Urea – top dressing","🐛 Scout for bollworm weekly","💧 Irrigation every 10-15 days"]},
+      {m:"August",     acts:["🌸 Flowering & boll formation","⚗️ Spray for pink bollworm if needed","🧪 Potash application for boll fill"]},
+      {m:"September",  acts:["🌿 Defoliants if early harvest needed","💧 Reduce irrigation","🔍 Monitor for sucking pests"]},
+      {m:"October",    acts:["🌾 1st picking starts","📦 Store in clean dry place","🌿 Continue picking every 20 days"]},
+      {m:"November",   acts:["🌾 2nd & 3rd picking","🧹 Remove crop residues post harvest","📝 Record yield for next season"]},
+    ]
+  },
+  soybean: {
+    season:"Kharif", color:"#5d4037",
+    months: [
+      {m:"June",       acts:["🌱 Sow after first good rain (June 20+)","💧 Seed treatment with Rhizobium","🌾 Row spacing 45cm, seed rate 75kg/ha"]},
+      {m:"July",       acts:["🌿 Weed control – 1st & 2nd week critical","🧪 Top-dress with Potash","🐛 Scout for stem fly"]},
+      {m:"August",     acts:["🌸 Flowering – no stress allowed","💧 Irrigation if no rain for 10 days","🔍 Watch for yellow mosaic virus"]},
+      {m:"September",  acts:["🌾 Pod filling – critical stage","⚗️ Spray fungicide for pod diseases","💧 Irrigation at pod fill"]},
+      {m:"October",    acts:["🌾 Harvest when 95% pods turn brown","🚜 Thresh carefully to avoid splitting","📦 Dry to 12% moisture before storage"]},
+    ]
+  },
+  maize: {
+    season:"Kharif", color:"#e65100",
+    months: [
+      {m:"June",       acts:["🌱 Sow after first rain","💧 Row spacing 60×25cm","🧪 Basal dose: NPK before sowing"]},
+      {m:"July",       acts:["🌿 Weed control – very critical","🧪 1st top-dress Urea at knee-high","💧 Irrigation at tasseling if dry"]},
+      {m:"August",     acts:["🌾 Tasseling & silking – critical water","🐛 Watch for fall armyworm","🧪 2nd top-dress Urea"]},
+      {m:"September",  acts:["🌽 Ear development","💧 Irrigation at grain fill","🔍 Monitor for downy mildew"]},
+      {m:"October",    acts:["🌾 Harvest – husks dry, grains hard","🌬️ Dry cobs in sun","📦 Shell and store at <14% moisture"]},
+    ]
+  },
+  tomato: {
+    season:"Rabi/Zaid", color:"#c62828",
+    months: [
+      {m:"September",  acts:["🌱 Nursery sowing in raised beds","💧 Water nursery lightly twice daily","🧪 Apply FYM to nursery beds"]},
+      {m:"October",    acts:["🌾 Transplant 25-30 day seedlings","💧 Drip irrigation setup recommended","🧪 Basal dose NPK at transplanting"]},
+      {m:"November",   acts:["🌿 Stake plants (1m height)","🧪 1st top-dress fertigation","🐛 Scout for thrips / whitefly"]},
+      {m:"December",   acts:["🌸 Flowering starts","⚗️ Spray for early blight","💧 Maintain soil moisture via drip"]},
+      {m:"January",    acts:["🍅 Green fruits appear","🧪 Potash spray for fruit quality","🐛 Monitor for fruit borer"]},
+      {m:"February",   acts:["🍅 Harvesting begins","📦 Grade and pack carefully","📝 Record yield"]},
+    ]
+  },
+  onion: {
+    season:"Rabi", color:"#6a1b9a",
+    months: [
+      {m:"October",    acts:["🌱 Nursery sowing for Rabi onion","💧 Light daily irrigation in nursery","🧪 Apply DAP in nursery bed"]},
+      {m:"November",   acts:["🌾 Transplant 6-week seedlings","💧 Flood irrigation then 8-10 day interval","🌿 Row spacing 15×10cm"]},
+      {m:"December",   acts:["🌿 Weed control critical","🧪 Top-dress Urea 1st dose","🔍 Scout for thrips – damage reduces yield"]},
+      {m:"January",    acts:["🧪 Top-dress Urea 2nd dose","⛔ Stop Nitrogen after 60 days","💧 Regular irrigation for bulb formation"]},
+      {m:"February",   acts:["🧅 Bulb swelling – maintain moisture","⚗️ Spray for purple blotch if seen","💧 Reduce irrigation last 2 weeks"]},
+      {m:"March",      acts:["🌿 Neck fall = harvest time!","🌬️ Cure in field for 7-10 days","📦 Store in well-ventilated sheds"]},
+    ]
+  },
+  sugarcane: {
+    season:"Annual", color:"#1565c0",
+    months: [
+      {m:"Feb–Mar",    acts:["🌱 Plant setts in furrows","💧 Irrigation immediately after planting","🧪 Basal dose – Phosphorus & Potash"]},
+      {m:"Apr–May",    acts:["🌿 Germination & tillering","💧 Irrigation every 10 days","🌿 Gap filling in 1st month"]},
+      {m:"Jun–Jul",    acts:["🧪 Urea top-dress – 3 splits","💧 Flood irrigation or drip","🌿 Earthing up – mound soil around stems"]},
+      {m:"Aug–Sep",    acts:["🌾 Grand growth period","💧 Highest water need – don't skip","🐛 Monitor for top borer"]},
+      {m:"Oct–Nov",    acts:["⛔ Stop Nitrogen application","💧 Reduce irrigation","🔍 Maturity test – brix reading >18"]},
+      {m:"Dec–Jan",    acts:["🔪 Harvesting season","🏭 Send to mill within 24 hours","🌱 Ratoon management – fertilize stubble"]},
+    ]
+  },
+  gram: {
+    season:"Rabi", color:"#f57f17",
+    months: [
+      {m:"October",    acts:["🌱 Sow after kharif harvest","💧 Seed treatment – Rhizobium + Trichoderma","🌾 Row spacing 30cm, depth 5-7cm"]},
+      {m:"November",   acts:["🌿 Weed control – hand weeding","🧪 Foliar spray – DAP 2%","💧 Pre-flowering irrigation if dry"]},
+      {m:"December",   acts:["🌸 Flowering begins","⚗️ Spray for pod borer","💧 Pod initiation irrigation"]},
+      {m:"January",    acts:["🫘 Pod filling","💧 Irrigation at pod fill critical","🔍 Monitor for wilt disease"]},
+      {m:"February",   acts:["🌾 Harvest when plants turn yellow","🌬️ Thresh after 2-3 days drying","📦 Store in dry airtight containers"]},
+    ]
+  }
+};
+
+function generateCalendar(){
+  var crop    = document.getElementById('cropSel').value;
+  var region  = document.getElementById('regionSel').value;
+  var soil    = document.getElementById('soilSel').value;
+  var data    = CAL_DATA[crop];
+  if(!data){ alert("Data not available"); return; }
+
+  var cropName = document.getElementById('cropSel').selectedOptions[0].text;
+  var html = '<div class="cal-header" style="background:'+data.color+'">';
+  html += '<div class="cal-crop-name">'+cropName+'</div>';
+  html += '<div class="cal-season-badge">'+data.season+' Crop</div>';
+  html += '</div>';
+  html += '<div class="months-list">';
+  data.months.forEach(function(m, i){
+    html += '<div class="month-row" style="animation-delay:'+(i*0.07)+'s">';
+    html += '<div class="month-label">'+m.m+'</div>';
+    html += '<div class="month-acts">';
+    m.acts.forEach(function(a){
+      html += '<div class="act-chip">'+a+'</div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // Quick tip
+  var tips = {
+    wheat:"💡 Wheat tip: Sow by mid-November for best yield. Delayed sowing reduces grain weight.",
+    rice:"💡 Rice tip: SRI method (single seedling, wider spacing) can increase yield by 20-30%.",
+    cotton:"💡 Cotton tip: Avoid waterlogging – cotton roots rot in standing water.",
+    soybean:"💡 Soybean tip: Rhizobium seed treatment can save 25% on nitrogen fertilizer cost.",
+    maize:"💡 Maize tip: Fall Armyworm can destroy entire crop in 3 days. Scout daily in August.",
+    tomato:"💡 Tomato tip: Drip fertigation gives 40% higher yield vs flood irrigation.",
+    onion:"💡 Onion tip: Do NOT over-irrigate in last 3 weeks – it causes neck rot in storage.",
+    sugarcane:"💡 Sugarcane tip: Trash mulching saves 30% irrigation and suppresses weeds.",
+    gram:"💡 Gram tip: Do NOT give heavy irrigation – gram is drought tolerant and over-watering causes wilt."
+  };
+
+  document.getElementById('quickTip').style.display='block';
+  document.getElementById('quickTip').textContent = tips[crop]||'';
+  document.getElementById('calOutput').innerHTML = html;
+  document.getElementById('saveCalBtn').style.display='inline-flex';
+  document.getElementById('seasonStrip').style.display='flex';
+}
+</script>
+
+  <!-- Save Button (shown after generating) -->
+  <div style="margin-top:14px;display:none" id="saveCalBtnWrap">
+    <button class="btn-green" id="saveCalBtn" onclick="saveCalEntry()" style="display:none">💾 Save This Plan</button>
+    <div id="saveCalMsg" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+  </div>
+
+  <!-- Saved Entries -->
+  <div class="card" style="margin-top:24px" id="savedEntriesCard">
+    <div class="card-title">📋 My Saved Crop Plans</div>
+    {% if saved_entries %}
+      <div id="savedList">
+      {% for e in saved_entries %}
+        <div class="saved-entry" id="se-{{ e[0] }}">
+          <div class="se-info">
+            <span class="se-crop">🌾 {{ e[1] }}</span>
+            <span class="se-region">{{ e[2] or '' }}</span>
+            <span class="se-date" style="font-size:11px;color:#aaa">{{ e[6].strftime('%d %b %Y') if e[6] else '' }}</span>
+          </div>
+          <button class="se-del" onclick="deleteCalEntry('{{ e[0] }}')">🗑️ Delete</button>
+        </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <p id="noSavedMsg" style="font-size:13px;color:#aaa">No saved plans yet. Generate a calendar and click Save.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+var currentCalCrop = '';
+var currentCalRegion = '';
+
+var origGenerate = generateCalendar;
+generateCalendar = function(){
+  origGenerate();
+  currentCalCrop = document.getElementById('cropSel').selectedOptions[0].text;
+  currentCalRegion = document.getElementById('regionSel').selectedOptions[0].text;
+  document.getElementById('saveCalBtnWrap').style.display = 'block';
+  document.getElementById('saveCalBtn').style.display = 'inline-flex';
+};
+
+function saveCalEntry(){
+  var btn = document.getElementById('saveCalBtn');
+  btn.disabled = true;
+  fetch('/crop_calendar/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({crop: currentCalCrop, region: currentCalRegion, notes: ''})
+  }).then(r=>r.json()).then(d=>{
+    btn.disabled=false;
+    var m = document.getElementById('saveCalMsg');
+    m.style.display='block';
+    if(d.status==='success'){
+      m.innerText='✅ Plan saved!'; m.style.background='#e8f5e9'; m.style.color='#2e7d32';
+      setTimeout(()=>location.reload(),900);
+    } else {
+      m.innerText='❌ '+(d.msg||'Error'); m.style.background='#ffebee'; m.style.color='#c62828';
+    }
+    setTimeout(()=>m.style.display='none',3000);
+  });
+}
+
+function deleteCalEntry(id){
+  if(!confirm('Delete this saved plan?')) return;
+  fetch('/crop_calendar/delete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({id: id})
+  }).then(r=>r.json()).then(d=>{
+    if(d.status==='success'){
+      var el = document.getElementById('se-'+id); if(el) el.remove();
+    }
+  });
+}
+</script>
+</body>
+</html>

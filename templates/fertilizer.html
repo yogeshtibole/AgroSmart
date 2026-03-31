@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Fertilizer Calculator | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fertilizer.css') }}">
+</head>
+<body>
+{% set active='fertilizer' %}
+{% include '_sidebar.html' %}
+<div class="main">
+  <p class="page-title">🧪 Fertilizer & Nutrient Calculator</p>
+  <p class="page-sub">Calculate exact NPK dose for your crop area — avoid waste, boost yield</p>
+
+  <!-- Language bar -->
+  <div class="lang-bar">
+    <span class="lang-label">🌍</span>
+    <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
+  </div>
+
+  <div class="fert-grid">
+    <div class="card">
+      <div class="card-title">🌾 <span data-k="inputs">Crop & Field Inputs</span></div>
+
+      <label class="form-label" data-k="crop">Crop</label>
+      <select class="form-select" id="cropF">
+        <option value="wheat">Wheat (गेहूँ / गहू)</option>
+        <option value="rice">Rice (धान / भात)</option>
+        <option value="cotton">Cotton (कपास / कापूस)</option>
+        <option value="maize">Maize (मक्का / मका)</option>
+        <option value="soybean">Soybean (सोयाबीन)</option>
+        <option value="tomato">Tomato (टमाटर / टोमॅटो)</option>
+        <option value="onion">Onion (प्याज / कांदा)</option>
+        <option value="sugarcane">Sugarcane (गन्ना / ऊस)</option>
+        <option value="gram">Gram / Chickpea (चना / हरभरा)</option>
+      </select>
+
+      <label class="form-label" data-k="area">Farm Area (acres)</label>
+      <input class="form-input" type="number" id="areaF" step="0.1" placeholder="e.g. 2.5"
+             value="{{ user[3] if user and user[3] else '' }}">
+
+      <label class="form-label" data-k="soil_ph">Soil pH</label>
+      <input class="form-input" type="number" id="phF" step="0.1" min="4" max="10"
+             placeholder="e.g. 6.5" value="{{ user[4] if user and user[4] else '' }}">
+
+      <label class="form-label" data-k="soil_type">Soil Type</label>
+      <select class="form-select" id="soilF">
+        <option value="black" {% if user and user[5]=='Black Soil' %}selected{% endif %}>Black Soil</option>
+        <option value="alluvial" {% if user and user[5]=='Alluvial Soil' %}selected{% endif %}>Alluvial Soil</option>
+        <option value="red" {% if user and user[5]=='Red Soil' %}selected{% endif %}>Red Soil</option>
+        <option value="laterite" {% if user and user[5]=='Laterite Soil' %}selected{% endif %}>Laterite Soil</option>
+      </select>
+
+      <label class="form-label" data-k="prev_crop">Previous Crop (for residue benefit)</label>
+      <select class="form-select" id="prevCrop">
+        <option value="none">None / Fallow</option>
+        <option value="legume">Legume (Soybean / Gram / Moong)</option>
+        <option value="cereal">Cereal (Wheat / Rice / Maize)</option>
+        <option value="vegetable">Vegetables</option>
+      </select>
+
+      <button class="btn-green" onclick="calcFertilizer()">🧮 <span data-k="calculate">Calculate Dose</span></button>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="fertResult">
+      <div class="card-title">📊 <span data-k="results">Fertilizer Recommendation</span></div>
+      <div class="fert-placeholder">
+        <div style="font-size:52px;margin-bottom:12px">🧪</div>
+        <p style="color:var(--text-light);font-size:14px" data-k="fill_and_calc">Fill crop details and click Calculate</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NPK Reference table -->
+  <div class="card ref-card">
+    <div class="card-title">📋 <span data-k="npk_guide">NPK Nutrient Guide</span></div>
+    <div class="npk-grid">
+      <div class="npk-col n">
+        <div class="npk-symbol">N</div>
+        <div class="npk-name" data-k="nitrogen">Nitrogen</div>
+        <div class="npk-role" data-k="n_role">Promotes leaf & stem growth. Gives dark green colour.</div>
+        <div class="npk-sources" data-k="n_sources">Sources: Urea (46%N), DAP (18%N), Ammonium Sulphate (21%N)</div>
+      </div>
+      <div class="npk-col p">
+        <div class="npk-symbol">P</div>
+        <div class="npk-name" data-k="phosphorus">Phosphorus</div>
+        <div class="npk-role" data-k="p_role">Root development & flowering. Needed at sowing time.</div>
+        <div class="npk-sources" data-k="p_sources">Sources: DAP (46%P₂O₅), SSP (16%P), MOP</div>
+      </div>
+      <div class="npk-col k">
+        <div class="npk-symbol">K</div>
+        <div class="npk-name" data-k="potassium">Potassium</div>
+        <div class="npk-role" data-k="k_role">Disease resistance, fruit quality, stress tolerance.</div>
+        <div class="npk-sources" data-k="k_sources">Sources: MOP (60%K₂O), SOP (50%K₂O), NPK complex</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+window.onload = function(){
+  setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+};
+
+var LANG = 'en';
+var S = {
+  en: { inputs:"Crop & Field Inputs", crop:"Crop", area:"Farm Area (acres)", soil_ph:"Soil pH",
+        soil_type:"Soil Type", prev_crop:"Previous Crop (for residue benefit)",
+        calculate:"Calculate Dose", results:"Fertilizer Recommendation",
+        fill_and_calc:"Fill crop details and click Calculate",
+        npk_guide:"NPK Nutrient Guide",
+        nitrogen:"Nitrogen", phosphorus:"Phosphorus", potassium:"Potassium",
+        n_role:"Promotes leaf & stem growth. Gives dark green colour.",
+        p_role:"Root development & flowering. Needed at sowing time.",
+        k_role:"Disease resistance, fruit quality, stress tolerance.",
+        n_sources:"Sources: Urea (46%N), DAP (18%N), Ammonium Sulphate (21%N)",
+        p_sources:"Sources: DAP (46%P₂O₅), SSP (16%P), MOP",
+        k_sources:"Sources: MOP (60%K₂O), SOP (50%K₂O), NPK complex" },
+  hi: { inputs:"फसल और खेत की जानकारी", crop:"फसल", area:"खेत का क्षेत्रफल (एकड़)", soil_ph:"मिट्टी pH",
+        soil_type:"मिट्टी का प्रकार", prev_crop:"पिछली फसल",
+        calculate:"खुराक गणना करें", results:"उर्वरक सिफारिश",
+        fill_and_calc:"फसल की जानकारी भरें और गणना करें",
+        npk_guide:"NPK पोषक तत्व मार्गदर्शिका",
+        nitrogen:"नाइट्रोजन", phosphorus:"फॉस्फोरस", potassium:"पोटेशियम",
+        n_role:"पत्ती और तना विकास को बढ़ावा देता है।",
+        p_role:"जड़ विकास और फूलना। बुवाई के समय जरूरी।",
+        k_role:"रोग प्रतिरोध, फल गुणवत्ता, तनाव सहनशीलता।",
+        n_sources:"स्रोत: यूरिया (46%N), DAP (18%N)",
+        p_sources:"स्रोत: DAP (46%P₂O₅), SSP (16%P)",
+        k_sources:"स्रोत: MOP (60%K₂O), SOP (50%K₂O)" },
+  mr: { inputs:"पीक आणि शेताची माहिती", crop:"पीक", area:"शेत क्षेत्र (एकर)", soil_ph:"माती pH",
+        soil_type:"मातीचा प्रकार", prev_crop:"मागील पीक",
+        calculate:"डोस मोजा", results:"खत शिफारस",
+        fill_and_calc:"पीक माहिती भरा आणि मोजा",
+        npk_guide:"NPK पोषक मार्गदर्शक",
+        nitrogen:"नत्र", phosphorus:"स्फुरद", potassium:"पालाश",
+        n_role:"पाने आणि खोडाची वाढ. गडद हिरवा रंग देतो.",
+        p_role:"मुळांची वाढ आणि फुलणे. पेरणीच्या वेळी आवश्यक.",
+        k_role:"रोग प्रतिकार, फळांचा दर्जा, ताण सहनशीलता.",
+        n_sources:"स्रोत: युरिया (46%N), DAP (18%N)",
+        p_sources:"स्रोत: DAP (46%P₂O₅), SSP (16%P)",
+        k_sources:"स्रोत: MOP (60%K₂O), SOP (50%K₂O)" }
+};
+function setLang(lang, btn){
+  LANG=lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    var k=el.getAttribute('data-k'); if(S[lang][k]) el.textContent=S[lang][k];
+  });
+}
+
+// NPK requirements kg/ha per crop
+var NPK = {
+  wheat:    {N:120, P:60, K:40},
+  rice:     {N:120, P:60, K:60},
+  cotton:   {N:150, P:60, K:60},
+  maize:    {N:120, P:60, K:40},
+  soybean:  {N:30,  P:60, K:40},
+  tomato:   {N:150, P:75, K:100},
+  onion:    {N:100, P:50, K:60},
+  sugarcane:{N:280, P:90, K:150},
+  gram:     {N:20,  P:40, K:20}
+};
+
+function calcFertilizer(){
+  var crop = document.getElementById('cropF').value;
+  var area = parseFloat(document.getElementById('areaF').value);
+  var ph   = parseFloat(document.getElementById('phF').value);
+  var soil = document.getElementById('soilF').value;
+  var prev = document.getElementById('prevCrop').value;
+
+  if(!area||area<=0){ alert("Please enter farm area"); return; }
+
+  var base = NPK[crop];
+  var areaHa = area * 0.4047; // acres to hectares
+
+  // Adjustments
+  var nAdj = prev==='legume' ? 0.75 : 1; // legume saves 25% N
+  var pAdj = ph < 6.5 ? 1.1 : ph > 8 ? 1.15 : 1.0;
+  var kAdj = soil==='alluvial' ? 0.85 : 1.0;
+
+  var N = (base.N * areaHa * nAdj).toFixed(1);
+  var P = (base.P * areaHa * pAdj).toFixed(1);
+  var K = (base.K * areaHa * kAdj).toFixed(1);
+
+  // Product quantities (bags of 50kg)
+  var urea    = (N / 0.46 / 50).toFixed(1);
+  var dap     = (P / 0.46 / 50).toFixed(1);
+  var mop     = (K / 0.60 / 50).toFixed(1);
+
+  var cropName = document.getElementById('cropF').selectedOptions[0].text;
+  var ph_warn = '';
+  if(ph && ph<6.0)  ph_warn='<div class="ph-alert warning">⚠️ Low pH: Apply 2 bags of Lime (CaCO₃) per acre to improve pH and nutrient availability.</div>';
+  if(ph && ph>8.0)  ph_warn='<div class="ph-alert warning">⚠️ High pH: Apply Gypsum (3 bags/acre) or Sulfur to reduce alkalinity.</div>';
+  var leg_note = prev==='legume' ? '<div class="ph-alert info">✅ Legume benefit: N reduced by 25% — previous legume crop fixed nitrogen in soil.</div>' : '';
+
+  var html = '<div class="card-title">📊 Fertilizer for '+cropName+' ('+area+' acres)</div>';
+  html += leg_note + ph_warn;
+  html += '<div class="npk-result-grid">';
+  html += fertCard('N','Nitrogen','#2e7d32','#e8f5e9',N,'kg','Urea',urea,'bags (50kg)');
+  html += fertCard('P','Phosphorus','#1565c0','#e3f2fd',P,'kg','DAP',dap,'bags (50kg)');
+  html += fertCard('K','Potassium','#e65100','#fff3e0',K,'kg','MOP',mop,'bags (50kg)');
+  html += '</div>';
+
+  html += '<div class="schedule-box"><div class="sch-title">📅 Application Schedule</div>';
+  html += getSchedule(crop);
+  html += '</div>';
+  html += '<p class="fert-disclaimer">* Based on ICAR/IARI recommendations. Adjust after soil test.</p>';
+
+  document.getElementById('fertResult').innerHTML = html;
+}
+
+function fertCard(sym, name, color, bg, qty, unit, product, bags, bagUnit){
+  return '<div class="fert-card" style="border-top:4px solid '+color+';background:'+bg+'">'+
+    '<div class="fert-sym" style="color:'+color+'">'+sym+'</div>'+
+    '<div class="fert-name">'+name+'</div>'+
+    '<div class="fert-qty">'+qty+' <span>'+unit+'</span></div>'+
+    '<div class="fert-product">≈ '+bags+' '+bagUnit+'<br><small>'+product+'</small></div>'+
+    '</div>';
+}
+
+function getSchedule(crop){
+  var schedules = {
+    wheat:"<div class='sch-step'><b>Sowing time (Basal):</b> 100% P & K + 1/3 N (as DAP+MOP+Urea)</div><div class='sch-step'><b>30 days (CRI stage):</b> 1/3 N as Urea top-dress</div><div class='sch-step'><b>60 days (Jointing):</b> Remaining 1/3 N as Urea</div>",
+    rice:"<div class='sch-step'><b>Transplanting:</b> 100% P & K + 1/4 N (basal)</div><div class='sch-step'><b>20 days:</b> 1/2 N top-dress (active tillering)</div><div class='sch-step'><b>45 days:</b> 1/4 N (panicle initiation)</div>",
+    cotton:"<div class='sch-step'><b>Sowing:</b> 100% P & K + 1/3 N</div><div class='sch-step'><b>45 days:</b> 1/3 N Urea top-dress</div><div class='sch-step'><b>75 days (boll formation):</b> 1/3 N + Foliar Boron spray</div>",
+    default:"<div class='sch-step'><b>At sowing (Basal):</b> 100% P & K + 1/3 N</div><div class='sch-step'><b>30 days:</b> 1/3 N top-dress</div><div class='sch-step'><b>60 days:</b> Remaining 1/3 N</div>"
+  };
+  return schedules[crop] || schedules.default;
+}
+</script>
+</body>
+</html>

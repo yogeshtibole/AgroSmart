@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>AgroSmart — Login</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -15,7 +14,7 @@
     <h1 class="brand-name">AgroSmart</h1>
     <p class="brand-tagline">Intelligent Farming,<br><em>for every farmer.</em></p>
     <div class="features-list">
-      <div class="feature-item"><span class="feat-icon">🌦</span><div><strong>Live Weather</strong><p>Real-time forecasts for your farm</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🌦</span><div><strong>Live Weather</strong><p>Real-time forecasts</p></div></div>
       <div class="feature-item"><span class="feat-icon">🌱</span><div><strong>Crop Advisor</strong><p>AI-powered recommendations</p></div></div>
       <div class="feature-item"><span class="feat-icon">🧠</span><div><strong>Disease Diagnosis</strong><p>Detect crop disease early</p></div></div>
       <div class="feature-item"><span class="feat-icon">💧</span><div><strong>Smart Irrigation</strong><p>Optimize water usage</p></div></div>
@@ -33,9 +32,13 @@
       <button class="tab" onclick="switchTab('register',this)">New Here?</button>
     </div>
 
-    <!-- LOGIN TAB -->
+    <!-- ── RETURNING FARMER TAB ── -->
     <div id="tab-login" class="form-panel active">
-      <div class="form-header"><h2>Welcome back 👋</h2><p>Enter your mobile number to continue</p></div>
+      <div class="form-header">
+        <h2>Welcome back 👋</h2>
+        <p>Enter your mobile to continue</p>
+      </div>
+
       <div class="input-group">
         <label>Mobile Number</label>
         <div class="input-wrap">
@@ -43,30 +46,43 @@
           <input type="tel" id="login_mobile" placeholder="98765 43210" maxlength="10">
         </div>
       </div>
+
+      <!-- Fix 2: Simple always-visible password field, no checkbox -->
+      <div class="input-group" style="margin-top:14px">
+        <label>Password <span class="opt-label">(leave blank if not set)</span></label>
+        <input type="password" id="login_password" placeholder="Enter password if you have one">
+      </div>
+
+      <div id="loginError" class="login-error-box" style="display:none"></div>
+
       <button class="btn-primary" onclick="loginUser()">
         <span>Login to Dashboard</span><span class="btn-arrow">→</span>
       </button>
       <p class="form-note">No account? <a href="#" onclick="switchTabByName('register')">Create your profile →</a></p>
     </div>
 
-    <!-- REGISTER TAB -->
+    <!-- ── NEW HERE TAB ── -->
     <div id="tab-register" class="form-panel">
-      <div class="form-header"><h2>Set up your farm 🌾</h2><p>Takes less than a minute</p></div>
+      <div class="form-header">
+        <h2>Set up your farm 🌾</h2>
+        <p>Takes less than a minute</p>
+      </div>
+
       <div class="input-grid">
         <div class="input-group full">
           <label>Full Name</label>
-          <input type="text" id="name" placeholder="e.g. Yogesh Tibole">
+          <input type="text" id="name" placeholder="e.g. Ramesh Patil">
         </div>
         <div class="input-group full">
           <label>Mobile Number <span class="req">*</span></label>
           <div class="input-wrap">
             <span class="input-prefix">+91</span>
-            <input type="tel" id="phone" placeholder="93734 99314" maxlength="10" required>
+            <input type="tel" id="phone" placeholder="98765 43210" maxlength="10" required>
           </div>
         </div>
         <div class="input-group full">
           <label>Village / Location</label>
-          <input type="text" id="location" placeholder="e.g. Pune, Maharashtra">
+          <input type="text" id="location" placeholder="e.g. Nashik, Maharashtra">
         </div>
         <div class="input-group half">
           <label>Farm Size (acres)</label>
@@ -86,7 +102,20 @@
             <option value="Laterite Soil">Laterite Soil</option>
           </select>
         </div>
+
+        <!-- Fix 1: Password in register tab — simple, always visible -->
+        <div class="input-group full">
+          <label>Set Password <span class="opt-label">(optional — can set later too)</span></label>
+          <input type="password" id="reg_password" placeholder="Min 6 characters">
+        </div>
+        <!-- Confirm only shows when password is typed -->
+        <div class="input-group full" id="confirmRow" style="display:none">
+          <label>Confirm Password</label>
+          <input type="password" id="reg_confirm" placeholder="Repeat password">
+        </div>
+
       </div>
+
       <button class="btn-primary" onclick="createProfile()">
         <span>Create Profile & Enter</span><span class="btn-arrow">→</span>
       </button>
@@ -113,45 +142,60 @@ function switchTabByName(name){
     : document.querySelector('.tab:last-child'));
 }
 function showLoading(msg){
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  document.getElementById('loadingMsg').innerText = msg || 'Please wait...';
+  document.getElementById('loadingOverlay').style.display='flex';
+  document.getElementById('loadingMsg').innerText = msg||'Please wait...';
 }
-function hideLoading(){
-  document.getElementById('loadingOverlay').style.display = 'none';
+function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
+
+function showLoginError(msg){
+  var el = document.getElementById('loginError');
+  el.innerText = msg; el.style.display='block';
+  setTimeout(function(){ el.style.display='none'; }, 4000);
 }
 
-// ── RETURNING FARMER LOGIN ──────────────────────────────────────────────────
+// Show confirm field only when user starts typing password
+document.addEventListener('DOMContentLoaded', function(){
+  var pwdInput = document.getElementById('reg_password');
+  if(pwdInput){
+    pwdInput.addEventListener('input', function(){
+      document.getElementById('confirmRow').style.display = this.value.length > 0 ? 'block' : 'none';
+    });
+  }
+});
+
+// ── LOGIN: phone only OR phone+password (auto-detect) ──
 function loginUser(){
-  var mobile = document.getElementById('login_mobile').value.trim();
+  var mobile   = document.getElementById('login_mobile').value.trim();
+  var password = document.getElementById('login_password').value.trim();
   if(!mobile){ shake('login_mobile'); return; }
+
+  // Auto-detect: if password typed → use password mode
+  var mode = password ? 'with_password' : 'phone_only';
 
   showLoading('Logging in...');
   fetch('/simple_login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({mobile: mobile})
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mobile:mobile, password:password, mode:mode})
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(d.status === 'success'){
-      // ✅ Save everything returned from DB into localStorage
-      // This ensures nav shows real name even before dashboard loads
-      localStorage.setItem('phone',    d.phone     || mobile);
-      localStorage.setItem('name',     d.name      || '');
-      localStorage.setItem('location', d.location  || '');
-      localStorage.setItem('farmSize', d.farm_size || '');
-      localStorage.setItem('soilPh',   d.soil_ph   || '');
-      localStorage.setItem('soilType', d.soil_type || '');
+    if(d.status==='success'){
+      localStorage.setItem('phone',    d.phone    || mobile);
+      localStorage.setItem('name',     d.name     || '');
+      localStorage.setItem('location', d.location || '');
+      localStorage.setItem('farmSize', d.farm_size|| '');
+      localStorage.setItem('soilPh',   d.soil_ph  || '');
+      localStorage.setItem('soilType', d.soil_type|| '');
       window.location.href = "{{ url_for('dashboard') }}";
     } else {
       hideLoading();
-      alert('Login failed. Please try again.');
+      showLoginError(d.msg || 'Login failed. Try again.');
     }
-  })
-  .catch(function(){ hideLoading(); alert('Something went wrong. Try again.'); });
+  }).catch(function(){ hideLoading(); showLoginError('Something went wrong. Try again.'); });
 }
 
-// ── NEW REGISTRATION ────────────────────────────────────────────────────────
+// ── REGISTER: profile + optional password ──
 function createProfile(){
   var phone = document.getElementById('phone').value.trim();
   if(!phone){ shake('phone'); return; }
@@ -161,61 +205,61 @@ function createProfile(){
   var farmSize = document.getElementById('farmSize').value;
   var soilPh   = document.getElementById('soilPh').value;
   var soilType = document.getElementById('soilType').value;
+  var password = document.getElementById('reg_password').value.trim();
+  var confirm  = document.getElementById('reg_confirm').value.trim();
+
+  if(password){
+    if(password.length < 6){
+      alert('Password must be at least 6 characters.'); return;
+    }
+    if(confirm && password !== confirm){
+      alert('Passwords do not match.'); return;
+    }
+  }
 
   showLoading('Creating your profile...');
 
-  // Step 1: Create session (login)
+  // Step 1: Create session
   fetch('/simple_login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({mobile: phone})
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mobile:phone, mode:'phone_only'})
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.status !== 'success'){ throw new Error('Login failed'); }
     showLoading('Saving farm details...');
-
-    // Step 2: Save profile to DB
-    // X-Requested-With tells Flask to return JSON instead of redirecting
+    // Step 2: Save profile
     return fetch('/save_profile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: new URLSearchParams({
-        name:      name,
-        location:  location,
-        phone:     phone,
-        farm_size: farmSize,
-        soil_ph:   soilPh,
-        soil_type: soilType
-      })
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
+      body: new URLSearchParams({name:name, location:location, phone:phone,
+                                  farm_size:farmSize, soil_ph:soilPh, soil_type:soilType})
     });
   })
   .then(function(r){ return r.json(); })
   .then(function(saved){
-    // ✅ Step 3: Update localStorage with data CONFIRMED saved in DB
-    // Use the returned values from DB (not just what user typed)
+    // Step 3: Save password if entered
+    if(password){
+      showLoading('Saving password...');
+      return fetch('/set_password_ajax', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({new_password:password})
+      }).then(function(){ return saved; });
+    }
+    return saved;
+  })
+  .then(function(saved){
+    localStorage.setItem('name',     saved.name     || name);
     localStorage.setItem('phone',    phone);
-    localStorage.setItem('name',     saved.name      || name);
-    localStorage.setItem('location', saved.location  || location);
-    localStorage.setItem('farmSize', saved.farm_size || farmSize);
-    localStorage.setItem('soilPh',   saved.soil_ph   || soilPh);
-    localStorage.setItem('soilType', saved.soil_type || soilType);
+    localStorage.setItem('location', saved.location || location);
     window.location.href = "{{ url_for('dashboard') }}";
   })
-  .catch(function(err){
-    console.error('createProfile error:', err);
-    hideLoading();
-    alert('Something went wrong. Try again.');
-  });
+  .catch(function(){ hideLoading(); alert('Something went wrong. Try again.'); });
 }
 
 function shake(id){
   var el = document.getElementById(id);
-  el.classList.add('shake');
-  el.focus();
+  el.classList.add('shake'); el.focus();
   setTimeout(function(){ el.classList.remove('shake'); }, 500);
 }
 

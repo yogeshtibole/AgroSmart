@@ -1,0 +1,60 @@
+.lang-bar { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.lang-label { font-size:13px; font-weight:600; color:var(--text-mid); }
+.lang-btn {
+  padding:6px 16px; border-radius:20px; border:1.5px solid var(--border);
+  background:var(--white); font-family:inherit; font-size:13px; font-weight:600;
+  cursor:pointer; color:var(--text-mid); transition:all .2s;
+}
+.lang-btn:hover { border-color:var(--green); color:var(--green); }
+.lang-btn.active { background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+.cal-grid { display:grid; grid-template-columns:300px 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:768px){ .cal-grid{ grid-template-columns:1fr; } }
+
+.sel-card { height:fit-content; }
+
+.tip-box {
+  margin-top:16px; padding:12px 14px;
+  background:#fffde7; border:1.5px solid #ffe082;
+  border-radius:10px; font-size:13px; color:#5d4037; line-height:1.5;
+}
+
+.cal-output { min-height:300px; overflow:hidden; }
+.cal-placeholder { display:flex; flex-direction:column; align-items:center;
+  justify-content:center; height:280px; color:var(--text-light); font-size:14px; }
+
+.cal-header {
+  border-radius:10px 10px 0 0; padding:20px 24px; margin:-22px -22px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.cal-crop-name { font-size:18px; font-weight:700; color:#fff; }
+.cal-season-badge { font-size:12px; background:rgba(255,255,255,0.2); color:#fff;
+  padding:4px 12px; border-radius:20px; font-weight:600; }
+
+.months-list { display:flex; flex-direction:column; gap:12px; }
+.month-row {
+  display:flex; gap:14px; align-items:flex-start;
+  animation:fadeUp .35s ease both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+.month-label {
+  min-width:90px; font-weight:700; font-size:13px; color:var(--green-dark);
+  background:var(--green-light); padding:6px 10px; border-radius:8px; text-align:center;
+}
+.month-acts { display:flex; flex-wrap:wrap; gap:8px; }
+.act-chip {
+  background:#f4f7f4; border:1px solid var(--border); border-radius:8px;
+  padding:5px 11px; font-size:13px; color:var(--text); line-height:1.4;
+}
+
+.season-strip { display:flex; gap:16px; flex-wrap:wrap; }
+.season-card {
+  flex:1; min-width:200px; border-radius:12px; padding:18px 20px; color:#fff;
+}
+.season-card.kharif { background:linear-gradient(135deg,#2e7d32,#4caf50); }
+.season-card.rabi   { background:linear-gradient(135deg,#1565c0,#42a5f5); }
+.season-card.zaid   { background:linear-gradient(135deg,#e65100,#ff9800); }
+.sc-title  { font-size:16px; font-weight:700; margin-bottom:4px; }
+.sc-months { font-size:13px; opacity:.85; margin-bottom:6px; }
+.sc-desc   { font-size:12px; opacity:.75; }

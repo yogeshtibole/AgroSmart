@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{{ farmer[0] or 'Farmer' }} | AgroSmart</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='community.css') }}">
+  <style>
+    .fp-hero{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:24px;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .fp-top{display:flex;align-items:center;gap:24px;margin-bottom:20px;flex-wrap:wrap;}
+    .fp-avatar{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--green-dark),var(--green));color:#fff;font-size:36px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .fp-avatar-img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--border);flex-shrink:0;}
+    .fp-name{font-size:22px;font-weight:700;margin-bottom:4px;}
+    .fp-loc{font-size:13px;color:var(--text-mid);margin-bottom:8px;}
+    .fp-bio{font-size:13px;color:var(--text-mid);margin-bottom:12px;line-height:1.6;}
+    .fp-stats{display:flex;gap:24px;margin-bottom:14px;}
+    .fp-stat{text-align:center;}
+    .fp-stat strong{display:block;font-size:20px;font-weight:700;color:var(--green-dark);}
+    .fp-stat span{font-size:12px;color:var(--text-mid);}
+    .fp-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn-follow{background:var(--green-dark);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;}
+    .btn-follow:hover{background:var(--green-mid);}
+    .btn-follow.following{background:#fff;color:var(--green-dark);border:2px solid var(--green-dark);}
+    .btn-msg{background:none;border:1.5px solid var(--border);padding:10px 20px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text);}
+    .btn-msg:hover{background:var(--green-light);border-color:var(--green);}
+    .fp-posts-title{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);}
+  </style>
+</head>
+
+<body data-me="{{ user[2] if user else '' }}"
+      data-farmer-phone="{{ farmer[2] if farmer else '' }}"
+      data-farmer-name="{{ farmer[0]|replace('"','') if farmer and farmer[0] else 'Farmer' }}">
+
+{% set active='community' %}
+{% include '_sidebar.html' %}
+
+<div class="main">
+  <a href="{{ url_for('community') }}" style="font-size:13px;font-weight:600;color:var(--green-mid);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:18px">← Back to Community</a>
+
+  <div class="fp-hero">
+    <div class="fp-top">
+      {% if farmer[6] %}
+        <img src="{{ url_for('static', filename=farmer[6]) }}" class="fp-avatar-img" alt="Profile">
+      {% else %}
+        <div class="fp-avatar">{{ (farmer[0] or 'F')[0].upper() }}</div>
+      {% endif %}
+      <div style="flex:1">
+        <p class="fp-name">{{ farmer[0] or 'Farmer' }}</p>
+        <p class="fp-loc">📍 {{ farmer[1] or 'Location not set' }}</p>
+        {% if farmer[7] %}<p class="fp-bio">{{ farmer[7] }}</p>{% endif %}
+        <div class="fp-stats">
+          <div class="fp-stat"><strong>{{ posts|length }}</strong><span>Posts</span></div>
+          <div class="fp-stat"><strong>{{ followers }}</strong><span>Followers</span></div>
+          <div class="fp-stat"><strong>{{ following_count }}</strong><span>Following</span></div>
+        </div>
+        <div class="fp-actions">
+          {% if farmer[2] != user[2] %}
+          <button class="btn-follow {% if is_following %}following{% endif %}" id="followBtn">
+            {% if is_following %}✅ Following{% else %}➕ Follow{% endif %}
+          </button>
+          <button class="btn-msg" id="msgBtn">✉️ Message</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if farmer[3] or farmer[4] or farmer[5] %}
+    <div style="display:flex;gap:16px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #f2f2f2">
+      {% if farmer[3] %}<div style="font-size:12px;color:var(--text-mid)">🌾 Farm Size: <strong>{{ farmer[3] }} acres</strong></div>{% endif %}
+      {% if farmer[4] %}<div style="font-size:12px;color:var(--text-mid)">🧪 Soil pH: <strong>{{ farmer[4] }}</strong></div>{% endif %}
+      {% if farmer[5] %}<div style="font-size:12px;color:var(--text-mid)">🪨 Soil: <strong>{{ farmer[5] }}</strong></div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="fp-posts">
+    <p class="fp-posts-title">📝 Posts by {{ farmer[0] or 'Farmer' }}</p>
+    {% if posts %}
+      {% for p in posts %}
+      <div class="post-card" id="p-{{ p[0] }}">
+        <div class="post-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            {% if farmer[6] %}
+              <img src="{{ url_for('static', filename=farmer[6]) }}" class="post-avatar-img" alt="">
+            {% else %}
+              <div class="post-avatar">{{ (farmer[0] or 'F')[0].upper() }}</div>
+            {% endif %}
+            <div class="post-meta">
+              <span class="post-author">{{ farmer[0] or 'Farmer' }}</span>
+              <span class="post-time">{{ p[7].strftime('%d %b %Y, %I:%M %p') if p[7] else '' }}</span>
+            </div>
+          </div>
+          <div class="cat-badge cat-{{ p[5] }}">{{ p[5].title() }}</div>
+        </div>
+        <div class="post-title">{{ p[3] }}</div>
+        <div class="post-body">{{ p[4][:300] }}{% if p[4]|length > 300 %}…{% endif %}</div>
+        {% if p[8] %}<img src="{{ url_for('static', filename=p[8]) }}" class="post-image" alt="Post image">{% endif %}
+        <div class="post-footer">
+          <span class="like-btn" style="cursor:default">❤️ {{ p[6] }}</span>
+          <a href="{{ url_for('community_thread', post_id=p[0]) }}" class="reply-btn">💬 {{ p[9] }} Replies</a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="card empty-comm"><p>No posts yet from this farmer.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div id="msgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;width:380px;max-width:95vw;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.2)">
+    <div style="background:linear-gradient(135deg,#1a3d22,#2d6a3f);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="color:#fff;font-size:14px;font-weight:700" id="msgModalTitle">Message</div>
+      <button onclick="document.getElementById('msgModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">×</button>
+    </div>
+    <div id="msgThread" style="padding:14px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#f9fdf9"></div>
+    <div style="padding:12px;border-top:1px solid #eee;display:flex;gap:8px">
+      <input id="msgInput" type="text" placeholder="Type a message..." class="form-input" style="margin:0;flex:1" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button onclick="sendMsg()" class="btn-green" style="margin:0;padding:10px 16px">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+<script>
+  // Use a self-executing function to keep variables clean
+  (function initProfile() {
+    // Read from data attributes to avoid "Unterminated string" errors
+    const ME = document.body.getAttribute('data-me') || '';
+    const FARMER_PHONE = document.body.getAttribute('data-farmer-phone') || '';
+    const FARMER_NAME = document.body.getAttribute('data-farmer-name') || 'Farmer';
+    
+    // Safely parse Jinja values using backticks
+    const navUserName = `{{ user[0]|replace("'","") if user and user[0] else "" }}`;
+    const userPic = `{{ user[6] if user and user[6] else "" }}`;
+
+    // Initialize Shared Nav
+    if (typeof setNavUser === "function") {
+      setNavUser(navUserName, ME);
+    }
+    if (userPic && typeof setNavPic === "function") {
+      setNavPic('/static/' + userPic);
+    }
+
+    // Attach click events
+    const followBtn = document.getElementById('followBtn');
+    const msgBtn = document.getElementById('msgBtn');
+
+    if (followBtn) {
+      followBtn.addEventListener('click', function() { toggleFollow(FARMER_PHONE); });
+    }
+    if (msgBtn) {
+      msgBtn.addEventListener('click', function() { openMsgModal(FARMER_PHONE, FARMER_NAME); });
+    }
+
+    // Store ME in a way accessible to functions below
+    window.SESSION_USER = ME;
+  })();
+
+  var currentMsgTo = '';
+
+  function openMsgModal(phone, name) {
+    currentMsgTo = phone;
+    document.getElementById('msgModalTitle').innerText = '✉️ Message ' + name;
+    document.getElementById('msgModal').style.display = 'flex';
+    loadThread(phone);
+  }
+
+  function loadThread(phone) {
+    const t = document.getElementById('msgThread');
+    const ME = window.SESSION_USER;
+    t.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center">Loading...</p>';
+    fetch('/community/messages/' + phone)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (!d.messages || !d.messages.length) {
+          t.innerHTML = '<p style="color:#aaa;font-size:12px;text-align:center">No messages yet.</p>';
+          return;
+        }
+        t.innerHTML = d.messages.map(function(m) {
+          var isMe = m.from === ME;
+          return '<div style="max-width:80%;align-self:' + (isMe ? 'flex-end' : 'flex-start') +
+                 ';background:' + (isMe ? '#1a3d22' : '#f4f7f4') +
+                 ';color:' + (isMe ? '#fff' : '#333') +
+                 ';border-radius:12px;padding:8px 12px;font-size:13px">' + m.text + '</div>';
+        }).join('');
+        t.scrollTop = t.scrollHeight;
+      });
+  }
+
+  function sendMsg() {
+    const inp = document.getElementById('msgInput');
+    const msg = inp.value.trim();
+    if (!msg || !currentMsgTo) return;
+    fetch('/community/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: currentMsgTo, message: msg })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status === 'success') {
+        inp.value = '';
+        loadThread(currentMsgTo);
+      }
+    });
+  }
+
+  function toggleFollow(phone) {
+    fetch('/community/follow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: phone })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status === 'success') {
+        const btn = document.getElementById('followBtn');
+        if (d.action === 'followed') {
+          btn.textContent = '✅ Following';
+          btn.classList.add('following');
+        } else {
+          btn.textContent = '➕ Follow';
+          btn.classList.remove('following');
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>
