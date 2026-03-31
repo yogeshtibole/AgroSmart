@@ -162,6 +162,12 @@ def page_icon(page):
             'history':'🕒','login':'🔑','general':'⚡'}.get(page or 'general','⚡')
 app.jinja_env.globals['page_icon'] = page_icon
 
+# ✅ Called at module level so gunicorn also runs it on startup
+try:
+    ensure_tables()
+except Exception as e:
+    print(f"⚠️ ensure_tables warning: {e}")
+
 # ── WEATHER ADVICE ──────────────────────────────────────────────────────────
 def get_weather_advice(temp, humidity, desc):
     d = desc.lower()

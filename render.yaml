@@ -3,7 +3,7 @@ services:
     name: agrosmart
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --timeout 120
     envVars:
       - key: DATABASE_URL
         value: postgresql://neondb_owner:npg_j1WFv0CsAQDa@ep-misty-night-a1idymaf-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
