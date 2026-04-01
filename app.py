@@ -668,6 +668,12 @@ def send_message():
     msg   = data.get('message','').strip()
     if not to or not msg: return jsonify({"status":"fail","msg":"Missing data"})
     db_exec("INSERT INTO community_messages (sender_phone,receiver_phone,message) VALUES (%s,%s,%s)",(phone,to,msg))
+    # Create a message notification for the recipient
+    sender = db_exec("SELECT name FROM farmers WHERE phone=%s", (phone,), fetch='one')
+    sender_name = sender[0] if sender else "A farmer"
+    create_notification(to, 'message', phone, sender_name,
+                        f"{sender_name} sent you a message",
+                        f"/community/farmer/{phone}")
     return jsonify({"status":"success"})
 
 @app.route("/community/messages/<other_phone>")
@@ -761,6 +767,85 @@ def notifications_read_all():
     except Exception:
         pass
     return jsonify({"status": "success"})
+
+@app.route("/community/followers/<farmer_phone>")
+def community_followers(farmer_phone):
+    if 'user' not in session: return jsonify({"users": []}), 401
+    rows = db_exec("""
+        SELECT f.phone, f.name, f.location, f.profile_pic
+        FROM community_follows cf
+        JOIN farmers f ON f.phone = cf.follower_phone
+        WHERE cf.following_phone = %s
+        ORDER BY f.name ASC LIMIT 100
+    """, (farmer_phone,), fetch='all') or []
+    return jsonify({"users": [
+        {"phone": r[0], "name": r[1] or "Farmer", "location": r[2] or "", "pic": r[3] or ""}
+        for r in rows
+    ]})
+
+@app.route("/community/following/<farmer_phone>")
+def community_following(farmer_phone):
+    if 'user' not in session: return jsonify({"users": []}), 401
+    rows = db_exec("""
+        SELECT f.phone, f.name, f.location, f.profile_pic
+        FROM community_follows cf
+        JOIN farmers f ON f.phone = cf.following_phone
+        WHERE cf.follower_phone = %s
+        ORDER BY f.name ASC LIMIT 100
+    """, (farmer_phone,), fetch='all') or []
+    return jsonify({"users": [
+        {"phone": r[0], "name": r[1] or "Farmer", "location": r[2] or "", "pic": r[3] or ""}
+        for r in rows
+    ]})
+
+@app.route("/community/stats/<farmer_phone>")
+def community_stats(farmer_phone):
+    if 'user' not in session: return jsonify({"posts": 0, "followers": 0, "following": 0}), 401
+    posts = db_exec("SELECT COUNT(*) FROM community_posts WHERE phone=%s", (farmer_phone,), fetch='one')
+    followers = db_exec("SELECT COUNT(*) FROM community_follows WHERE following_phone=%s", (farmer_phone,), fetch='one')
+    following = db_exec("SELECT COUNT(*) FROM community_follows WHERE follower_phone=%s", (farmer_phone,), fetch='one')
+    return jsonify({
+        "posts":     posts[0] if posts else 0,
+        "followers": followers[0] if followers else 0,
+        "following": following[0] if following else 0
+    })
+
+@app.route("/community/messages/preview")
+def messages_preview():
+    if 'user' not in session: return jsonify({"messages": []}), 401
+    phone = session['user']
+    try:
+        rows = db_exec("""
+            SELECT DISTINCT ON (cm.sender_phone)
+                cm.sender_phone, f.name, f.profile_pic,
+                cm.message, cm.created_at, cm.is_read
+            FROM community_messages cm
+            LEFT JOIN farmers f ON f.phone = cm.sender_phone
+            WHERE cm.receiver_phone = %s
+            ORDER BY cm.sender_phone, cm.created_at DESC
+            LIMIT 10
+        """, (phone,), fetch='all') or []
+        return jsonify({"messages": [
+            {"from_phone": r[0], "from_name": r[1] or "Farmer",
+             "from_pic": r[2] or "", "text": r[3] or "",
+             "created_at": str(r[4]), "read": bool(r[5])}
+            for r in rows
+        ]})
+    except Exception:
+        return jsonify({"messages": []})
+
+@app.route("/community/messages/unread_count")
+def messages_unread_count():
+    if 'user' not in session: return jsonify({"count": 0})
+    phone = session['user']
+    try:
+        row = db_exec(
+            "SELECT COUNT(*) FROM community_messages WHERE receiver_phone=%s AND is_read=FALSE",
+            (phone,), fetch='one'
+        )
+        return jsonify({"count": row[0] if row else 0})
+    except Exception:
+        return jsonify({"count": 0})
 
 def create_notification(owner_phone, ntype, actor_phone, actor_name, text, link=""):
     """Helper to insert a notification. Called from like/follow/comment routes."""

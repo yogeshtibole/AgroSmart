@@ -12,7 +12,7 @@
 {% include '_sidebar.html' %}
 <div class="main">
   <p class="page-title">👨‍🌾 My Profile</p>
-  <p class="page-sub">Your farm details and public info. For password & settings, go to <a href="{{ url_for('settings') }}" style="color:var(--green-mid);font-weight:600">⚙️ Settings</a></p>
+  <p class="page-sub">Your public farm profile. For password & settings, go to <a href="{{ url_for('settings') }}" style="color:var(--green-mid);font-weight:600">⚙️ Settings</a></p>
 
   {% with messages=get_flashed_messages(with_categories=true) %}
     {% if messages %}{% for cat,msg in messages %}
@@ -23,87 +23,115 @@
   <div id="saveMsg" style="display:none" class="flash flash-success">✅ Profile saved successfully!</div>
   <div id="saveErr" style="display:none" class="flash flash-danger">❌ Something went wrong.</div>
 
-  <div class="profile-grid">
+  <!-- ── INSTAGRAM-STYLE PROFILE CARD ── -->
+  <div class="ig-profile-card">
+    <div class="ig-profile-top">
+      <!-- Avatar -->
+      <div class="ig-avatar-wrap">
+        {% if user and user[6] %}
+          <img id="avatarImg" src="{{ url_for('static', filename=user[6]) }}" class="ig-avatar-img" alt="Profile">
+        {% else %}
+          <div class="ig-avatar" id="avatarInitial">{{ (user[0] or 'F')[0].upper() if user and user[0] else 'F' }}</div>
+        {% endif %}
+        <label class="ig-avatar-change" for="picInput" title="Change photo">📷</label>
+        <input type="file" id="picInput" name="profile_pic" accept="image/*" style="display:none" onchange="previewPic(this)">
+      </div>
 
-    <!-- VIEW CARD -->
-    <div class="card profile-view">
-      <div class="avatar-section">
-        <div class="avatar-wrap">
-          {% if user and user[6] %}
-            <img id="avatarImg" src="{{ url_for('static', filename=user[6]) }}" class="avatar-img" alt="Profile">
-          {% else %}
-            <div class="avatar" id="avatarInitial">{{ (user[0] or 'F')[0].upper() if user and user[0] else 'F' }}</div>
-          {% endif %}
-          <label class="avatar-change" for="picInput" title="Change photo">📷</label>
+      <!-- Info -->
+      <div class="ig-profile-info">
+        <div class="ig-name-row">
+          <h2 id="viewName">{{ user[0] if user and user[0] else 'Farmer' }}</h2>
+          <a href="{{ url_for('settings') }}" class="ig-edit-btn">✏️ Edit Profile</a>
+        </div>
+        <p class="ig-phone">📱 {{ user[2] if user else '—' }}</p>
+        {% if user and user[10] %}<p class="ig-bio">{{ user[10] }}</p>{% endif %}
+        <p class="ig-location">📍 {{ user[1] if user and user[1] else 'Location not set' }}</p>
+
+        <!-- Stats row -->
+        <div class="ig-stats-row">
+          <div class="ig-stat-item">
+            <strong id="postCount">0</strong>
+            <span>Posts</span>
+          </div>
+          <div class="ig-stat-item ig-stat-clickable" onclick="openModal('followers')">
+            <strong id="followerCount">0</strong>
+            <span>Followers</span>
+          </div>
+          <div class="ig-stat-item ig-stat-clickable" onclick="openModal('following')">
+            <strong id="followingCount">0</strong>
+            <span>Following</span>
+          </div>
+        </div>
+
+        <!-- Farm badges -->
+        <div class="ig-badges">
+          {% if user and user[3] %}<span class="ig-badge">🌾 {{ user[3] }} acres</span>{% endif %}
+          {% if user and user[5] %}<span class="ig-badge">🪨 {{ user[5] }}</span>{% endif %}
+          {% if user and user[4] %}<span class="ig-badge">🧪 pH {{ user[4] }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EDIT FORM ── -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">✏️ Edit Farm Profile</div>
+    <form id="profileForm" method="POST" action="{{ url_for('save_profile') }}" enctype="multipart/form-data">
+
+      <label class="form-label">Full Name</label>
+      <input class="form-input" type="text" id="inputName" name="name"
+             value="{{ user[0] if user and user[0] else '' }}" placeholder="Enter your name">
+
+      <label class="form-label">Village / Location</label>
+      <input class="form-input" type="text" id="inputLocation" name="location"
+             value="{{ user[1] if user and user[1] else '' }}" placeholder="e.g. Nashik, Maharashtra">
+
+      <label class="form-label">Bio / About</label>
+      <textarea class="form-input" name="bio" rows="2" placeholder="Tell other farmers about yourself...">{{ user[10] if user and user[10] else '' }}</textarea>
+
+      <div class="form-row">
+        <div>
+          <label class="form-label">Farm Size (acres)</label>
+          <input class="form-input" type="number" id="inputFarmSize" name="farm_size" step="0.1"
+                 value="{{ user[3] if user and user[3] else '' }}" placeholder="0">
         </div>
         <div>
-          <h2 id="viewName">{{ user[0] if user and user[0] else 'Farmer' }}</h2>
-          <p class="phone-tag">📱 {{ user[2] if user else '—' }}</p>
-          {% if user and user[7] %}
-            <p style="font-size:11px;color:#2e7d32;margin-top:4px;font-weight:600">🔐 Password protected</p>
-          {% else %}
-            <p style="font-size:11px;color:#e65100;margin-top:4px">⚠️ No password set — <a href="{{ url_for('settings') }}" style="color:var(--green-mid)">Set in Settings</a></p>
-          {% endif %}
+          <label class="form-label">Soil pH</label>
+          <input class="form-input" type="number" id="inputSoilPh" name="soil_ph" step="0.1" min="0" max="14"
+                 value="{{ user[4] if user and user[4] else '' }}" placeholder="7.0">
         </div>
       </div>
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">📍 Location</span><span class="info-value" id="viewLocation">{{ user[1] if user and user[1] else '—' }}</span></div>
-        <div class="info-item"><span class="info-label">🌾 Farm Size</span><span class="info-value" id="viewFarmSize">{{ user[3] if user and user[3] else '—' }}{% if user and user[3] %} acres{% endif %}</span></div>
-        <div class="info-item"><span class="info-label">🧪 Soil pH</span><span class="info-value" id="viewSoilPh">{{ user[4] if user and user[4] else '—' }}</span></div>
-        <div class="info-item"><span class="info-label">🪨 Soil Type</span><span class="info-value" id="viewSoilType">{{ user[5] if user and user[5] else '—' }}</span></div>
+
+      <label class="form-label">Soil Type</label>
+      <select class="form-select" id="inputSoilType" name="soil_type">
+        <option value="">Select soil type</option>
+        <option value="Black Soil"    {% if user and user[5]=='Black Soil' %}selected{% endif %}>Black Soil</option>
+        <option value="Red Soil"      {% if user and user[5]=='Red Soil' %}selected{% endif %}>Red Soil</option>
+        <option value="Alluvial Soil" {% if user and user[5]=='Alluvial Soil' %}selected{% endif %}>Alluvial Soil</option>
+        <option value="Laterite Soil" {% if user and user[5]=='Laterite Soil' %}selected{% endif %}>Laterite Soil</option>
+      </select>
+
+      <label class="form-label">Profile Picture</label>
+      <div class="pic-upload-row">
+        <button type="button" class="btn-outline-sm" onclick="document.getElementById('picInput').click()">📷 Choose Photo</button>
+        <span class="pic-name" id="picName">No file chosen</span>
       </div>
-      <a href="{{ url_for('settings') }}" class="clink" style="margin-top:14px;display:inline-block">⚙️ Go to Settings →</a>
+
+      <button class="btn-green" type="button" id="saveBtn" onclick="saveProfile()">💾 Save Profile</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── FOLLOWERS / FOLLOWING MODAL ── -->
+<div id="ffModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;align-items:center;justify-content:center">
+  <div class="ff-modal-box">
+    <div class="ff-modal-header">
+      <span id="ffModalTitle" style="font-size:15px;font-weight:700">Followers</span>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text);line-height:1">×</button>
     </div>
-
-    <!-- EDIT FORM -->
-    <div class="card">
-      <div class="card-title">✏️ Edit Farm Profile</div>
-      <form id="profileForm" method="POST" action="{{ url_for('save_profile') }}" enctype="multipart/form-data">
-        <input type="file" id="picInput" name="profile_pic" accept="image/*" style="display:none" onchange="previewPic(this)">
-
-        <label class="form-label">Full Name</label>
-        <input class="form-input" type="text" id="inputName" name="name"
-               value="{{ user[0] if user and user[0] else '' }}" placeholder="Enter your name">
-
-        <label class="form-label">Village / Location</label>
-        <input class="form-input" type="text" id="inputLocation" name="location"
-               value="{{ user[1] if user and user[1] else '' }}" placeholder="e.g. Nashik, Maharashtra">
-
-        <label class="form-label">Bio / About</label>
-        <textarea class="form-input" name="bio" rows="2" placeholder="Tell other farmers about yourself...">{{ user[10] if user and user[10] else '' }}</textarea>
-
-        <div class="form-row">
-          <div>
-            <label class="form-label">Farm Size (acres)</label>
-            <input class="form-input" type="number" id="inputFarmSize" name="farm_size" step="0.1"
-                   value="{{ user[3] if user and user[3] else '' }}" placeholder="0">
-          </div>
-          <div>
-            <label class="form-label">Soil pH</label>
-            <input class="form-input" type="number" id="inputSoilPh" name="soil_ph" step="0.1" min="0" max="14"
-                   value="{{ user[4] if user and user[4] else '' }}" placeholder="7.0">
-          </div>
-        </div>
-
-        <label class="form-label">Soil Type</label>
-        <select class="form-select" id="inputSoilType" name="soil_type">
-          <option value="">Select soil type</option>
-          <option value="Black Soil"    {% if user and user[5]=='Black Soil' %}selected{% endif %}>Black Soil</option>
-          <option value="Red Soil"      {% if user and user[5]=='Red Soil' %}selected{% endif %}>Red Soil</option>
-          <option value="Alluvial Soil" {% if user and user[5]=='Alluvial Soil' %}selected{% endif %}>Alluvial Soil</option>
-          <option value="Laterite Soil" {% if user and user[5]=='Laterite Soil' %}selected{% endif %}>Laterite Soil</option>
-        </select>
-
-        <label class="form-label">Profile Picture</label>
-        <div class="pic-upload-row">
-          <button type="button" class="btn-outline-sm" onclick="document.getElementById('picInput').click()">📷 Choose Photo</button>
-          <span class="pic-name" id="picName">No file chosen</span>
-        </div>
-
-        <button class="btn-green" type="button" id="saveBtn" onclick="saveProfile()">💾 Save Profile</button>
-      </form>
+    <div id="ffModalList" class="ff-modal-list">
+      <div style="text-align:center;padding:30px;color:#bbb">Loading…</div>
     </div>
-
   </div>
 </div>
 
@@ -115,17 +143,75 @@ setNavUser(DB_NAME, DB_PHONE);
 var _ppic = '{{ user[6] if user and user[6] else "" }}';
 if(_ppic) setNavPic('/static/' + _ppic);
 
+// Load stats
+fetch('/community/stats/' + encodeURIComponent(DB_PHONE))
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    document.getElementById('postCount').textContent     = d.posts     || 0;
+    document.getElementById('followerCount').textContent = d.followers || 0;
+    document.getElementById('followingCount').textContent= d.following || 0;
+  }).catch(function(){});
+
+function openModal(type) {
+  var modal = document.getElementById('ffModal');
+  var title = document.getElementById('ffModalTitle');
+  var list  = document.getElementById('ffModalList');
+  title.textContent = type === 'followers' ? '👥 Followers' : '➕ Following';
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">Loading…</div>';
+  modal.style.display = 'flex';
+
+  var url = type === 'followers'
+    ? '/community/followers/' + encodeURIComponent(DB_PHONE)
+    : '/community/following/' + encodeURIComponent(DB_PHONE);
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var users = d.users || [];
+      if(!users.length){
+        list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">' +
+          (type==='followers' ? 'No followers yet' : 'Not following anyone yet') + '</div>';
+        return;
+      }
+      list.innerHTML = users.map(function(u){
+        var initials = (u.name || 'F')[0].toUpperCase();
+        var avatarHtml = u.pic
+          ? '<img src="/static/'+u.pic+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">'
+          : '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--green-dark),var(--green));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">'+initials+'</div>';
+        return '<a href="/community/farmer/'+encodeURIComponent(u.phone)+'" class="ff-user-row">'+
+          avatarHtml+
+          '<div style="flex:1;min-width:0">'+
+            '<p style="font-size:14px;font-weight:600;color:var(--text);margin:0">'+escapeHtml(u.name||'Farmer')+'</p>'+
+            '<p style="font-size:12px;color:var(--text-mid);margin:2px 0 0">'+escapeHtml(u.location||'')+'</p>'+
+          '</div>'+
+          '<span style="font-size:12px;color:var(--green-mid);font-weight:600">View →</span>'+
+        '</a>';
+      }).join('');
+    }).catch(function(){
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">Could not load list</div>';
+    });
+}
+
+function closeModal() {
+  document.getElementById('ffModal').style.display = 'none';
+}
+document.getElementById('ffModal').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+
+function escapeHtml(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function previewPic(input){
   if(input.files && input.files[0]){
     document.getElementById("picName").innerText = input.files[0].name;
     var reader = new FileReader();
     reader.onload = function(e){
-      var wrap=document.querySelector('.avatar-wrap');
-      var old=wrap.querySelector('.avatar')||wrap.querySelector('.avatar-img');
+      var wrap=document.querySelector('.ig-avatar-wrap');
+      var old=wrap.querySelector('.ig-avatar')||wrap.querySelector('.ig-avatar-img');
       if(old) old.remove();
       var img=document.createElement('img');
-      img.src=e.target.result; img.className='avatar-img'; img.id='avatarImg';
-      wrap.insertBefore(img, wrap.querySelector('.avatar-change'));
+      img.src=e.target.result; img.className='ig-avatar-img'; img.id='avatarImg';
+      wrap.insertBefore(img, wrap.querySelector('.ig-avatar-change'));
     };
     reader.readAsDataURL(input.files[0]);
   }
@@ -142,12 +228,6 @@ function saveProfile(){
     if(d.status==='success'){
       var name=document.getElementById('inputName').value.trim();
       document.getElementById('viewName').innerText=name||'Farmer';
-      document.getElementById('viewLocation').innerText=document.getElementById('inputLocation').value.trim()||'—';
-      document.getElementById('viewFarmSize').innerText=document.getElementById('inputFarmSize').value?document.getElementById('inputFarmSize').value+' acres':'—';
-      document.getElementById('viewSoilPh').innerText=document.getElementById('inputSoilPh').value||'—';
-      document.getElementById('viewSoilType').innerText=document.getElementById('inputSoilType').value||'—';
-      var ai=document.getElementById('avatarInitial');
-      if(ai && name) ai.innerText=name[0].toUpperCase();
       localStorage.setItem('name',d.name||name);
       setNavUser(d.name||name, DB_PHONE);
       if(d.profile_pic) setNavPic('/static/'+d.profile_pic);

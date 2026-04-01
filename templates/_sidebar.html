@@ -4,6 +4,26 @@
     <span class="brand">🌾 AgroSmart</span>
   </div>
   <div class="topbar-right">
+    <!-- MESSAGE NOTIFICATION BELL -->
+    <div class="notif-wrap" id="msgNotifWrap">
+      <button class="notif-bell" onclick="toggleMsgNotif()" id="msgNotifBtn" title="Messages">
+        ✉️
+        <span class="notif-badge" id="msgNotifBadge" style="display:none">0</span>
+      </button>
+      <div class="notif-dropdown" id="msgNotifDropdown" style="display:none">
+        <div class="notif-header">
+          <span class="notif-title">✉️ Messages</span>
+          <a href="{{ url_for('community') }}" style="font-size:12px;font-weight:600;color:var(--green-mid);text-decoration:none">View All</a>
+        </div>
+        <div class="notif-list" id="msgNotifList">
+          <div class="notif-empty">
+            <div style="font-size:36px;margin-bottom:8px">✉️</div>
+            <p>No messages yet</p>
+            <span>Messages from farmers will appear here</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- NOTIFICATION BELL — left of profile pill -->
     <div class="notif-wrap" id="notifWrap">
       <button class="notif-bell" onclick="toggleNotif()" id="notifBtn" title="Notifications">
@@ -57,12 +77,12 @@
     <li><a href="{{ url_for('dashboard') }}" {% if active=='dashboard' %}class="active"{% endif %}>📊 <span data-lang="dashboard">Dashboard</span></a></li>
     <li><a href="{{ url_for('weather') }}" {% if active=='weather' %}class="active"{% endif %}>🌦 <span data-lang="weather">Weather</span></a></li>
     <li><a href="{{ url_for('crop_advisor') }}" {% if active=='crop' %}class="active"{% endif %}>🌱 <span data-lang="crop_advisor">Crop Advisor</span></a></li>
-    <li><a href="{{ url_for('crop_calendar') }}" {% if active=='crop_calendar' %}class="active"{% endif %}>📅 Crop Calendar</a></li>
+    <li><a href="{{ url_for('crop_calendar') }}" {% if active=='crop_calendar' %}class="active"{% endif %}>📅 <span data-lang="crop_calendar">Crop Calendar</span></a></li>
     <li><a href="{{ url_for('irrigation') }}" {% if active=='irrigation' %}class="active"{% endif %}>💧 <span data-lang="irrigation">Irrigation</span></a></li>
-    <li><a href="{{ url_for('fertilizer') }}" {% if active=='fertilizer' %}class="active"{% endif %}>🧪 Fertilizer Calc</a></li>
+    <li><a href="{{ url_for('fertilizer') }}" {% if active=='fertilizer' %}class="active"{% endif %}>🧪 <span data-lang="fertilizer_calc">Fertilizer Calc</span></a></li>
     <li><a href="{{ url_for('yield_calculator') }}" {% if active=='yield' %}class="active"{% endif %}>📈 <span data-lang="yield_calc">Yield Calculator</span></a></li>
     <li><a href="{{ url_for('ai_diagnosis') }}" {% if active=='ai' %}class="active"{% endif %}>🌿 <span data-lang="ai_diag">AI Diagnosis</span></a></li>
-    <li><a href="{{ url_for('crop_diary') }}" {% if active=='diary' %}class="active"{% endif %}>📝 Crop Diary</a></li>
+    <li><a href="{{ url_for('crop_diary') }}" {% if active=='diary' %}class="active"{% endif %}>📝 <span data-lang="crop_diary">Crop Diary</span></a></li>
     <li><a href="{{ url_for('community') }}" {% if active=='community' %}class="active"{% endif %}>🤝 <span data-lang="community">Community</span></a></li>
     <li><a href="{{ url_for('history') }}" {% if active=='history' %}class="active"{% endif %}>🕒 <span data-lang="history">History</span></a></li>
     <li><a href="{{ url_for('profile') }}" {% if active=='profile' %}class="active"{% endif %}>👨‍🌾 <span data-lang="profile">Profile</span></a></li>

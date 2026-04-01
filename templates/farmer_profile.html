@@ -26,7 +26,14 @@
     .btn-msg{background:none;border:1.5px solid var(--border);padding:10px 20px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text);}
     .btn-msg:hover{background:var(--green-light);border-color:var(--green);}
     .fp-posts-title{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text);}
-  </style>
+    .fp-stat-clickable { cursor:pointer; transition:opacity .15s; }
+  .fp-stat-clickable:hover { opacity:.7; }
+  .ff-modal-box { background:var(--white);border-radius:18px;width:380px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.25); }
+  .ff-modal-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border); }
+  .ff-modal-list { overflow-y:auto;flex:1; }
+  .ff-user-row { display:flex;align-items:center;gap:12px;padding:12px 16px;text-decoration:none;border-bottom:1px solid #f2f2f2;transition:background .15s; }
+  .ff-user-row:hover { background:var(--green-light); }
+</style>
 </head>
 
 <body data-me="{{ user[2] if user else '' }}"
@@ -52,8 +59,8 @@
         {% if farmer[7] %}<p class="fp-bio">{{ farmer[7] }}</p>{% endif %}
         <div class="fp-stats">
           <div class="fp-stat"><strong>{{ posts|length }}</strong><span>Posts</span></div>
-          <div class="fp-stat"><strong>{{ followers }}</strong><span>Followers</span></div>
-          <div class="fp-stat"><strong>{{ following_count }}</strong><span>Following</span></div>
+          <div class="fp-stat fp-stat-clickable" onclick="openModal('followers')"><strong>{{ followers }}</strong><span>Followers</span></div>
+          <div class="fp-stat fp-stat-clickable" onclick="openModal('following')"><strong>{{ following_count }}</strong><span>Following</span></div>
         </div>
         <div class="fp-actions">
           {% if farmer[2] != user[2] %}
@@ -105,6 +112,19 @@
     {% else %}
       <div class="card empty-comm"><p>No posts yet from this farmer.</p></div>
     {% endif %}
+  </div>
+</div>
+
+<!-- ── FOLLOWERS / FOLLOWING MODAL ── -->
+<div id="ffModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;align-items:center;justify-content:center">
+  <div class="ff-modal-box">
+    <div class="ff-modal-header">
+      <span id="ffModalTitle" style="font-size:15px;font-weight:700">Followers</span>
+      <button onclick="closeFFModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text);line-height:1">×</button>
+    </div>
+    <div id="ffModalList" class="ff-modal-list">
+      <div style="text-align:center;padding:30px;color:#bbb">Loading…</div>
+    </div>
   </div>
 </div>
 
@@ -227,6 +247,54 @@
       }
     });
   }
+
+  function openModal(type) {
+    var PHONE = FARMER_PHONE;
+    var modal = document.getElementById('ffModal');
+    var title = document.getElementById('ffModalTitle');
+    var list  = document.getElementById('ffModalList');
+    title.textContent = type === 'followers' ? '👥 Followers' : '➕ Following';
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">Loading…</div>';
+    modal.style.display = 'flex';
+    var url = type === 'followers'
+      ? '/community/followers/' + encodeURIComponent(PHONE)
+      : '/community/following/' + encodeURIComponent(PHONE);
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var users = d.users || [];
+        if(!users.length){
+          list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">' +
+            (type==='followers' ? 'No followers yet' : 'Not following anyone yet') + '</div>';
+          return;
+        }
+        list.innerHTML = users.map(function(u){
+          var initials = (u.name || 'F')[0].toUpperCase();
+          var avatarHtml = u.pic
+            ? '<img src="/static/'+u.pic+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #eee">'
+            : '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a3d22,#4caf50);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">'+initials+'</div>';
+          return '<a href="/community/farmer/'+encodeURIComponent(u.phone)+'" class="ff-user-row">'+
+            avatarHtml+
+            '<div style="flex:1;min-width:0">'+
+              '<p style="font-size:14px;font-weight:600;color:var(--text);margin:0">'+escapeHtmlFP(u.name||'Farmer')+'</p>'+
+              '<p style="font-size:12px;color:#888;margin:2px 0 0">'+escapeHtmlFP(u.location||'')+'</p>'+
+            '</div>'+
+            '<span style="font-size:12px;color:#2d6a3f;font-weight:600">View →</span>'+
+          '</a>';
+        }).join('');
+      }).catch(function(){
+        list.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">Could not load list</div>';
+      });
+  }
+
+  function closeFFModal() {
+    document.getElementById('ffModal').style.display = 'none';
+  }
+  document.getElementById('ffModal').addEventListener('click', function(e){
+    if(e.target === this) closeFFModal();
+  });
+
+  function escapeHtmlFP(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>

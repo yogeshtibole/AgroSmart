@@ -86,7 +86,8 @@ var LANG_MAP = {
     'quick_access':'Quick Access','farm_overview':'Farm Overview',
     'weather_today':'Weather Today','crop_health':'Crop Health','soil_info':'Soil Info',
     'today_tasks':"Today's Tasks",'save_changes':'Save Changes',
-    'edit_profile':'Edit Profile','farm_gallery':'Farm Gallery'
+    'edit_profile':'Edit Profile','farm_gallery':'Farm Gallery',
+    'crop_calendar':'Crop Calendar','fertilizer_calc':'Fertilizer Calc','crop_diary':'Crop Diary'
   },
   hi: {
     'dashboard':'डैशबोर्ड','weather':'मौसम','crop_advisor':'फसल सलाहकार',
@@ -95,7 +96,8 @@ var LANG_MAP = {
     'quick_access':'त्वरित पहुँच','farm_overview':'खेत अवलोकन',
     'weather_today':'आज का मौसम','crop_health':'फसल स्वास्थ्य','soil_info':'मिट्टी जानकारी',
     'today_tasks':'आज के कार्य','save_changes':'बदलाव सहेजें',
-    'edit_profile':'प्रोफाइल संपादित करें','farm_gallery':'खेत गैलरी'
+    'edit_profile':'प्रोफाइल संपादित करें','farm_gallery':'खेत गैलरी',
+    'crop_calendar':'फसल कैलेंडर','fertilizer_calc':'खाद कैलकुलेटर','crop_diary':'फसल डायरी'
   },
   mr: {
     'dashboard':'डॅशबोर्ड','weather':'हवामान','crop_advisor':'पीक सल्लागार',
@@ -104,7 +106,8 @@ var LANG_MAP = {
     'quick_access':'त्वरित प्रवेश','farm_overview':'शेत आढावा',
     'weather_today':'आजचे हवामान','crop_health':'पीक आरोग्य','soil_info':'माती माहिती',
     'today_tasks':'आजची कामे','save_changes':'बदल जतन करा',
-    'edit_profile':'प्रोफाइल संपादित करा','farm_gallery':'शेत गॅलरी'
+    'edit_profile':'प्रोफाइल संपादित करा','farm_gallery':'शेत गॅलरी',
+    'crop_calendar':'पीक दिनदर्शिका','fertilizer_calc':'खत कॅल्क्युलेटर','crop_diary':'पीक डायरी'
   }
 };
 
@@ -196,8 +199,8 @@ function renderNotifications(){
     list.innerHTML = '<div class="notif-empty"><div style="font-size:36px;margin-bottom:8px">🔔</div><p>No notifications yet</p><span>Likes, comments &amp; follows will appear here</span></div>';
     return;
   }
-  var icons = {like:'❤️',comment:'💬',follow:'👤',share:'🔗'};
-  var iconClass = {like:'like',comment:'comment',follow:'follow',share:'share'};
+  var icons = {like:'❤️',comment:'💬',follow:'👤',share:'🔗',message:'✉️'};
+  var iconClass = {like:'like',comment:'comment',follow:'follow',share:'share',message:'comment'};
   list.innerHTML = notifData.map(function(n){
     return '<div class="notif-item '+(n.read?'':'unread')+'" onclick="onNotifClick(\''+n.id+'\',\''+n.link+'\')">'+
       '<div class="notif-icon '+(iconClass[n.type]||'like')+'">'+(icons[n.type]||'🔔')+'</div>'+
@@ -273,4 +276,96 @@ document.addEventListener('DOMContentLoaded', function(){
     var c = d.count || 0;
     if(c > 0){ badge.style.display='flex'; badge.textContent=c>9?'9+':c; }
   }).catch(function(){});
+});
+
+// ══════════════════════════════════════════════
+// MESSAGE NOTIFICATION SYSTEM
+// ══════════════════════════════════════════════
+var msgNotifOpen = false;
+var msgNotifData = [];
+
+function toggleMsgNotif(){
+  // Close regular notif if open
+  if(notifOpen){
+    notifOpen = false;
+    var dd = document.getElementById('notifDropdown');
+    if(dd) dd.style.display = 'none';
+  }
+  msgNotifOpen = !msgNotifOpen;
+  var dd = document.getElementById('msgNotifDropdown');
+  if(dd) dd.style.display = msgNotifOpen ? 'block' : 'none';
+  if(msgNotifOpen) loadMsgNotifications();
+}
+
+document.addEventListener('click', function(e){
+  var wrap = document.getElementById('msgNotifWrap');
+  if(wrap && msgNotifOpen && !wrap.contains(e.target)){
+    msgNotifOpen = false;
+    var dd = document.getElementById('msgNotifDropdown');
+    if(dd) dd.style.display = 'none';
+  }
+});
+
+// Also close regular notif when msg notif opens
+var _origToggleNotif = typeof toggleNotif === 'function' ? toggleNotif : null;
+
+function loadMsgNotifications(){
+  fetch('/community/messages/preview')
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    msgNotifData = d.messages || [];
+    renderMsgNotifications();
+    updateMsgBadge(0);
+  }).catch(function(){
+    renderMsgNotifications();
+  });
+}
+
+function renderMsgNotifications(){
+  var list = document.getElementById('msgNotifList');
+  if(!list) return;
+  if(!msgNotifData.length){
+    list.innerHTML = '<div class="notif-empty"><div style="font-size:36px;margin-bottom:8px">✉️</div><p>No messages yet</p><span>Messages from farmers will appear here</span></div>';
+    return;
+  }
+  list.innerHTML = msgNotifData.map(function(m){
+    var initials = (m.from_name || 'F')[0].toUpperCase();
+    var avatarHtml = m.from_pic
+      ? '<img src="/static/'+m.from_pic+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+      : '<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#1a3d22,#4caf50);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0">'+initials+'</div>';
+    return '<a href="/community/farmer/'+encodeURIComponent(m.from_phone)+'" class="notif-item '+(m.read?'':'unread')+'" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f2f2f2">'+
+      avatarHtml+
+      '<div style="flex:1;min-width:0">'+
+        '<strong style="font-size:13px;font-weight:700;color:var(--text)">'+escapeHtml(m.from_name||'Farmer')+'</strong>'+
+        '<p style="font-size:12px;color:var(--text-mid);margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escapeHtml(m.text||'')+'</p>'+
+        '<span style="font-size:11px;color:#bbb;display:block;margin-top:3px">'+timeAgo(m.created_at)+'</span>'+
+      '</div>'+
+      (m.read?'':'<div style="width:8px;height:8px;border-radius:50%;background:#e53935;flex-shrink:0"></div>')+
+    '</a>';
+  }).join('');
+}
+
+function updateMsgBadge(count){
+  var badge = document.getElementById('msgNotifBadge');
+  if(!badge) return;
+  if(count > 0){
+    badge.style.display = 'flex';
+    badge.textContent = count > 9 ? '9+' : count;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// Poll for unread message count every 30s
+function pollMsgCount(){
+  fetch('/community/messages/unread_count')
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    updateMsgBadge(d.count || 0);
+  }).catch(function(){});
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  pollMsgCount();
+  setInterval(pollMsgCount, 30000);
 });

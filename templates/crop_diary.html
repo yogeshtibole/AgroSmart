@@ -97,6 +97,11 @@
 window.onload = function(){
   setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
   document.getElementById('noteDate').value = new Date().toISOString().split('T')[0];
+  var savedLang = localStorage.getItem('agro_lang') || 'en';
+  var btnMap = {'en':0,'hi':1,'mr':2};
+  var btns = document.querySelectorAll('.lang-btn');
+  var idx = btnMap[savedLang] || 0;
+  setLang(savedLang, btns[idx] || btns[0]);
 };
 
 var MOOD = 'good';
