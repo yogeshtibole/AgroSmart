@@ -3,8 +3,8 @@ from database import get_connection
 import requests, os, hashlib, re, time
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "agrosmart_dev_secret_change_me")
-API_KEY = os.environ.get("OPENWEATHER_API_KEY", "")
+app.secret_key = "agrosmart_secret_2025"
+API_KEY ="c77ad771da8c51df70707890f376e2d5"
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
