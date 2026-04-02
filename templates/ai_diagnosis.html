@@ -79,16 +79,16 @@
 
   <div class="lang-bar">
     <span class="lang-label">🌍 Response in:</span>
-    <button class="lang-btn active" onclick="setLang('English',this)">English</button>
-    <button class="lang-btn" onclick="setLang('Hindi',this)">हिंदी</button>
-    <button class="lang-btn" onclick="setLang('Marathi',this)">मराठी</button>
+    <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
   </div>
 
   <div class="ai-grid">
     <!-- INPUT PANEL -->
     <div class="card upload-card">
       <div class="ai-powered-badge"><div class="ai-pulse"></div> Powered by Claude AI</div>
-      <div class="card-title">📋 Describe Your Crop Problem</div>
+      <div class="card-title">📋 <span data-lang="describe_problem">Describe Your Crop Problem</span></div>
 
       <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
         <div id="uploadPreview">
@@ -102,7 +102,7 @@
              style="display:none" onchange="previewImage(this)">
       <div id="fileError" style="display:none;margin-top:10px;padding:10px;background:#ffebee;border:1px solid #ffcdd2;border-radius:8px;font-size:13px;color:#c62828"></div>
 
-      <label class="form-label" style="margin-top:18px">Crop Type <span style="color:#e53935">*</span></label>
+      <label class="form-label" style="margin-top:18px" data-lang="crop_type">Crop Type <span style="color:#e53935">*</span></label>
       <select class="form-select" id="cropType">
         <option value="">— Select crop —</option>
         <option>Wheat</option><option>Rice</option><option>Maize</option>
@@ -111,7 +111,7 @@
         <option>Gram / Chickpea</option><option>Groundnut</option><option>Other</option>
       </select>
 
-      <label class="form-label">Symptoms Observed <span style="color:#e53935">*</span></label>
+      <label class="form-label" data-lang="symptoms">Symptoms Observed <span style="color:#e53935">*</span></label>
       <div class="symptom-checks" id="symptomChecks">
         <label class="sym-check"><input type="checkbox" value="yellow spots or yellowing leaves" onchange="toggleSym(this)"> 🟡 Yellow spots</label>
         <label class="sym-check"><input type="checkbox" value="brown or dead patches" onchange="toggleSym(this)"> 🟤 Brown patches</label>
@@ -125,18 +125,18 @@
         <label class="sym-check"><input type="checkbox" value="plant appears healthy for routine check" onchange="toggleSym(this)"> ✅ Looks healthy</label>
       </div>
 
-      <label class="form-label" style="margin-top:14px">Extra Details (optional)</label>
+      <label class="form-label" style="margin-top:14px" data-lang="extra_details">Extra Details (optional)</label>
       <textarea class="form-input" id="extraDetails" rows="3" style="resize:vertical"
         placeholder="e.g. 'Problem started 5 days ago after rain', 'Only bottom leaves affected', 'Entire field or just corners?'"></textarea>
 
       <button class="btn-green" id="diagnoseBtn" onclick="diagnose()" style="width:100%;margin-top:16px">
-        🔍 Run AI Diagnosis
+        <span data-lang="diagnose_btn">🔍 Run AI Diagnosis</span>
       </button>
     </div>
 
     <!-- RESULT PANEL -->
     <div class="card" id="diagCard">
-      <div class="card-title">🔬 AI Diagnosis Result</div>
+      <div class="card-title">🔬 <span data-lang="diag_result">AI Diagnosis Result</span></div>
       <div class="diag-placeholder">
         <div style="font-size:52px;margin-bottom:14px">🌿</div>
         <p style="color:var(--text-light);font-size:14px;text-align:center;line-height:1.7">
@@ -149,13 +149,13 @@
 
   <!-- History section -->
   <div class="card" id="histSection" style="display:none;margin-top:20px">
-    <div class="card-title">🕒 Recent Diagnoses (this session)</div>
+    <div class="card-title">🕒 <span data-lang="recent_diag">Recent Diagnoses (this session)</span></div>
     <div id="histList"></div>
   </div>
 
   <!-- Reference strip -->
   <div class="card tips-card" style="margin-top:20px">
-    <div class="card-title">💡 Common Crop Diseases Quick Reference</div>
+    <div class="card-title">💡 <span data-lang="quick_ref">Common Crop Diseases Quick Reference</span></div>
     <div class="disease-chips">
       <div class="disease-chip red">🍂 Leaf Blight — Copper Fungicide</div>
       <div class="disease-chip orange">🍃 Powdery Mildew — Sulfur Spray</div>
@@ -175,15 +175,27 @@
 <script>
 window.onload = function(){
   setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+  // Sync with global language setting from settings page
+  var savedLang = localStorage.getItem('agro_lang') || 'en';
+  var btnMap = {'en':0,'hi':1,'mr':2};
+  var btns = document.querySelectorAll('.lang-btn');
+  var idx = btnMap[savedLang] !== undefined ? btnMap[savedLang] : 0;
+  setLang(savedLang, btns[idx] || btns[0]);
 };
 
-var LANG = 'English';
+var LANG = 'en';
 var diagHistory = [];
 
 function setLang(lang, btn){
+  // Normalize old-style codes just in case
+  var codeMap = {'English':'en','Hindi':'hi','Marathi':'mr'};
+  lang = codeMap[lang] || lang;
   LANG = lang;
+  localStorage.setItem('agro_lang', lang);
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  // Apply translations to the whole page using shared applyLang
+  if(typeof applyLang === 'function') applyLang(lang);
 }
 
 function toggleSym(cb){

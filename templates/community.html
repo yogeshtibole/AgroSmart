@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -46,7 +46,7 @@
   <!-- SUGGESTED FARMERS -->
   {% if farmers_list and not search_results %}
   <div class="comm-search-section">
-    <p class="section-label">👨‍🌾 Farmers to Connect With</p>
+    <p class="section-label">👨‍🌾 <span data-lang="farmers_connect">Farmers to Connect With</span></p>
     <div class="farmers-row">
       {% for f in farmers_list %}
       <a href="{{ url_for('farmer_profile', farmer_phone=f[0]) }}" class="farmer-card">
@@ -68,7 +68,7 @@
   <div class="comm-layout">
     <!-- POST COMPOSER -->
     <div class="card composer-card">
-      <div class="card-title">📢 Share with the Community</div>
+      <div class="card-title">📢 <span data-lang="share_community">Share with the Community</span></div>
       <div class="cat-row" id="catRow">
         <button class="cat-btn active" data-cat="general" onclick="setCat('general',this)">💬 General</button>
         <button class="cat-btn" data-cat="disease" onclick="setCat('disease',this)">🦠 Disease</button>
@@ -77,18 +77,18 @@
         <button class="cat-btn" data-cat="tips" onclick="setCat('tips',this)">💡 Tips</button>
         <button class="cat-btn" data-cat="govt" onclick="setCat('govt',this)">🏛 Govt Scheme</button>
       </div>
-      <label class="form-label">Title</label>
+      <label class="form-label" data-lang="post_title">Title</label>
       <input class="form-input" type="text" id="postTitle" maxlength="250" placeholder="What's your question or tip?">
-      <label class="form-label">Message</label>
+      <label class="form-label" data-lang="post_message">Message</label>
       <textarea class="form-input post-area" id="postBody" rows="4" placeholder="Describe your question, problem, or farming tip..."></textarea>
-      <label class="form-label">Photo (optional)</label>
+      <label class="form-label" data-lang="post_photo">Photo (optional)</label>
       <div class="img-upload-row">
         <label for="postImgInput" class="img-upload-btn">📷 Add Photo</label>
         <input type="file" id="postImgInput" accept="image/*" style="display:none" onchange="previewPostImg(this)">
         <span id="postImgName" style="font-size:12px;color:#aaa">No photo selected</span>
       </div>
       <img id="postImgPreview" src="" style="display:none;max-height:180px;border-radius:10px;margin-top:10px;object-fit:cover;width:100%">
-      <button class="btn-green" id="postBtn" onclick="submitPost()" style="width:100%;justify-content:center">📢 Post to Community</button>
+      <button class="btn-green" id="postBtn" onclick="submitPost()" style="width:100%;justify-content:center"><span data-lang="post_btn">📢 Post to Community</span></button>
       <div id="postMsg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
     </div>
 
@@ -180,7 +180,7 @@
     <div id="msgThread" style="padding:14px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:#f9fdf9"></div>
     <div style="padding:12px;border-top:1px solid #eee;display:flex;gap:8px">
       <input id="msgInput" type="text" placeholder="Type a message..." class="form-input" style="margin:0;flex:1" onkeydown="if(event.key==='Enter')sendDM()">
-      <button onclick="sendDM()" class="btn-green" style="margin:0;padding:10px 16px">Send</button>
+      <button onclick="sendDM()" class="btn-green" style="margin:0;padding:10px 16px" data-lang="send">Send</button>
     </div>
   </div>
 </div>

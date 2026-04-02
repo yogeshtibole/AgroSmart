@@ -20,7 +20,7 @@
     {% endfor %}{% endif %}
   {% endwith %}
 
-  <!-- SEARCH BAR ONLY — no auto location -->
+  <!-- SEARCH BAR -->
   <div class="card search-card">
     <form method="POST" class="search-row">
       <input class="form-input" type="text" name="city" id="cityInput"
@@ -30,7 +30,20 @@
   </div>
 
   {% if weather %}
-  <!-- WEATHER RESULT -->
+
+  <!-- ══ RAIN ALERT BANNER ══ -->
+  {% if weather.rain_alert %}
+  <div class="rain-alert-banner">
+    <div class="rain-alert-icon">🌧️</div>
+    <div class="rain-alert-text">
+      <strong>Rain Alert — Farming Advisory</strong>
+      <p>{{ weather.rain_alert.msg }}</p>
+    </div>
+    <button class="rain-alert-close" onclick="this.parentElement.style.display='none'">✕</button>
+  </div>
+  {% endif %}
+
+  <!-- WEATHER HERO -->
   <div class="weather-hero">
     <div class="weather-hero-left">
       <p class="weather-city">📍 {{ weather.city }}</p>
@@ -46,17 +59,116 @@
       </div>
     </div>
   </div>
+
+  <!-- FARMING ADVICE -->
   <div class="advice-box {{ weather.advice_type }}">
     <strong>🌱 Farming Advice</strong>
     <p>{{ weather.advice }}</p>
   </div>
+
+  <!-- ══ WIND COMPASS + SPRAY ADVICE ROW ══ -->
+  <div class="wind-compass-row">
+
+    <div class="wind-compass-card">
+      <p class="section-label">💨 Wind Direction</p>
+      <div class="compass-wrap">
+        <!-- SVG Compass -->
+        <svg class="compass-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" data-wind-deg="{{ weather.wind_deg }}" id="compassSvg">
+          <!-- outer ring -->
+          <circle cx="80" cy="80" r="72" fill="#f0f7f0" stroke="#c8e6c9" stroke-width="2.5"/>
+          <circle cx="80" cy="80" r="60" fill="white" stroke="#e0ede0" stroke-width="1.5"/>
+          <!-- Cardinal labels -->
+          <text x="80" y="22" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">N</text>
+          <text x="80" y="148" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">S</text>
+          <text x="18"  y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">W</text>
+          <text x="144" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">E</text>
+          <!-- Intercardinal -->
+          <text x="120" y="36" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">NE</text>
+          <text x="120" y="130" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">SE</text>
+          <text x="38"  y="36" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">NW</text>
+          <text x="38"  y="130" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">SW</text>
+
+          <!-- tick marks (8 major) -->
+          <line x1="80" y1="12" x2="80" y2="22" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="80" y1="138" x2="80" y2="148" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="12" y1="80" x2="22" y2="80" stroke="#c8e6c9" stroke-width="2"/>
+          <line x1="138" y1="80" x2="148" y2="80" stroke="#c8e6c9" stroke-width="2"/>
+
+          <!-- ARROW — rotated to wind_deg via JS below -->
+          <g id="compassNeedle">
+            <!-- North tip (red) -->
+            <polygon points="80,22 75,80 85,80" fill="#e53935"/>
+            <!-- South tip (white/gray) -->
+            <polygon points="80,138 75,80 85,80" fill="#b0bec5"/>
+            <!-- center cap -->
+            <circle cx="80" cy="80" r="7" fill="#1a3d22"/>
+            <circle cx="80" cy="80" r="4" fill="white"/>
+          </g>
+
+          <!-- wind dir label -->
+          <text x="80" y="100" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#4a7a4a">{{ weather.wind_dir }}</text>
+        </svg>
+
+        <div class="compass-stats">
+          <div class="compass-stat-item">
+            <span class="cstat-val">{{ weather.wind }} m/s</span>
+            <span class="cstat-label">Speed</span>
+          </div>
+          <div class="compass-stat-item">
+            <span class="cstat-val">{{ weather.wind_deg }}°</span>
+            <span class="cstat-label">Degrees</span>
+          </div>
+          <div class="compass-stat-item">
+            <span class="cstat-val">{{ weather.wind_dir }}</span>
+            <span class="cstat-label">Direction</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spray advice -->
+      <div class="spray-advice-box">
+        <p>{{ weather.spray_msg }}</p>
+      </div>
+    </div>
+
+  </div><!-- end wind row -->
+
+  <!-- ══ 5-DAY FORECAST STRIP ══ -->
+  {% if weather.forecast %}
+  <div class="forecast-section">
+    <p class="section-label">🗓️ 5-Day Forecast</p>
+    <div class="forecast-strip">
+      {% for day in weather.forecast %}
+      <div class="forecast-card {% if loop.first %}forecast-today{% endif %}">
+        <p class="fc-day">
+          {% if loop.first %}Today
+          {% elif loop.index == 2 %}Tomorrow
+          {% else %}{{ day.date }}
+          {% endif %}
+        </p>
+        <img src="http://openweathermap.org/img/wn/{{ day.icon }}@2x.png" class="fc-icon" alt="{{ day.desc }}">
+        <p class="fc-desc">{{ day.desc }}</p>
+        <div class="fc-temps">
+          <span class="fc-max">{{ day.temp_max|round|int }}°</span>
+          <span class="fc-min">{{ day.temp_min|round|int }}°</span>
+        </div>
+        <div class="fc-rain-bar-wrap" title="{{ day.rain_pct }}% rain chance">
+          <div class="fc-rain-bar" data-pct="{{ day.rain_pct }}"></div>
+        </div>
+        <p class="fc-rain-pct">💧 {{ day.rain_pct }}%</p>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="forecast-note">Rain % = probability of precipitation for that day</p>
+  </div>
+  {% endif %}
 
   {% else %}
   <!-- QUICK CITY BUTTONS when no search yet -->
   <div class="weather-tip-card">
     <div style="font-size:48px;margin-bottom:12px">🌾</div>
     <h3>Search your city above</h3>
-    <p>Get live weather data and crop-specific farming advice for any city in India.</p>
+    <p>Get live weather, 5-day forecast, wind compass, and rain alerts for any city in India.</p>
     <div class="quick-cities">
       <button onclick="searchCity('Pune')">Pune</button>
       <button onclick="searchCity('Nashik')">Nashik</button>
@@ -69,7 +181,8 @@
     </div>
   </div>
   {% endif %}
-</div>
+
+</div><!-- end main -->
 
 <script src="{{ url_for('static', filename='shared.js') }}"></script>
 <script>
@@ -77,6 +190,19 @@ setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else
 function searchCity(city){
   document.getElementById('cityInput').value = city;
   document.querySelector('form').submit();
+}
+/* set rain bar widths from data attributes */
+document.querySelectorAll('.fc-rain-bar[data-pct]').forEach(function(el){
+  el.style.width = el.getAttribute('data-pct') + '%';
+});
+
+var svg = document.getElementById('compassSvg');
+if(svg){
+  var deg = parseFloat(svg.getAttribute('data-wind-deg')) || 0;
+  var needle = document.getElementById('compassNeedle');
+  if(needle){
+    needle.setAttribute('style','transform:rotate('+deg+'deg);transform-origin:80px 80px;');
+  }
 }
 </script>
 </body>

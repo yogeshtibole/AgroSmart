@@ -77,45 +77,254 @@ function applyTheme(theme){
   }
 }
 
-// ── Fix 4: LANGUAGE — applies to whole project ────────────────────────────────
+// ── LANGUAGE — unified system, applies to whole project ──────────────────────
+// Keys used with data-lang="" or data-k="" on any page
 var LANG_MAP = {
   en: {
+    // ── Sidebar / Nav ──
     'dashboard':'Dashboard','weather':'Weather','crop_advisor':'Crop Advisor',
     'irrigation':'Irrigation','yield_calc':'Yield Calculator','ai_diag':'AI Diagnosis',
     'profile':'Profile','history':'History','settings':'Settings','community':'Community',
+    'crop_calendar':'Crop Calendar','fertilizer_calc':'Fertilizer Calc','crop_diary':'Crop Diary',
+
+    // ── Dashboard ──
     'quick_access':'Quick Access','farm_overview':'Farm Overview',
-    'weather_today':'Weather Today','crop_health':'Crop Health','soil_info':'Soil Info',
-    'today_tasks':"Today's Tasks",'save_changes':'Save Changes',
-    'edit_profile':'Edit Profile','farm_gallery':'Farm Gallery',
-    'crop_calendar':'Crop Calendar','fertilizer_calc':'Fertilizer Calc','crop_diary':'Crop Diary'
+    'weather_today':'Weather Today','crop_health':'Crop Health','soil_info':'Soil & Farm Info',
+    'today_tasks':"Today's Tasks",'farm_gallery':'Farm Gallery',
+    'search_farmers':'Search Farmers',
+    'soil_farm_info':'Soil & Farm Info',
+    'run_diagnosis':'Run Diagnosis →','crop_advice':'Crop Advice →',
+    'open_diary':'Open Diary →',
+
+    // ── Profile ──
+    'edit_profile':'Edit Profile','save_changes':'Save Changes','save_profile':'Save Profile',
+    'full_name':'Full Name','village':'Village / Location','bio':'Bio / About',
+    'farm_size':'Farm Size (acres)','soil_ph':'Soil pH','soil_type':'Soil Type',
+    'profile_picture':'Profile Picture',
+
+    // ── Settings ──
+    'save_settings':'Save Settings',
+
+    // ── Irrigation ──
+    'input_params':'Input Parameters','crop_type':'Crop Type',
+    'soil_moisture':'Soil Moisture (%)','weather_cond':'Weather Condition',
+    'farm_size_acres':'Farm Size (acres)','check_irrigation':'Check Irrigation Need',
+    'recommendation':'Recommendation',
+
+    // ── Yield Calculator ──
+    'farm_params':'Farm Parameters','area_acres':'Area (acres)',
+    'water_rain':'Water / Rain Condition','calc_yield':'Calculate Yield',
+    'est_yield':'Estimated Yield',
+
+    // ── Weather ──
+    'search_city':'Search your city above',
+
+    // ── Community ──
+    'share_community':'Share with the Community',
+    'post_title':'Title','post_message':'Message','post_photo':'Photo (optional)',
+    'post_btn':'Post to Community','farmers_connect':'Farmers to Connect With',
+    'send':'Send',
+
+    // ── Fertilizer (shared with page's own data-k system) ──
+    'inputs':'Crop & Field Inputs','crop':'Crop','area':'Farm Area (acres)',
+    'soil_ph_k':'Soil pH','soil_type_k':'Soil Type',
+    'prev_crop':'Previous Crop (for residue benefit)',
+    'calculate':'Calculate Dose','results':'Fertilizer Recommendation',
+    'npk_guide':'NPK Nutrient Guide',
+
+    // ── AI Diagnosis ──
+    'describe_problem':'Describe Your Crop Problem',
+    'symptoms':'Symptoms Observed','extra_details':'Extra Details (optional)',
+    'diagnose_btn':'🔍 Diagnose My Crop',
+    'diag_result':'AI Diagnosis Result','recent_diag':'Recent Diagnoses (this session)',
+    'quick_ref':'Common Crop Diseases Quick Reference',
+
+    // ── Crop Calendar (shared with page's own data-k system) ──
+    'select_crop':'Select Your Crop & Region','region':'Region / State',
+    'generate':'Generate Calendar','select_to_view':'Select a crop and click Generate Calendar',
+    'kharif':'Kharif','rabi':'Rabi','zaid':'Zaid',
+    'kharif_months':'Jun – Oct','rabi_months':'Nov – Mar','zaid_months':'Mar – Jun',
+    'kharif_desc':'Monsoon crops: Rice, Cotton, Maize, Soybean',
+    'rabi_desc':'Winter crops: Wheat, Gram, Mustard',
+    'zaid_desc':'Summer crops: Watermelon, Mung, Vegetables',
+
+    // ── Crop Diary ──
+    'add_entry':'Add Entry','diary_entries':'My Diary Entries',
+    'entry_date':'Date','entry_crop':'Crop','entry_note':'Note / Observation',
+    'save_entry':'Save Entry',
+
+    // ── History ──
+    'activity_history':'Activity History'
   },
+
   hi: {
+    // ── Sidebar / Nav ──
     'dashboard':'डैशबोर्ड','weather':'मौसम','crop_advisor':'फसल सलाहकार',
     'irrigation':'सिंचाई','yield_calc':'उत्पादन कैलकुलेटर','ai_diag':'AI निदान',
     'profile':'प्रोफाइल','history':'इतिहास','settings':'सेटिंग्स','community':'समुदाय',
+    'crop_calendar':'फसल कैलेंडर','fertilizer_calc':'खाद कैलकुलेटर','crop_diary':'फसल डायरी',
+
+    // ── Dashboard ──
     'quick_access':'त्वरित पहुँच','farm_overview':'खेत अवलोकन',
-    'weather_today':'आज का मौसम','crop_health':'फसल स्वास्थ्य','soil_info':'मिट्टी जानकारी',
-    'today_tasks':'आज के कार्य','save_changes':'बदलाव सहेजें',
-    'edit_profile':'प्रोफाइल संपादित करें','farm_gallery':'खेत गैलरी',
-    'crop_calendar':'फसल कैलेंडर','fertilizer_calc':'खाद कैलकुलेटर','crop_diary':'फसल डायरी'
+    'weather_today':'आज का मौसम','crop_health':'फसल स्वास्थ्य','soil_info':'मिट्टी व खेत जानकारी',
+    'today_tasks':'आज के कार्य','farm_gallery':'खेत गैलरी',
+    'search_farmers':'किसान खोजें',
+    'soil_farm_info':'मिट्टी व खेत जानकारी',
+    'run_diagnosis':'निदान चलाएं →','crop_advice':'फसल सलाह →',
+    'open_diary':'डायरी खोलें →',
+
+    // ── Profile ──
+    'edit_profile':'प्रोफाइल संपादित करें','save_changes':'बदलाव सहेजें','save_profile':'प्रोफाइल सहेजें',
+    'full_name':'पूरा नाम','village':'गाँव / स्थान','bio':'परिचय / विवरण',
+    'farm_size':'खेत का आकार (एकड़)','soil_ph':'मिट्टी pH','soil_type':'मिट्टी का प्रकार',
+    'profile_picture':'प्रोफाइल फोटो',
+
+    // ── Settings ──
+    'save_settings':'सेटिंग्स सहेजें',
+
+    // ── Irrigation ──
+    'input_params':'इनपुट जानकारी','crop_type':'फसल का प्रकार',
+    'soil_moisture':'मिट्टी की नमी (%)','weather_cond':'मौसम की स्थिति',
+    'farm_size_acres':'खेत का आकार (एकड़)','check_irrigation':'💦 सिंचाई की जरूरत जांचें',
+    'recommendation':'सिफारिश',
+
+    // ── Yield Calculator ──
+    'farm_params':'खेत की जानकारी','area_acres':'क्षेत्र (एकड़)',
+    'water_rain':'पानी / बारिश की स्थिति','calc_yield':'📊 उत्पादन गणना करें',
+    'est_yield':'अनुमानित उत्पादन',
+
+    // ── Weather ──
+    'search_city':'अपना शहर ऊपर खोजें',
+
+    // ── Community ──
+    'share_community':'समुदाय के साथ साझा करें',
+    'post_title':'शीर्षक','post_message':'संदेश','post_photo':'फोटो (वैकल्पिक)',
+    'post_btn':'📢 समुदाय में पोस्ट करें','farmers_connect':'जुड़ने के लिए किसान',
+    'send':'भेजें',
+
+    // ── Fertilizer ──
+    'inputs':'फसल और खेत की जानकारी','crop':'फसल','area':'खेत का क्षेत्र (एकड़)',
+    'soil_ph_k':'मिट्टी pH','soil_type_k':'मिट्टी का प्रकार',
+    'prev_crop':'पिछली फसल (अवशेष लाभ के लिए)',
+    'calculate':'खुराक गणना करें','results':'खाद की सिफारिश',
+    'npk_guide':'NPK पोषक तत्व गाइड',
+
+    // ── AI Diagnosis ──
+    'describe_problem':'अपनी फसल की समस्या बताएं',
+    'symptoms':'देखे गए लक्षण','extra_details':'अतिरिक्त विवरण (वैकल्पिक)',
+    'diagnose_btn':'🔍 मेरी फसल का निदान करें',
+    'diag_result':'AI निदान परिणाम','recent_diag':'हाल के निदान (इस सत्र में)',
+    'quick_ref':'सामान्य फसल रोग त्वरित संदर्भ',
+
+    // ── Crop Calendar ──
+    'select_crop':'अपनी फसल और क्षेत्र चुनें','region':'राज्य / क्षेत्र',
+    'generate':'कैलेंडर बनाएं','select_to_view':'फसल चुनें और कैलेंडर बनाएं',
+    'kharif':'खरीफ','rabi':'रबी','zaid':'जायद',
+    'kharif_months':'जून – अक्तूबर','rabi_months':'नवम्बर – मार्च','zaid_months':'मार्च – जून',
+    'kharif_desc':'मानसून फसलें: धान, कपास, मक्का, सोयाबीन',
+    'rabi_desc':'रबी फसलें: गेहूँ, चना, सरसों',
+    'zaid_desc':'ग्रीष्म फसलें: तरबूज, मूंग, सब्जियाँ',
+
+    // ── Crop Diary ──
+    'add_entry':'प्रविष्टि जोड़ें','diary_entries':'मेरी डायरी प्रविष्टियाँ',
+    'entry_date':'तारीख','entry_crop':'फसल','entry_note':'नोट / अवलोकन',
+    'save_entry':'प्रविष्टि सहेजें',
+
+    // ── History ──
+    'activity_history':'गतिविधि इतिहास'
   },
+
   mr: {
+    // ── Sidebar / Nav ──
     'dashboard':'डॅशबोर्ड','weather':'हवामान','crop_advisor':'पीक सल्लागार',
     'irrigation':'सिंचन','yield_calc':'उत्पादन कॅल्क्युलेटर','ai_diag':'AI निदान',
     'profile':'प्रोफाइल','history':'इतिहास','settings':'सेटिंग्ज','community':'समुदाय',
+    'crop_calendar':'पीक दिनदर्शिका','fertilizer_calc':'खत कॅल्क्युलेटर','crop_diary':'पीक डायरी',
+
+    // ── Dashboard ──
     'quick_access':'त्वरित प्रवेश','farm_overview':'शेत आढावा',
-    'weather_today':'आजचे हवामान','crop_health':'पीक आरोग्य','soil_info':'माती माहिती',
-    'today_tasks':'आजची कामे','save_changes':'बदल जतन करा',
-    'edit_profile':'प्रोफाइल संपादित करा','farm_gallery':'शेत गॅलरी',
-    'crop_calendar':'पीक दिनदर्शिका','fertilizer_calc':'खत कॅल्क्युलेटर','crop_diary':'पीक डायरी'
+    'weather_today':'आजचे हवामान','crop_health':'पीक आरोग्य','soil_info':'माती व शेत माहिती',
+    'today_tasks':'आजची कामे','farm_gallery':'शेत गॅलरी',
+    'search_farmers':'शेतकरी शोधा',
+    'soil_farm_info':'माती व शेत माहिती',
+    'run_diagnosis':'निदान चालवा →','crop_advice':'पीक सल्ला →',
+    'open_diary':'डायरी उघडा →',
+
+    // ── Profile ──
+    'edit_profile':'प्रोफाइल संपादित करा','save_changes':'बदल जतन करा','save_profile':'प्रोफाइल जतन करा',
+    'full_name':'पूर्ण नाव','village':'गाव / स्थान','bio':'परिचय / विवरण',
+    'farm_size':'शेताचा आकार (एकर)','soil_ph':'माती pH','soil_type':'मातीचा प्रकार',
+    'profile_picture':'प्रोफाइल फोटो',
+
+    // ── Settings ──
+    'save_settings':'सेटिंग्ज जतन करा',
+
+    // ── Irrigation ──
+    'input_params':'इनपुट माहिती','crop_type':'पिकाचा प्रकार',
+    'soil_moisture':'मातीतील ओलावा (%)','weather_cond':'हवामान स्थिती',
+    'farm_size_acres':'शेताचा आकार (एकर)','check_irrigation':'💦 सिंचनाची गरज तपासा',
+    'recommendation':'शिफारस',
+
+    // ── Yield Calculator ──
+    'farm_params':'शेत माहिती','area_acres':'क्षेत्र (एकर)',
+    'water_rain':'पाणी / पाऊस स्थिती','calc_yield':'📊 उत्पादन मोजा',
+    'est_yield':'अनुमानित उत्पादन',
+
+    // ── Weather ──
+    'search_city':'वरती तुमचे शहर शोधा',
+
+    // ── Community ──
+    'share_community':'समुदायासह सामायिक करा',
+    'post_title':'शीर्षक','post_message':'संदेश','post_photo':'फोटो (पर्यायी)',
+    'post_btn':'📢 समुदायात पोस्ट करा','farmers_connect':'जोडण्यासाठी शेतकरी',
+    'send':'पाठवा',
+
+    // ── Fertilizer ──
+    'inputs':'पीक आणि शेत माहिती','crop':'पीक','area':'शेत क्षेत्र (एकर)',
+    'soil_ph_k':'माती pH','soil_type_k':'मातीचा प्रकार',
+    'prev_crop':'मागील पीक (अवशेष फायद्यासाठी)',
+    'calculate':'डोस मोजा','results':'खताची शिफारस',
+    'npk_guide':'NPK पोषक मार्गदर्शक',
+
+    // ── AI Diagnosis ──
+    'describe_problem':'तुमची पीक समस्या सांगा',
+    'symptoms':'दिसलेली लक्षणे','extra_details':'अतिरिक्त तपशील (पर्यायी)',
+    'diagnose_btn':'🔍 माझ्या पिकाचे निदान करा',
+    'diag_result':'AI निदान परिणाम','recent_diag':'अलीकडील निदान (या सत्रात)',
+    'quick_ref':'सामान्य पीक रोग द्रुत संदर्भ',
+
+    // ── Crop Calendar ──
+    'select_crop':'तुमची पीक आणि प्रदेश निवडा','region':'राज्य / प्रदेश',
+    'generate':'कॅलेंडर तयार करा','select_to_view':'पीक निवडा आणि कॅलेंडर तयार करा',
+    'kharif':'खरीप','rabi':'रब्बी','zaid':'उन्हाळी',
+    'kharif_months':'जून – ऑक्टोबर','rabi_months':'नोव्हेंबर – मार्च','zaid_months':'मार्च – जून',
+    'kharif_desc':'पावसाळी पिके: भात, कापूस, मका, सोयाबीन',
+    'rabi_desc':'हिवाळी पिके: गहू, हरभरा, मोहरी',
+    'zaid_desc':'उन्हाळी पिके: टरबूज, मूग, भाजीपाला',
+
+    // ── Crop Diary ──
+    'add_entry':'नोंद जोडा','diary_entries':'माझ्या डायरी नोंदी',
+    'entry_date':'तारीख','entry_crop':'पीक','entry_note':'नोट / निरीक्षण',
+    'save_entry':'नोंद जतन करा',
+
+    // ── History ──
+    'activity_history':'क्रियाकलाप इतिहास'
   }
 };
 
+// Applies language to ALL elements using either data-lang or data-k attribute
+// This unifies the sidebar system (data-lang) and page system (data-k) into one
 function applyLang(lang){
   var map = LANG_MAP[lang] || LANG_MAP.en;
+  // Handle data-lang (sidebar, dashboard)
   document.querySelectorAll('[data-lang]').forEach(function(el){
     var key = el.getAttribute('data-lang');
     if(map[key]) el.innerText = map[key];
+  });
+  // Handle data-k (fertilizer, crop_calendar, crop_diary pages)
+  document.querySelectorAll('[data-k]').forEach(function(el){
+    var key = el.getAttribute('data-k');
+    if(map[key]) el.textContent = map[key];
   });
   document.documentElement.setAttribute('lang', lang === 'hi' ? 'hi' : lang === 'mr' ? 'mr' : 'en');
 }

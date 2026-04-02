@@ -1,48 +1,88 @@
-AGROSMART CLEAN REBUILD
+AGROSMART — LOCAL SETUP GUIDE
+==============================
 
-This version removes ALL Python internal library conflicts.
+Project Structure:
+  AgroSmart_Final/
+  ├── app.py
+  ├── database.py
+  ├── agro_db.sql        ← full schema (12 tables)
+  ├── requirements.txt
+  ├── render.yaml        ← Render + Neon cloud deploy config
+  ├── templates/
+  └── static/
 
-Structure:
+--------------------------------------------------------------
+OPTION A — LOCAL POSTGRESQL SETUP
+--------------------------------------------------------------
 
-AgroSmart/
-│
-├── app.py
-├── database.py
-├── templates/
-├── static/
-├── agro_db.sql (if originally present)
+1) Install dependencies:
+   pip install flask psycopg2-binary requests gunicorn
 
------------------------------------
-
-SETUP:
-
-1) Install:
-   pip install flask psycopg2-binary
-
-2) Create Database:
-
+2) Create the database in psql:
    CREATE DATABASE agrosmart;
 
-   \c agrosmart;
+3) Run the schema:
+   psql -U postgres -d agrosmart -f agro_db.sql
 
-   CREATE TABLE farmers (
-       id SERIAL PRIMARY KEY,
-       name VARCHAR(100),
-       location VARCHAR(100),
-       phone VARCHAR(20),
-       farm_size VARCHAR(50),
-       soil_ph VARCHAR(20),
-       soil_type VARCHAR(50)
-   );
+   This creates all 12 tables automatically (idempotent — safe
+   to run multiple times).
 
-3) Update database.py password.
+4) Configure credentials via environment variables (recommended):
+   Create a .env file in AgroSmart_Final/:
 
-4) Run:
+     DB_NAME=agrosmart
+     DB_USER=postgres
+     DB_PASSWORD=your_password
+     DB_HOST=localhost
+     DB_PORT=5432
+
+   Then load it before running:
+     export $(cat .env | xargs)   # Linux/macOS
+     # On Windows use: set DB_PASSWORD=your_password  etc.
+
+   OR — for quick local testing only — edit database.py and
+   set the fallback values directly (not recommended for
+   shared/production use).
+
+5) Run the app:
    python app.py
 
-5) Open:
+6) Open in browser:
    http://127.0.0.1:5000
 
------------------------------------
+--------------------------------------------------------------
+OPTION B — CLOUD DEPLOY (Render + Neon PostgreSQL)
+--------------------------------------------------------------
 
-This version is clean and safe.
+1) Push code to GitHub.
+2) Create a new Web Service on Render pointing to your repo.
+3) Render reads render.yaml automatically — it sets DATABASE_URL.
+4) Tables are auto-created on first startup via ensure_tables().
+   No manual SQL step needed.
+
+--------------------------------------------------------------
+FULL TABLE LIST (agro_db.sql)
+--------------------------------------------------------------
+
+  farmers                  — user accounts & profile data
+  login_history            — login timestamps per user
+  activity_log             — page-level activity tracking
+  crop_diary               — personal field notes
+  crop_calendar_entries    — sow/harvest planning
+  community_posts          — forum posts
+  community_likes          — post likes (unique per user)
+  community_replies        — post comments
+  community_messages       — direct messages between users
+  community_follows        — follow relationships
+  community_shares         — post share tracking
+  notifications            — in-app notification feed
+
+--------------------------------------------------------------
+NOTES
+--------------------------------------------------------------
+
+• app.py calls ensure_tables() on every startup — safe to run
+  repeatedly; uses CREATE TABLE IF NOT EXISTS throughout.
+• The phone number is the primary login key (TEXT UNIQUE NOT NULL).
+• Passwords are stored as SHA-256 hashes.
+• Profile images are stored under static/uploads/.

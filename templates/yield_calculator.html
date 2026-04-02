@@ -16,37 +16,37 @@
 
   <div class="yield-grid">
     <div class="card">
-      <div class="card-title">🌾 Farm Parameters</div>
+      <div class="card-title">🌾 <span data-lang="farm_params">Farm Parameters</span></div>
 
-      <label class="form-label">Crop Type</label>
+      <label class="form-label" data-lang="crop_type">Crop Type</label>
       <select class="form-select" id="cropType">
         <option value="wheat">Wheat</option><option value="rice">Rice</option>
         <option value="maize">Maize</option><option value="cotton">Cotton</option>
         <option value="soybean">Soybean</option><option value="sugarcane">Sugarcane</option>
       </select>
 
-      <label class="form-label">Area (acres)</label>
+      <label class="form-label" data-lang="area_acres">Area (acres)</label>
       <input class="form-input" type="number" id="area" step="0.1" placeholder="e.g. 2.5" value="{{ user[3] if user and user[3] else '' }}">
 
-      <label class="form-label">Soil Type</label>
+      <label class="form-label" data-lang="soil_type">Soil Type</label>
       <select class="form-select" id="soilType">
         {% for st,val in [('Black Soil','black'),('Alluvial Soil','alluvial'),('Red Soil','red'),('Laterite Soil','laterite')] %}
           <option value="{{ val }}" {% if user and user[5]==st %}selected{% endif %}>{{ st }}</option>
         {% endfor %}
       </select>
 
-      <label class="form-label">Water / Rain Condition</label>
+      <label class="form-label" data-lang="water_rain">Water / Rain Condition</label>
       <select class="form-select" id="water">
         <option value="low">💧 Low (under 400mm)</option>
         <option value="moderate" selected>💧💧 Moderate (400–800mm)</option>
         <option value="high">💧💧💧 High (above 800mm)</option>
       </select>
 
-      <button class="btn-green" onclick="calcYield()">📊 Calculate Yield</button>
+      <button class="btn-green" onclick="calcYield()"><span data-lang="calc_yield">📊 Calculate Yield</span></button>
     </div>
 
     <div class="card" id="yieldResultCard">
-      <div class="card-title">📊 Estimated Yield</div>
+      <div class="card-title">📊 <span data-lang="est_yield">Estimated Yield</span></div>
       <div class="yield-placeholder">
         <div style="font-size:48px;margin-bottom:12px">📈</div>
         <p style="color:var(--text-light);font-size:14px">Fill parameters and calculate</p>

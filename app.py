@@ -1,13 +1,32 @@
 from flask import Flask, render_template, request, redirect, flash, jsonify, session
 from database import get_connection
-import requests, os, hashlib
+import requests, os, hashlib, re, time
 
 app = Flask(__name__)
-app.secret_key = "agrosmart_secret_2025"
-API_KEY = "c77ad771da8c51df70707890f376e2d5"
+app.secret_key = os.environ.get("SECRET_KEY", "agrosmart_dev_secret_change_me")
+API_KEY = os.environ.get("OPENWEATHER_API_KEY", "")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+def secure_image_upload(file_obj, prefix):
+    """Validate and save an uploaded image. Returns relative path or None."""
+    if not file_obj or not file_obj.filename:
+        return None
+    ext = os.path.splitext(file_obj.filename)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return None
+    file_obj.stream.seek(0, 2)
+    size = file_obj.stream.tell()
+    file_obj.stream.seek(0)
+    if size > MAX_IMAGE_BYTES:
+        return None
+    filename = f"{prefix}_{int(time.time())}{ext}"
+    file_obj.save(os.path.join(UPLOAD_FOLDER, filename))
+    return f"uploads/{filename}"
 
 def hash_pwd(p): return hashlib.sha256(p.encode()).hexdigest()
 
@@ -30,7 +49,7 @@ def ensure_tables():
     db_exec("""
         CREATE TABLE IF NOT EXISTS farmers (
             id SERIAL PRIMARY KEY, name VARCHAR(100), location VARCHAR(100),
-            phone TEXT, farm_size FLOAT, soil_ph FLOAT,
+            phone TEXT UNIQUE NOT NULL, farm_size FLOAT, soil_ph FLOAT,
             soil_type VARCHAR(50), profile_pic TEXT, password TEXT,
             theme VARCHAR(20) DEFAULT 'light', language VARCHAR(10) DEFAULT 'en',
             bio TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -203,6 +222,9 @@ def simple_login():
     password = data.get('password','').strip()
     mode     = data.get('mode','phone_only')
     if not mobile: return jsonify({"status":"fail","msg":"No mobile number"})
+    # Basic phone validation: digits only, 7-15 chars
+    if not re.fullmatch(r'[+\d]{7,15}', mobile):
+        return jsonify({"status":"fail","msg":"Invalid mobile number format"})
 
     if mode == 'with_password':
         user = db_exec("SELECT name,location,phone,farm_size,soil_ph,soil_type,profile_pic,password FROM farmers WHERE phone=%s",(mobile,),fetch='one')
@@ -252,20 +274,17 @@ def set_password():
 def save_profile():
     if 'user' not in session: return jsonify({"status":"fail"}), 401
     phone = session['user']
-    name      = request.form.get("name","").strip()
-    location  = request.form.get("location","").strip()
+    name      = request.form.get("name","").strip()[:100]
+    location  = request.form.get("location","").strip()[:100]
     farm_size = request.form.get("farm_size") or None
     soil_ph   = request.form.get("soil_ph") or None
-    soil_type = request.form.get("soil_type","").strip()
-    bio       = request.form.get("bio","").strip()
+    soil_type = request.form.get("soil_type","").strip()[:50]
+    bio       = request.form.get("bio","").strip()[:500]
     pic_path  = None
     if 'profile_pic' in request.files:
-        f = request.files['profile_pic']
-        if f and f.filename:
-            ext = os.path.splitext(f.filename)[1].lower()
-            filename = f"pic_{phone}{ext}"
-            f.save(os.path.join(UPLOAD_FOLDER, filename))
-            pic_path = f"uploads/{filename}"
+        pic_path = secure_image_upload(request.files['profile_pic'], f"pic_{phone}")
+        if pic_path is None and request.files['profile_pic'].filename:
+            return jsonify({"status": "fail", "msg": "Invalid image. Use JPG/PNG/GIF/WEBP under 5MB."}), 400
     if farmer_exists(phone):
         if pic_path: ok = db_exec("UPDATE farmers SET name=%s,location=%s,farm_size=%s,soil_ph=%s,soil_type=%s,profile_pic=%s,bio=%s WHERE phone=%s",(name,location,farm_size,soil_ph,soil_type,pic_path,bio,phone))
         else:        ok = db_exec("UPDATE farmers SET name=%s,location=%s,farm_size=%s,soil_ph=%s,soil_type=%s,bio=%s WHERE phone=%s",(name,location,farm_size,soil_ph,soil_type,bio,phone))
@@ -340,6 +359,18 @@ def delete_history():
     else: return jsonify({"status":"fail"})
     return jsonify({"status":"success"})
 
+def deg_to_compass(deg):
+    dirs = ["N","NE","E","SE","S","SW","W","NW"]
+    return dirs[round(deg/45) % 8]
+
+def get_spray_advice(wind_speed, wind_dir_label):
+    if wind_speed > 5.5:
+        return f"⚠️ Wind too strong ({wind_speed} m/s, {wind_dir_label}) — avoid spraying pesticides now."
+    elif wind_speed > 3:
+        return f"🌬️ Moderate wind ({wind_speed} m/s, {wind_dir_label}) — spray carefully, stay upwind."
+    else:
+        return f"✅ Calm wind ({wind_speed} m/s, {wind_dir_label}) — ideal conditions for spraying."
+
 @app.route("/weather", methods=["GET","POST"])
 def weather():
     if 'user' not in session: return redirect("/login")
@@ -349,16 +380,73 @@ def weather():
         if not city: flash("Please enter a city name!","warning")
         else:
             try:
+                # Current weather
                 data = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric",timeout=5).json()
                 if data.get("cod")==200:
-                    temp,humidity = data["main"]["temp"],data["main"]["humidity"]
-                    desc = data["weather"][0]["description"].title()
-                    advice,atype = get_weather_advice(temp,humidity,desc)
-                    weather_data = {"city":city.title(),"temp":temp,"humidity":humidity,
-                                    "description":desc,"icon":data["weather"][0]["icon"],
-                                    "wind":data["wind"]["speed"],"feels":data["main"]["feels_like"],
-                                    "advice":advice,"advice_type":atype}
-                    log_activity(session['user'],f"Searched weather: {city.title()}","weather")
+                    temp      = data["main"]["temp"]
+                    humidity  = data["main"]["humidity"]
+                    desc      = data["weather"][0]["description"].title()
+                    wind_spd  = round(data["wind"]["speed"], 1)
+                    wind_deg  = data["wind"].get("deg", 0)
+                    wind_dir  = deg_to_compass(wind_deg)
+                    advice, atype = get_weather_advice(temp, humidity, desc)
+                    spray_msg     = get_spray_advice(wind_spd, wind_dir)
+
+                    # 5-day forecast (every 24h slot)
+                    forecast_list = []
+                    rain_alert    = None
+                    try:
+                        fc = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric&cnt=40",timeout=5).json()
+                        seen_days = {}
+                        for item in fc.get("list", []):
+                            day_label = item["dt_txt"][:10]
+                            if day_label not in seen_days:
+                                seen_days[day_label] = {
+                                    "date":    day_label,
+                                    "icon":    item["weather"][0]["icon"],
+                                    "desc":    item["weather"][0]["description"].title(),
+                                    "temp_max": item["main"]["temp_max"],
+                                    "temp_min": item["main"]["temp_min"],
+                                    "rain_pct": round(item.get("pop", 0) * 100)
+                                }
+                            else:
+                                seen_days[day_label]["temp_max"] = max(seen_days[day_label]["temp_max"], item["main"]["temp_max"])
+                                seen_days[day_label]["temp_min"] = min(seen_days[day_label]["temp_min"], item["main"]["temp_min"])
+                                seen_days[day_label]["rain_pct"] = max(seen_days[day_label]["rain_pct"], round(item.get("pop",0)*100))
+                        forecast_list = list(seen_days.values())[:5]
+
+                        # Rain alert: check next 48h (16 slots of 3h = ~48h)
+                        for item in fc.get("list", [])[:16]:
+                            d48 = item["weather"][0]["description"].lower()
+                            pop = item.get("pop", 0)
+                            if "rain" in d48 or "drizzle" in d48 or "storm" in d48 or pop >= 0.6:
+                                slot_time = item["dt_txt"]
+                                if "tomorrow" not in str(rain_alert):
+                                    rain_alert = {
+                                        "msg": f"🌧️ Rain likely within 48 hours ({item['weather'][0]['description'].title()}, {round(pop*100)}% chance) — delay fertilizer & pesticide application.",
+                                        "time": slot_time
+                                    }
+                                break
+                    except Exception as fe:
+                        print("Forecast Error:", fe)
+
+                    weather_data = {
+                        "city":        city.title(),
+                        "temp":        temp,
+                        "humidity":    humidity,
+                        "description": desc,
+                        "icon":        data["weather"][0]["icon"],
+                        "wind":        wind_spd,
+                        "wind_deg":    wind_deg,
+                        "wind_dir":    wind_dir,
+                        "feels":       data["main"]["feels_like"],
+                        "advice":      advice,
+                        "advice_type": atype,
+                        "spray_msg":   spray_msg,
+                        "forecast":    forecast_list,
+                        "rain_alert":  rain_alert
+                    }
+                    log_activity(session['user'], f"Searched weather: {city.title()}", "weather")
                 else: flash("City not found!","danger")
             except Exception as e: print("Weather Error:",e); flash("Error fetching weather!","danger")
     return render_template("weather.html", weather=weather_data, user=user)
@@ -550,17 +638,14 @@ def farmer_profile(farmer_phone):
 def community_post():
     if 'user' not in session: return jsonify({"status":"fail"}), 401
     phone = session['user']
-    title = request.form.get('title','').strip()
-    body  = request.form.get('body','').strip()
-    cat   = request.form.get('category','general')
+    title = request.form.get('title','').strip()[:300]
+    body  = request.form.get('body','').strip()[:5000]
+    cat   = request.form.get('category','general').strip()[:50]
     img_path = None
     if 'image' in request.files:
-        f = request.files['image']
-        if f and f.filename:
-            ext = os.path.splitext(f.filename)[1].lower()
-            filename = f"post_{phone}_{int(__import__('time').time())}{ext}"
-            f.save(os.path.join(UPLOAD_FOLDER, filename))
-            img_path = f"uploads/{filename}"
+        img_path = secure_image_upload(request.files['image'], f"post_{phone}")
+        if img_path is None and request.files['image'].filename:
+            return jsonify({"status": "fail", "msg": "Invalid image. Use JPG/PNG/GIF/WEBP under 5MB."}), 400
     if not title or not body: return jsonify({"status":"fail","msg":"Title and message required"})
     db_exec("INSERT INTO community_posts (phone,title,body,category,image_path) VALUES (%s,%s,%s,%s,%s)",
             (phone, title, body, cat, img_path))
@@ -583,7 +668,7 @@ def community_reply():
     phone = session['user']
     data  = request.get_json(silent=True) or {}
     post_id = data.get('post_id')
-    body    = data.get('body','').strip()
+    body    = data.get('body','').strip()[:2000]
     if not post_id or not body: return jsonify({"status":"fail","msg":"Missing data"})
     db_exec("INSERT INTO community_replies (post_id,phone,body) VALUES (%s,%s,%s)",(post_id, phone, body))
     log_activity(phone, "Replied in community", "community")

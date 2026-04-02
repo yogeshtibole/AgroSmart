@@ -88,10 +88,10 @@
     </a>
   </div>
 
-  <p class="section-label">Farm Overview</p>
+  <p class="section-label" data-lang="farm_overview">Farm Overview</p>
   <div class="cards-grid">
     <div class="card">
-      <div class="ci">🌱</div><h3>Soil & Farm Info</h3>
+      <div class="ci">🌱</div><h3 data-lang="soil_farm_info">Soil & Farm Info</h3>
       <div class="cd"><span class="cl">Farm Size</span><span class="cv">{% if user and user[3] %}{{ user[3] }} acres{% else %}—{% endif %}</span></div>
       <div class="cd"><span class="cl">Soil Type</span><span class="cv">{{ user[5] if user and user[5] else '—' }}</span></div>
       <div class="cd"><span class="cl">Soil pH</span><span class="cv">{{ user[4] if user and user[4] else '—' }}</span></div>
@@ -109,19 +109,19 @@
     </div>
 
     <div class="card" id="weatherCard">
-      <div class="ci">🌦</div><h3>Weather Today</h3>
+      <div class="ci">🌦</div><h3 data-lang="weather_today">Weather Today</h3>
       <p class="loading-msg">📍 Detecting location...</p>
     </div>
 
     <div class="card">
-      <div class="ci">🌿</div><h3>Crop Health</h3>
+      <div class="ci">🌿</div><h3 data-lang="crop_health">Crop Health</h3>
       <div class="health-chip" id="healthChip">Loading...</div>
       <p class="health-note" id="healthNote">Checking conditions...</p>
       <a href="{{ url_for('ai_diagnosis') }}" class="clink">Run Diagnosis →</a>
     </div>
 
     <div class="card">
-      <div class="ci">📅</div><h3>Today's Tasks</h3>
+      <div class="ci">📅</div><h3 data-lang="today_tasks">Today's Tasks</h3>
       <div class="task-item">🌅 Check crop moisture early morning</div>
       <div class="task-item">🔍 Inspect leaves for pest signs</div>
       <div class="task-item">📓 Log today's field observations</div>

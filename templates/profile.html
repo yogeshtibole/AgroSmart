@@ -75,34 +75,34 @@
 
   <!-- ── EDIT FORM ── -->
   <div class="card" style="margin-top:20px">
-    <div class="card-title">✏️ Edit Farm Profile</div>
+    <div class="card-title">✏️ <span data-lang="edit_profile">Edit Farm Profile</span></div>
     <form id="profileForm" method="POST" action="{{ url_for('save_profile') }}" enctype="multipart/form-data">
 
-      <label class="form-label">Full Name</label>
+      <label class="form-label" data-lang="full_name">Full Name</label>
       <input class="form-input" type="text" id="inputName" name="name"
              value="{{ user[0] if user and user[0] else '' }}" placeholder="Enter your name">
 
-      <label class="form-label">Village / Location</label>
+      <label class="form-label" data-lang="village">Village / Location</label>
       <input class="form-input" type="text" id="inputLocation" name="location"
              value="{{ user[1] if user and user[1] else '' }}" placeholder="e.g. Nashik, Maharashtra">
 
-      <label class="form-label">Bio / About</label>
+      <label class="form-label" data-lang="bio">Bio / About</label>
       <textarea class="form-input" name="bio" rows="2" placeholder="Tell other farmers about yourself...">{{ user[10] if user and user[10] else '' }}</textarea>
 
       <div class="form-row">
         <div>
-          <label class="form-label">Farm Size (acres)</label>
+          <label class="form-label" data-lang="farm_size">Farm Size (acres)</label>
           <input class="form-input" type="number" id="inputFarmSize" name="farm_size" step="0.1"
                  value="{{ user[3] if user and user[3] else '' }}" placeholder="0">
         </div>
         <div>
-          <label class="form-label">Soil pH</label>
+          <label class="form-label" data-lang="soil_ph">Soil pH</label>
           <input class="form-input" type="number" id="inputSoilPh" name="soil_ph" step="0.1" min="0" max="14"
                  value="{{ user[4] if user and user[4] else '' }}" placeholder="7.0">
         </div>
       </div>
 
-      <label class="form-label">Soil Type</label>
+      <label class="form-label" data-lang="soil_type">Soil Type</label>
       <select class="form-select" id="inputSoilType" name="soil_type">
         <option value="">Select soil type</option>
         <option value="Black Soil"    {% if user and user[5]=='Black Soil' %}selected{% endif %}>Black Soil</option>
@@ -111,13 +111,13 @@
         <option value="Laterite Soil" {% if user and user[5]=='Laterite Soil' %}selected{% endif %}>Laterite Soil</option>
       </select>
 
-      <label class="form-label">Profile Picture</label>
+      <label class="form-label" data-lang="profile_picture">Profile Picture</label>
       <div class="pic-upload-row">
         <button type="button" class="btn-outline-sm" onclick="document.getElementById('picInput').click()">📷 Choose Photo</button>
         <span class="pic-name" id="picName">No file chosen</span>
       </div>
 
-      <button class="btn-green" type="button" id="saveBtn" onclick="saveProfile()">💾 Save Profile</button>
+      <button class="btn-green" type="button" id="saveBtn" onclick="saveProfile()">💾 <span data-lang="save_profile">Save Profile</span></button>
     </form>
   </div>
 </div>

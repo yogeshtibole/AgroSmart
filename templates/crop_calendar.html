@@ -145,13 +145,16 @@ var STRINGS = {
 
 function setLang(lang, btn) {
   LANG = lang;
+  localStorage.setItem('agro_lang', lang);
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  var s = STRINGS[lang];
+  if(btn) btn.classList.add('active');
+  var s = STRINGS[lang] || STRINGS['en'];
   document.querySelectorAll('[data-k]').forEach(el => {
     var k = el.getAttribute('data-k');
     if (s[k]) el.textContent = s[k];
   });
+  // Also apply global translations (sidebar, data-lang elements)
+  if(typeof applyLang === 'function') applyLang(lang);
 }
 
 // Calendar data per crop

@@ -117,8 +117,11 @@ var S = {
       no_notes:"अद्याप कोणत्याही नोंदी नाहीत. पहिले शेत निरीक्षण जोडा!"}
 };
 function setLang(lang,btn){
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  localStorage.setItem('agro_lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
   document.querySelectorAll('[data-k]').forEach(el=>{ var k=el.getAttribute('data-k'); if(S[lang]&&S[lang][k]) el.textContent=S[lang][k]; });
+  if(typeof applyLang === 'function') applyLang(lang);
 }
 
 function setMood(mood, btn){

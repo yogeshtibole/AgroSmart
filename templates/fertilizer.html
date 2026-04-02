@@ -154,11 +154,15 @@ var S = {
 };
 function setLang(lang, btn){
   LANG=lang;
+  localStorage.setItem('agro_lang', lang);
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  var strings = S[lang] || S['en'];
   document.querySelectorAll('[data-k]').forEach(el=>{
-    var k=el.getAttribute('data-k'); if(S[lang][k]) el.textContent=S[lang][k];
+    var k=el.getAttribute('data-k'); if(strings[k]) el.textContent=strings[k];
   });
+  // Also apply global translations (sidebar, data-lang elements)
+  if(typeof applyLang === 'function') applyLang(lang);
 }
 
 // NPK requirements kg/ha per crop

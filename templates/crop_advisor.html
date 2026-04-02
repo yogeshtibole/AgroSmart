@@ -52,9 +52,9 @@
 
   <div class="lang-bar">
     <span class="lang-label">🌍 Response in:</span>
-    <button class="lang-btn active" onclick="setLang('English',this)">English</button>
-    <button class="lang-btn" onclick="setLang('Hindi',this)">हिंदी</button>
-    <button class="lang-btn" onclick="setLang('Marathi',this)">मराठी</button>
+    <button class="lang-btn active" onclick="setLang('en',this)">English</button>
+    <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
+    <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
   </div>
 
   <div class="advisor-grid">
@@ -165,13 +165,22 @@
 <script>
 window.onload = function(){
   setNavUser("{{ user[0] if user and user[0] else '' }}", "{{ user[2] if user else '' }}");
+  var savedLang = localStorage.getItem('agro_lang') || 'en';
+  var btnMap = {'en':0,'hi':1,'mr':2};
+  var btns = document.querySelectorAll('.lang-btn');
+  var idx = btnMap[savedLang] !== undefined ? btnMap[savedLang] : 0;
+  setLang(savedLang, btns[idx] || btns[0]);
 };
 
-var LANG = 'English';
+var LANG = 'en';
 function setLang(lang, btn){
+  var codeMap = {'English':'en','Hindi':'hi','Marathi':'mr'};
+  lang = codeMap[lang] || lang;
   LANG = lang;
+  localStorage.setItem('agro_lang', lang);
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(typeof applyLang === 'function') applyLang(lang);
 }
 
 // ═══════════════════════════════════════════════════════

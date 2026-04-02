@@ -16,33 +16,33 @@
 
   <div class="irr-grid">
     <div class="card">
-      <div class="card-title">🌱 Input Parameters</div>
+      <div class="card-title">🌱 <span data-lang="input_params">Input Parameters</span></div>
 
-      <label class="form-label">Crop Type</label>
+      <label class="form-label" data-lang="crop_type">Crop Type</label>
       <select class="form-select" id="crop">
         <option>Wheat</option><option>Rice</option><option>Maize</option>
         <option>Cotton</option><option>Sugarcane</option><option>Soybean</option>
       </select>
 
-      <label class="form-label">Soil Moisture (%)</label>
+      <label class="form-label" data-lang="soil_moisture">Soil Moisture (%)</label>
       <input class="form-input" type="number" id="moisture" placeholder="e.g. 45" min="0" max="100">
       <div class="moisture-bar-wrap"><div class="moisture-bar" id="moistureBar"></div></div>
 
-      <label class="form-label">Weather Condition</label>
+      <label class="form-label" data-lang="weather_cond">Weather Condition</label>
       <select class="form-select" id="weather">
         <option value="Dry">☀️ Dry / Hot</option>
         <option value="Normal">⛅ Normal</option>
         <option value="Rainy">🌧 Rainy</option>
       </select>
 
-      <label class="form-label">Farm Size (acres)</label>
+      <label class="form-label" data-lang="farm_size_acres">Farm Size (acres)</label>
       <input class="form-input" type="number" id="farmSize" placeholder="e.g. 2" value="{{ user[3] if user and user[3] else '' }}">
 
-      <button class="btn-green" onclick="checkIrrigation()">💦 Check Irrigation Need</button>
+      <button class="btn-green" onclick="checkIrrigation()"><span data-lang="check_irrigation">💦 Check Irrigation Need</span></button>
     </div>
 
     <div class="card" id="resultCard">
-      <div class="card-title">✅ Recommendation</div>
+      <div class="card-title">✅ <span data-lang="recommendation">Recommendation</span></div>
       <div class="irr-placeholder">
         <div style="font-size:48px;margin-bottom:12px">💧</div>
         <p style="color:var(--text-light);font-size:14px">Enter values to get irrigation advice</p>
