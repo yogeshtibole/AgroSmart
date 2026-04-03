@@ -75,7 +75,7 @@
 {% include '_sidebar.html' %}
 <div class="main">
   <p class="page-title">🧠 AI Crop Disease Diagnosis</p>
-  <p class="page-sub">Real Claude AI analysis — not just a lookup table. Identify diseases, get treatment advice.</p>
+  <p class="page-sub">Real Groq AI analysis — not just a lookup table. Identify diseases, get treatment advice.</p>
 
   <div class="lang-bar">
     <span class="lang-label">🌍 Response in:</span>
@@ -87,7 +87,7 @@
   <div class="ai-grid">
     <!-- INPUT PANEL -->
     <div class="card upload-card">
-      <div class="ai-powered-badge"><div class="ai-pulse"></div> Powered by Claude AI</div>
+      <div class="ai-powered-badge"><div class="ai-pulse"></div> Powered by Groq AI</div>
       <div class="card-title">📋 <span data-lang="describe_problem">Describe Your Crop Problem</span></div>
 
       <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
@@ -141,7 +141,7 @@
         <div style="font-size:52px;margin-bottom:14px">🌿</div>
         <p style="color:var(--text-light);font-size:14px;text-align:center;line-height:1.7">
           Select your crop, check the symptoms you see,<br>and click <strong>Run AI Diagnosis</strong>.<br>
-          <span style="font-size:12px;color:#bbb">Claude AI will give you a detailed expert analysis.</span>
+          <span style="font-size:12px;color:#bbb">Groq AI will give you a detailed expert analysis.</span>
         </p>
       </div>
     </div>
@@ -253,7 +253,7 @@ async function diagnose(){
   if(symptoms.length === 0){ errEl.style.display='block'; errEl.textContent='❌ Please check at least one symptom.'; return; }
 
   var btn = document.getElementById('diagnoseBtn');
-  btn.disabled = true; btn.textContent = '🧠 Claude AI is analyzing...';
+  btn.disabled = true; btn.textContent = '🧠 Groq AI is analyzing...';
 
   // Show thinking state
   document.getElementById('diagCard').innerHTML =
@@ -261,7 +261,7 @@ async function diagnose(){
     '<div class="thinking-anim">'+
       '<div style="font-size:36px;margin-bottom:16px">🌿</div>'+
       '<div class="thinking-dots"><span></span><span></span><span></span></div>'+
-      '<p style="margin-top:14px;font-size:14px;color:var(--text-mid);font-weight:600">Claude AI is analyzing your crop…</p>'+
+      '<p style="margin-top:14px;font-size:14px;color:var(--text-mid);font-weight:600">Groq AI is analyzing your crop…</p>'+
       '<p style="font-size:12px;color:#aaa;margin-top:6px">Checking disease patterns, severity, and treatment options</p>'+
     '</div>';
 
@@ -305,29 +305,33 @@ Use this exact format (keep the bold headers):
 End with one motivating sentence for the farmer.`;
 
   try {
-    var messages;
-    if(imgFile){
-      var b64 = await fileToBase64(imgFile);
-      messages = [{
-        role:"user",
-        content:[
-          { type:"image", source:{ type:"base64", media_type: imgFile.type, data: b64.split(',')[1] }},
-          { type:"text", text: prompt + "\n\n[A photo of the affected crop has been uploaded. Please incorporate visual observations from the image into your diagnosis.]" }
-        ]
-      }];
-    } else {
-      messages = [{ role:"user", content: prompt }];
+    var GROQ_KEY = localStorage.getItem('agro_api_key');
+    if (!GROQ_KEY) throw new Error('No Groq API key set. Please add it in Settings → AI Assistant.');
+
+    var userMessage = prompt;
+    if (imgFile) {
+      userMessage += "\n\n[Note: A photo of the affected crop was uploaded by the farmer. Please provide diagnosis based on the symptoms described above.]";
     }
 
-    var resp = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ model:"claude-sonnet-4-5-20251022", max_tokens:1000, messages })
+    var resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + GROQ_KEY
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        max_tokens: 1000,
+        messages: [
+          { role: "system", content: "You are an expert agricultural scientist and plant pathologist with deep knowledge of Indian farming. Provide detailed, practical crop disease diagnoses." },
+          { role: "user", content: userMessage }
+        ]
+      })
     });
 
     var data = await resp.json();
-    if(data.error){ throw new Error(data.error.message); }
-    var text = data.content && data.content[0] ? data.content[0].text : 'No response received.';
+    if (data.error) { throw new Error(data.error.message); }
+    var text = data.choices && data.choices[0] ? data.choices[0].message.content : 'No response received.';
 
     // Determine severity from response
     var sev = 'medium';

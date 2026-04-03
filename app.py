@@ -488,6 +488,30 @@ def set_password_ajax():
     log_activity(phone, "Set password during registration", "login")
     return jsonify({"status":"success"})
 
+@app.route("/delete_account", methods=["POST"])
+def delete_account():
+    if 'user' not in session:
+        return jsonify({"status": "fail", "msg": "Not logged in"}), 401
+    phone = session['user']
+    # Remove all follow relationships (as follower or being followed)
+    db_exec("DELETE FROM community_follows WHERE follower_phone=%s OR following_phone=%s", (phone, phone))
+    # Remove all community activity
+    db_exec("DELETE FROM community_likes WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_replies WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_shares WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_messages WHERE sender_phone=%s OR receiver_phone=%s", (phone, phone))
+    db_exec("DELETE FROM notifications WHERE owner_phone=%s OR actor_phone=%s", (phone, phone))
+    db_exec("DELETE FROM community_posts WHERE phone=%s", (phone,))
+    # Remove personal data
+    db_exec("DELETE FROM login_history WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM activity_log WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM crop_calendar_entries WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM crop_diary WHERE phone=%s", (phone,))
+    # Finally remove the farmer record itself
+    db_exec("DELETE FROM farmers WHERE phone=%s", (phone,))
+    session.clear()
+    return jsonify({"status": "success"})
+
 @app.route("/logout")
 def logout():
     if 'user' in session: log_activity(session['user'],"Logged out","login")
@@ -581,7 +605,9 @@ def community():
         search_results = db_exec("""
             SELECT phone, name, location, profile_pic,
                    (SELECT COUNT(*) FROM community_posts WHERE phone=f.phone) AS posts,
-                   (SELECT COUNT(*) FROM community_follows WHERE following_phone=f.phone) AS followers
+                   (SELECT COUNT(*) FROM community_follows cf
+                    JOIN farmers f2 ON f2.phone = cf.follower_phone
+                    WHERE cf.following_phone=f.phone) AS followers
             FROM farmers f
             WHERE LOWER(name) LIKE %s OR phone LIKE %s
             LIMIT 20
@@ -601,10 +627,14 @@ def community():
     farmers_list = db_exec("""
         SELECT phone, name, location, profile_pic,
                (SELECT COUNT(*) FROM community_posts WHERE phone=f.phone) AS posts,
-               (SELECT COUNT(*) FROM community_follows WHERE following_phone=f.phone) AS followers
+               (SELECT COUNT(*) FROM community_follows cf
+                JOIN farmers f2 ON f2.phone = cf.follower_phone
+                WHERE cf.following_phone=f.phone) AS followers
         FROM farmers f
         WHERE phone != %s
-        ORDER BY (SELECT COUNT(*) FROM community_follows WHERE following_phone=f.phone) DESC
+        ORDER BY (SELECT COUNT(*) FROM community_follows cf
+                  JOIN farmers f2 ON f2.phone = cf.follower_phone
+                  WHERE cf.following_phone=f.phone) DESC
         LIMIT 10
     """, (phone,), fetch='all') or []
 
@@ -626,8 +656,12 @@ def farmer_profile(farmer_phone):
         FROM community_posts p LEFT JOIN farmers f ON f.phone=p.phone
         WHERE p.phone=%s ORDER BY p.created_at DESC
     """, (farmer_phone,), fetch='all') or []
-    followers = db_exec("SELECT COUNT(*) FROM community_follows WHERE following_phone=%s",(farmer_phone,),fetch='one')
-    following = db_exec("SELECT COUNT(*) FROM community_follows WHERE follower_phone=%s",(farmer_phone,),fetch='one')
+    followers = db_exec("""SELECT COUNT(*) FROM community_follows cf
+                           JOIN farmers f ON f.phone = cf.follower_phone
+                           WHERE cf.following_phone=%s""",(farmer_phone,),fetch='one')
+    following = db_exec("""SELECT COUNT(*) FROM community_follows cf
+                           JOIN farmers f ON f.phone = cf.following_phone
+                           WHERE cf.follower_phone=%s""",(farmer_phone,),fetch='one')
     is_following = db_exec("SELECT 1 FROM community_follows WHERE follower_phone=%s AND following_phone=%s",(phone,farmer_phone),fetch='one') is not None
     return render_template("farmer_profile.html", user=get_user(phone), farmer=farmer, posts=posts,
                            followers=followers[0] if followers else 0,
@@ -887,8 +921,12 @@ def community_following(farmer_phone):
 def community_stats(farmer_phone):
     if 'user' not in session: return jsonify({"posts": 0, "followers": 0, "following": 0}), 401
     posts = db_exec("SELECT COUNT(*) FROM community_posts WHERE phone=%s", (farmer_phone,), fetch='one')
-    followers = db_exec("SELECT COUNT(*) FROM community_follows WHERE following_phone=%s", (farmer_phone,), fetch='one')
-    following = db_exec("SELECT COUNT(*) FROM community_follows WHERE follower_phone=%s", (farmer_phone,), fetch='one')
+    followers = db_exec("""SELECT COUNT(*) FROM community_follows cf
+                           JOIN farmers f ON f.phone = cf.follower_phone
+                           WHERE cf.following_phone=%s""", (farmer_phone,), fetch='one')
+    following = db_exec("""SELECT COUNT(*) FROM community_follows cf
+                           JOIN farmers f ON f.phone = cf.following_phone
+                           WHERE cf.follower_phone=%s""", (farmer_phone,), fetch='one')
     return jsonify({
         "posts":     posts[0] if posts else 0,
         "followers": followers[0] if followers else 0,
