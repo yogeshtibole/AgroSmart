@@ -11,8 +11,8 @@
 {% set active='weather' %}
 {% include '_sidebar.html' %}
 <div class="main">
-  <p class="page-title">🌦 Weather Forecast</p>
-  <p class="page-sub">Search your city to get live weather and farming advice</p>
+  <p class="page-title" data-lang="weather_title">🌦 Weather Forecast</p>
+  <p class="page-sub" data-lang="weather_sub">Search your city to get live weather and farming advice</p>
 
   {% with messages=get_flashed_messages(with_categories=true) %}
     {% if messages %}{% for cat,msg in messages %}
@@ -24,19 +24,20 @@
   <div class="card search-card">
     <form method="POST" class="search-row">
       <input class="form-input" type="text" name="city" id="cityInput"
+             data-ph="weather_search_ph"
              placeholder="Search city e.g. Pune, Nashik, Mumbai..." value="{{ request.form.get('city','') }}">
-      <button class="btn-green" type="submit" style="margin-top:0">🔍 Search</button>
+      <button class="btn-green" type="submit" style="margin-top:0" data-lang="weather_search_btn">🔍 Search</button>
     </form>
   </div>
 
   {% if weather %}
 
-  <!-- ══ RAIN ALERT BANNER ══ -->
+  <!-- RAIN ALERT BANNER -->
   {% if weather.rain_alert %}
   <div class="rain-alert-banner">
     <div class="rain-alert-icon">🌧️</div>
     <div class="rain-alert-text">
-      <strong>Rain Alert — Farming Advisory</strong>
+      <strong data-lang="rain_alert_heading">Rain Alert — Farming Advisory</strong>
       <p>{{ weather.rain_alert.msg }}</p>
     </div>
     <button class="rain-alert-close" onclick="this.parentElement.style.display='none'">✕</button>
@@ -53,96 +54,79 @@
     <div class="weather-hero-right">
       <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" class="weather-icon" alt="">
       <div class="weather-stats-row">
-        <div class="wstat"><span>{{ weather.humidity }}%</span><small>Humidity</small></div>
-        <div class="wstat"><span>{{ weather.wind }} m/s</span><small>Wind</small></div>
-        <div class="wstat"><span>{{ weather.feels }}°C</span><small>Feels Like</small></div>
+        <div class="wstat"><span>{{ weather.humidity }}%</span><small data-lang="humidity">Humidity</small></div>
+        <div class="wstat"><span>{{ weather.wind }} m/s</span><small data-lang="wind">Wind</small></div>
+        <div class="wstat"><span>{{ weather.feels }}°C</span><small data-lang="feels_like">Feels Like</small></div>
       </div>
     </div>
   </div>
 
   <!-- FARMING ADVICE -->
   <div class="advice-box {{ weather.advice_type }}">
-    <strong>🌱 Farming Advice</strong>
+    <strong data-lang="farming_advice">🌱 Farming Advice</strong>
     <p>{{ weather.advice }}</p>
   </div>
 
-  <!-- ══ WIND COMPASS + SPRAY ADVICE ROW ══ -->
+  <!-- WIND COMPASS + SPRAY ADVICE -->
   <div class="wind-compass-row">
-
     <div class="wind-compass-card">
-      <p class="section-label">💨 Wind Direction</p>
+      <p class="section-label" data-lang="wind_direction">💨 Wind Direction</p>
       <div class="compass-wrap">
-        <!-- SVG Compass -->
         <svg class="compass-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" data-wind-deg="{{ weather.wind_deg }}" id="compassSvg">
-          <!-- outer ring -->
           <circle cx="80" cy="80" r="72" fill="#f0f7f0" stroke="#c8e6c9" stroke-width="2.5"/>
           <circle cx="80" cy="80" r="60" fill="white" stroke="#e0ede0" stroke-width="1.5"/>
-          <!-- Cardinal labels -->
           <text x="80" y="22" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">N</text>
           <text x="80" y="148" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">S</text>
           <text x="18"  y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">W</text>
           <text x="144" y="84" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="700" fill="#1a3d22">E</text>
-          <!-- Intercardinal -->
           <text x="120" y="36" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">NE</text>
           <text x="120" y="130" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">SE</text>
           <text x="38"  y="36" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">NW</text>
           <text x="38"  y="130" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a8a6a">SW</text>
-
-          <!-- tick marks (8 major) -->
           <line x1="80" y1="12" x2="80" y2="22" stroke="#c8e6c9" stroke-width="2"/>
           <line x1="80" y1="138" x2="80" y2="148" stroke="#c8e6c9" stroke-width="2"/>
           <line x1="12" y1="80" x2="22" y2="80" stroke="#c8e6c9" stroke-width="2"/>
           <line x1="138" y1="80" x2="148" y2="80" stroke="#c8e6c9" stroke-width="2"/>
-
-          <!-- ARROW — rotated to wind_deg via JS below -->
           <g id="compassNeedle">
-            <!-- North tip (red) -->
             <polygon points="80,22 75,80 85,80" fill="#e53935"/>
-            <!-- South tip (white/gray) -->
             <polygon points="80,138 75,80 85,80" fill="#b0bec5"/>
-            <!-- center cap -->
             <circle cx="80" cy="80" r="7" fill="#1a3d22"/>
             <circle cx="80" cy="80" r="4" fill="white"/>
           </g>
-
-          <!-- wind dir label -->
           <text x="80" y="100" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#4a7a4a">{{ weather.wind_dir }}</text>
         </svg>
 
         <div class="compass-stats">
           <div class="compass-stat-item">
             <span class="cstat-val">{{ weather.wind }} m/s</span>
-            <span class="cstat-label">Speed</span>
+            <span class="cstat-label" data-lang="wind_speed">Speed</span>
           </div>
           <div class="compass-stat-item">
             <span class="cstat-val">{{ weather.wind_deg }}°</span>
-            <span class="cstat-label">Degrees</span>
+            <span class="cstat-label" data-lang="wind_degrees">Degrees</span>
           </div>
           <div class="compass-stat-item">
             <span class="cstat-val">{{ weather.wind_dir }}</span>
-            <span class="cstat-label">Direction</span>
+            <span class="cstat-label" data-lang="wind_dir_label">Direction</span>
           </div>
         </div>
       </div>
-
-      <!-- Spray advice -->
       <div class="spray-advice-box">
         <p>{{ weather.spray_msg }}</p>
       </div>
     </div>
+  </div>
 
-  </div><!-- end wind row -->
-
-  <!-- ══ 5-DAY FORECAST STRIP ══ -->
+  <!-- 5-DAY FORECAST -->
   {% if weather.forecast %}
   <div class="forecast-section">
-    <p class="section-label">🗓️ 5-Day Forecast</p>
+    <p class="section-label" data-lang="forecast_label">🗓️ 5-Day Forecast</p>
     <div class="forecast-strip">
       {% for day in weather.forecast %}
       <div class="forecast-card {% if loop.first %}forecast-today{% endif %}">
         <p class="fc-day">
-          {% if loop.first %}Today
-          {% elif loop.index == 2 %}Tomorrow
+          {% if loop.first %}<span data-lang="forecast_today">Today</span>
+          {% elif loop.index == 2 %}<span data-lang="forecast_tomorrow">Tomorrow</span>
           {% else %}{{ day.date }}
           {% endif %}
         </p>
@@ -159,16 +143,16 @@
       </div>
       {% endfor %}
     </div>
-    <p class="forecast-note">Rain % = probability of precipitation for that day</p>
+    <p class="forecast-note" data-lang="forecast_note">Rain % = probability of precipitation for that day</p>
   </div>
   {% endif %}
 
   {% else %}
-  <!-- QUICK CITY BUTTONS when no search yet -->
+  <!-- QUICK CITY BUTTONS -->
   <div class="weather-tip-card">
     <div style="font-size:48px;margin-bottom:12px">🌾</div>
-    <h3>Search your city above</h3>
-    <p>Get live weather, 5-day forecast, wind compass, and rain alerts for any city in India.</p>
+    <h3 data-lang="weather_tip_h">Search your city above</h3>
+    <p data-lang="weather_tip_p">Get live weather, 5-day forecast, wind compass, and rain alerts for any city in India.</p>
     <div class="quick-cities">
       <button onclick="searchCity('Pune')">Pune</button>
       <button onclick="searchCity('Nashik')">Nashik</button>
@@ -182,7 +166,7 @@
   </div>
   {% endif %}
 
-</div><!-- end main -->
+</div>
 
 <script src="{{ url_for('static', filename='shared.js') }}"></script>
 <script>
@@ -191,18 +175,14 @@ function searchCity(city){
   document.getElementById('cityInput').value = city;
   document.querySelector('form').submit();
 }
-/* set rain bar widths from data attributes */
 document.querySelectorAll('.fc-rain-bar[data-pct]').forEach(function(el){
   el.style.width = el.getAttribute('data-pct') + '%';
 });
-
 var svg = document.getElementById('compassSvg');
 if(svg){
   var deg = parseFloat(svg.getAttribute('data-wind-deg')) || 0;
   var needle = document.getElementById('compassNeedle');
-  if(needle){
-    needle.setAttribute('style','transform:rotate('+deg+'deg);transform-origin:80px 80px;');
-  }
+  if(needle){ needle.setAttribute('style','transform:rotate('+deg+'deg);transform-origin:80px 80px;'); }
 }
 </script>
 </body>

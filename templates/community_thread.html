@@ -11,7 +11,7 @@
 {% set active='community' %}
 {% include '_sidebar.html' %}
 <div class="main">
-  <a href="{{ url_for('community') }}" class="back-link">← Back to Community</a>
+  <a href="{{ url_for('community') }}" class="back-link" data-lang="back_community">← Back to Community</a>
 
   <!-- Original post -->
   <div class="card thread-post">
@@ -27,7 +27,7 @@
     <div class="post-body-full">{{ post[4] }}</div>
     <div class="post-footer">
       <button class="like-btn" onclick="likePost('{{ post[0] }}',this)">
-        👍 <span class="like-count">{{ post[6] }}</span> Likes
+        👍 <span class="like-count">{{ post[6] }}</span> <span data-lang="likes">Likes</span>
       </button>
     </div>
   </div>
@@ -50,15 +50,16 @@
     {% endfor %}
 
     {% if not replies %}
-    <div class="no-replies">No replies yet. Be the first to answer!</div>
+    <div class="no-replies" data-lang="no_replies">No replies yet. Be the first to answer!</div>
     {% endif %}
 
     <!-- Reply box -->
     <div class="card reply-composer">
-      <div class="card-title">✍️ Write a Reply</div>
+      <div class="card-title" data-lang="write_reply">✍️ Write a Reply</div>
       <textarea class="form-input" id="replyBody" rows="4"
+                data-ph="reply_ph"
                 placeholder="Share your experience or answer..."></textarea>
-      <button class="btn-green" id="replyBtn" onclick="submitReply('{{ post[0] }}')">💬 Post Reply</button>
+      <button class="btn-green" id="replyBtn" onclick="submitReply('{{ post[0] }}')" data-lang="post_reply_btn">💬 Post Reply</button>
       <div id="replyMsg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
     </div>
   </div>

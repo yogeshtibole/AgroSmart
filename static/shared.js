@@ -104,6 +104,17 @@ var LANG_MAP = {
 
     // ── Settings ──
     'save_settings':'Save Settings',
+    'settings_sub':'Manage your profile, appearance, language and account security',
+    'stab_appearance':'🎨 Appearance','stab_profile':'👤 Profile',
+    'stab_security':'🔐 Security','stab_ai':'🤖 AI Settings',
+    'theme_label':'Theme','theme_sub':'Choose how AgroSmart looks across all pages',
+    'language':'Language','lang_sub':'Select your preferred language — applies to all pages instantly',
+    'save_appearance':'💾 Save Appearance Settings',
+    'personal_info':'Personal Information','personal_info_sub':'Update your name, location, and farm details',
+    'pwd_security':'Password & Security',
+    'danger_zone':'Danger Zone','danger_caution':'Irreversible account actions — proceed with caution',
+    'delete_account':'Delete Account Data',
+    'ai_assistant':'AI Assistant (Groq API)',
 
     // ── Irrigation ──
     'input_params':'Input Parameters','crop_type':'Crop Type',
@@ -154,7 +165,90 @@ var LANG_MAP = {
     'save_entry':'Save Entry',
 
     // ── History ──
-    'activity_history':'Activity History'
+    'activity_history':'Activity History',
+    'hist_sub':'Complete record of all your logins and page activities',
+    'tab_all':'All','tab_logins':'🔑 Logins','tab_activity':'⚡ Activity',
+    'clear_all':'🗑 Clear All','clear_logins':'🗑 Clear Logins','clear_activity':'🗑 Clear Activity',
+    'clear_all_logins':'🗑 Clear All Logins','clear_all_activity':'🗑 Clear All Activity',
+    'logged_in':'🔑 Logged in','no_history':'No history yet','no_login_records':'No login records','no_activity_yet':'No activity yet',
+
+    // ── Weather ──
+    'weather_title':'🌦 Weather Forecast',
+    'weather_sub':'Search your city to get live weather and farming advice',
+    'weather_search_ph':'Search city e.g. Pune, Nashik, Mumbai...',
+    'weather_search_btn':'🔍 Search',
+    'rain_alert_heading':'Rain Alert — Farming Advisory',
+    'farming_advice':'🌱 Farming Advice',
+    'wind_direction':'💨 Wind Direction',
+    'wind_speed':'Speed','wind_degrees':'Degrees','wind_dir_label':'Direction',
+    'forecast_label':'🗓️ 5-Day Forecast',
+    'forecast_today':'Today','forecast_tomorrow':'Tomorrow',
+    'forecast_note':'Rain % = probability of precipitation for that day',
+    'weather_tip_h':'Search your city above',
+    'weather_tip_p':'Get live weather, 5-day forecast, wind compass, and rain alerts for any city in India.',
+    'humidity':'Humidity','wind':'Wind','feels_like':'Feels Like',
+
+    // ── Login ──
+    'login_tagline':'Intelligent Farming, for every farmer.',
+    'feat_weather':'Live Weather','feat_weather_p':'Real-time forecasts',
+    'feat_crop':'Crop Advisor','feat_crop_p':'AI-powered recommendations',
+    'feat_disease':'Disease Diagnosis','feat_disease_p':'Detect crop disease early',
+    'feat_irr':'Smart Irrigation','feat_irr_p':'Optimize water usage',
+    'login_footer':'Trusted by farmers across India 🇮🇳',
+    'tab_returning':'Returning Farmer','tab_new':'New Here?',
+    'welcome_back':'Welcome back 👋','enter_mobile':'Enter your mobile to continue',
+    'mobile_number':'Mobile Number',
+    'password_label':'Password','pwd_hint_login':'(leave blank if not set)',
+    'pwd_ph':'Enter password if you have one',
+    'login_btn':'Login to Dashboard',
+    'no_account':'No account?','create_profile_link':'Create your profile →',
+    'setup_farm':'Set up your farm 🌾','takes_min':'Takes less than a minute',
+    'full_name_label':'Full Name',
+    'mobile_required':'Mobile Number',
+    'village_location':'Village / Location',
+    'farm_size_label':'Farm Size (acres)',
+    'soil_ph_label':'Soil pH',
+    'soil_type_label':'Soil Type','select_soil_type':'Select soil type',
+    'set_password':'Set Password','pwd_optional':'(optional — can set later too)',
+    'pwd_min':'Min 6 characters',
+    'confirm_password':'Confirm Password','repeat_pwd':'Repeat password',
+    'create_enter':'Create Profile & Enter',
+    'already_reg':'Already registered?','login_link':'Login →',
+
+    // ── Crop Advisor ──
+    'crop_adv_title':'🌱 AI Crop Advisor',
+    'crop_adv_sub':'Get personalized crop recommendations powered by Claude AI',
+    'response_in':'🌍 Response in:',
+    'farm_conditions':'🧪 Your Farm Conditions',
+    'soil_type_label2':'Soil Type','select_soil':'Select soil type',
+    'growing_season':'Growing Season','select_season':'Select season',
+    'state_region':'State / Region','select_state':'Select state',
+    'annual_rainfall':'Annual Rainfall (mm)',
+    'water_source':'Water Source','select_water':'Select',
+    'market_access':'Market Access','select_market':'Select',
+    'get_advice_btn':'🌾 Get Crop Advice',
+    'ai_recommendations':'✅ AI Crop Recommendations',
+    'ask_question':'💬 Ask AI a Quick Farming Question',
+    'type_question':'Type your farming question...',
+    'ask_ai_btn':'Ask AI →',
+    'qa_govt':'🏛 Govt Schemes','qa_msp':'💰 MSP Prices','qa_organic':'🌿 Organic Farming',
+    'qa_drip':'💧 Drip Irrigation','qa_soil':'🪨 Soil Health','qa_pmkisan':'📋 PM Kisan',
+
+    // ── Community Thread ──
+    'back_community':'← Back to Community',
+    'likes':'Likes','write_reply':'✍️ Write a Reply',
+    'reply_ph':'Share your experience or answer...',
+    'post_reply_btn':'💬 Post Reply',
+    'no_replies':'No replies yet. Be the first to answer!',
+
+    // ── Farmer Profile ──
+    'back_to_community':'← Back to Community',
+    'posts_label':'Posts','followers_label':'Followers','following_label':'Following',
+    'follow_btn':'➕ Follow','following_btn':'✅ Following','message_btn':'✉️ Message',
+    'farm_size_fp':'🌾 Farm Size:','soil_ph_fp':'🧪 Soil pH:','soil_fp':'🪨 Soil:',
+    'acres':'acres',
+    'no_posts_farmer':'No posts yet from this farmer.',
+    'no_location':'Location not set'
   },
 
   hi: {
@@ -181,6 +275,17 @@ var LANG_MAP = {
 
     // ── Settings ──
     'save_settings':'सेटिंग्स सहेजें',
+    'settings_sub':'अपनी प्रोफाइल, दिखावट, भाषा और सुरक्षा प्रबंधित करें',
+    'stab_appearance':'🎨 दिखावट','stab_profile':'👤 प्रोफाइल',
+    'stab_security':'🔐 सुरक्षा','stab_ai':'🤖 AI सेटिंग्स',
+    'theme_label':'थीम','theme_sub':'AgroSmart सभी पेजों पर कैसा दिखे चुनें',
+    'language':'भाषा','lang_sub':'पसंदीदा भाषा चुनें — सभी पेजों पर तुरंत लागू होगी',
+    'save_appearance':'💾 दिखावट सेटिंग्स सहेजें',
+    'personal_info':'व्यक्तिगत जानकारी','personal_info_sub':'अपना नाम, स्थान और खेत की जानकारी अपडेट करें',
+    'pwd_security':'पासवर्ड और सुरक्षा',
+    'danger_zone':'खतरनाक क्षेत्र','danger_caution':'अपरिवर्तनीय खाता कार्रवाई — सावधानी से करें',
+    'delete_account':'खाता डेटा हटाएं',
+    'ai_assistant':'AI सहायक (Groq API)',
 
     // ── Irrigation ──
     'input_params':'इनपुट जानकारी','crop_type':'फसल का प्रकार',
@@ -231,7 +336,90 @@ var LANG_MAP = {
     'save_entry':'प्रविष्टि सहेजें',
 
     // ── History ──
-    'activity_history':'गतिविधि इतिहास'
+    'activity_history':'गतिविधि इतिहास',
+    'hist_sub':'आपके सभी लॉगिन और गतिविधियों का पूर्ण रिकॉर्ड',
+    'tab_all':'सभी','tab_logins':'🔑 लॉगिन','tab_activity':'⚡ गतिविधि',
+    'clear_all':'🗑 सब हटाएं','clear_logins':'🗑 लॉगिन हटाएं','clear_activity':'🗑 गतिविधि हटाएं',
+    'clear_all_logins':'🗑 सभी लॉगिन हटाएं','clear_all_activity':'🗑 सभी गतिविधि हटाएं',
+    'logged_in':'🔑 लॉग इन हुए','no_history':'अभी कोई इतिहास नहीं','no_login_records':'कोई लॉगिन रिकॉर्ड नहीं','no_activity_yet':'अभी कोई गतिविधि नहीं',
+
+    // ── Weather ──
+    'weather_title':'🌦 मौसम पूर्वानुमान',
+    'weather_sub':'अपना शहर खोजें और लाइव मौसम व कृषि सलाह पाएं',
+    'weather_search_ph':'शहर खोजें जैसे पुणे, नासिक, मुंबई...',
+    'weather_search_btn':'🔍 खोजें',
+    'rain_alert_heading':'वर्षा चेतावनी — कृषि सलाह',
+    'farming_advice':'🌱 कृषि सलाह',
+    'wind_direction':'💨 हवा की दिशा',
+    'wind_speed':'गति','wind_degrees':'डिग्री','wind_dir_label':'दिशा',
+    'forecast_label':'🗓️ 5 दिनों का पूर्वानुमान',
+    'forecast_today':'आज','forecast_tomorrow':'कल',
+    'forecast_note':'वर्षा % = उस दिन वर्षा की संभावना',
+    'weather_tip_h':'अपना शहर ऊपर खोजें',
+    'weather_tip_p':'किसी भी भारतीय शहर के लिए लाइव मौसम, 5 दिनों का पूर्वानुमान, हवा कंपास और वर्षा चेतावनी पाएं।',
+    'humidity':'आर्द्रता','wind':'हवा','feels_like':'महसूस होता है',
+
+    // ── Login ──
+    'login_tagline':'बुद्धिमान खेती, हर किसान के लिए।',
+    'feat_weather':'लाइव मौसम','feat_weather_p':'रियल-टाइम पूर्वानुमान',
+    'feat_crop':'फसल सलाहकार','feat_crop_p':'AI-संचालित सिफारिशें',
+    'feat_disease':'रोग निदान','feat_disease_p':'फसल रोग जल्दी पहचानें',
+    'feat_irr':'स्मार्ट सिंचाई','feat_irr_p':'पानी का उपयोग अनुकूलित करें',
+    'login_footer':'पूरे भारत के किसानों का विश्वास 🇮🇳',
+    'tab_returning':'पुराना किसान','tab_new':'नया यहाँ?',
+    'welcome_back':'वापस स्वागत है 👋','enter_mobile':'जारी रखने के लिए मोबाइल दर्ज करें',
+    'mobile_number':'मोबाइल नंबर',
+    'password_label':'पासवर्ड','pwd_hint_login':'(सेट नहीं है तो खाली छोड़ें)',
+    'pwd_ph':'पासवर्ड हो तो दर्ज करें',
+    'login_btn':'डैशबोर्ड में लॉगिन करें',
+    'no_account':'खाता नहीं?','create_profile_link':'अपनी प्रोफाइल बनाएं →',
+    'setup_farm':'अपना खेत सेट करें 🌾','takes_min':'एक मिनट से कम',
+    'full_name_label':'पूरा नाम',
+    'mobile_required':'मोबाइल नंबर',
+    'village_location':'गाँव / स्थान',
+    'farm_size_label':'खेत का आकार (एकड़)',
+    'soil_ph_label':'मिट्टी pH',
+    'soil_type_label':'मिट्टी का प्रकार','select_soil_type':'मिट्टी का प्रकार चुनें',
+    'set_password':'पासवर्ड सेट करें','pwd_optional':'(वैकल्पिक — बाद में भी सेट कर सकते हैं)',
+    'pwd_min':'न्यूनतम 6 अक्षर',
+    'confirm_password':'पासवर्ड की पुष्टि करें','repeat_pwd':'पासवर्ड दोहराएं',
+    'create_enter':'प्रोफाइल बनाएं और प्रवेश करें',
+    'already_reg':'पहले से पंजीकृत?','login_link':'लॉगिन करें →',
+
+    // ── Crop Advisor ──
+    'crop_adv_title':'🌱 AI फसल सलाहकार',
+    'crop_adv_sub':'Claude AI द्वारा व्यक्तिगत फसल सिफारिशें पाएं',
+    'response_in':'🌍 जवाब भाषा:',
+    'farm_conditions':'🧪 आपकी खेत की स्थिति',
+    'soil_type_label2':'मिट्टी का प्रकार','select_soil':'मिट्टी का प्रकार चुनें',
+    'growing_season':'उगाने का मौसम','select_season':'मौसम चुनें',
+    'state_region':'राज्य / क्षेत्र','select_state':'राज्य चुनें',
+    'annual_rainfall':'वार्षिक वर्षा (मिमी)',
+    'water_source':'जल स्रोत','select_water':'चुनें',
+    'market_access':'बाजार पहुँच','select_market':'चुनें',
+    'get_advice_btn':'🌾 फसल सलाह लें',
+    'ai_recommendations':'✅ AI फसल सिफारिशें',
+    'ask_question':'💬 AI से त्वरित खेती प्रश्न पूछें',
+    'type_question':'अपना खेती प्रश्न टाइप करें...',
+    'ask_ai_btn':'AI से पूछें →',
+    'qa_govt':'🏛 सरकारी योजनाएं','qa_msp':'💰 MSP मूल्य','qa_organic':'🌿 जैविक खेती',
+    'qa_drip':'💧 ड्रिप सिंचाई','qa_soil':'🪨 मिट्टी स्वास्थ्य','qa_pmkisan':'📋 PM किसान',
+
+    // ── Community Thread ──
+    'back_community':'← समुदाय पर वापस',
+    'likes':'पसंद','write_reply':'✍️ जवाब लिखें',
+    'reply_ph':'अपना अनुभव या जवाब साझा करें...',
+    'post_reply_btn':'💬 जवाब पोस्ट करें',
+    'no_replies':'अभी कोई जवाब नहीं। पहले जवाब दें!',
+
+    // ── Farmer Profile ──
+    'back_to_community':'← समुदाय पर वापस',
+    'posts_label':'पोस्ट','followers_label':'अनुयायी','following_label':'अनुसरण',
+    'follow_btn':'➕ अनुसरण करें','following_btn':'✅ अनुसरण हो रहा है','message_btn':'✉️ संदेश',
+    'farm_size_fp':'🌾 खेत का आकार:','soil_ph_fp':'🧪 मिट्टी pH:','soil_fp':'🪨 मिट्टी:',
+    'acres':'एकड़',
+    'no_posts_farmer':'इस किसान की अभी कोई पोस्ट नहीं।',
+    'no_location':'स्थान सेट नहीं है'
   },
 
   mr: {
@@ -258,6 +446,17 @@ var LANG_MAP = {
 
     // ── Settings ──
     'save_settings':'सेटिंग्ज जतन करा',
+    'settings_sub':'तुमची प्रोफाइल, देखावा, भाषा आणि सुरक्षा व्यवस्थापित करा',
+    'stab_appearance':'🎨 देखावा','stab_profile':'👤 प्रोफाइल',
+    'stab_security':'🔐 सुरक्षा','stab_ai':'🤖 AI सेटिंग्ज',
+    'theme_label':'थीम','theme_sub':'AgroSmart सर्व पानांवर कसे दिसेल ते निवडा',
+    'language':'भाषा','lang_sub':'पसंतीची भाषा निवडा — सर्व पानांवर त्वरित लागू होईल',
+    'save_appearance':'💾 देखावा सेटिंग्ज जतन करा',
+    'personal_info':'वैयक्तिक माहिती','personal_info_sub':'तुमचे नाव, स्थान आणि शेत माहिती अपडेट करा',
+    'pwd_security':'पासवर्ड आणि सुरक्षा',
+    'danger_zone':'धोकादायक क्षेत्र','danger_caution':'अपरिवर्तनीय खाते क्रिया — सावधानीने करा',
+    'delete_account':'खाते डेटा हटवा',
+    'ai_assistant':'AI सहाय्यक (Groq API)',
 
     // ── Irrigation ──
     'input_params':'इनपुट माहिती','crop_type':'पिकाचा प्रकार',
@@ -308,7 +507,90 @@ var LANG_MAP = {
     'save_entry':'नोंद जतन करा',
 
     // ── History ──
-    'activity_history':'क्रियाकलाप इतिहास'
+    'activity_history':'क्रियाकलाप इतिहास',
+    'hist_sub':'आपल्या सर्व लॉगिन आणि क्रियाकलापांची पूर्ण नोंद',
+    'tab_all':'सर्व','tab_logins':'🔑 लॉगिन','tab_activity':'⚡ क्रियाकलाप',
+    'clear_all':'🗑 सर्व साफ करा','clear_logins':'🗑 लॉगिन साफ करा','clear_activity':'🗑 क्रियाकलाप साफ करा',
+    'clear_all_logins':'🗑 सर्व लॉगिन साफ करा','clear_all_activity':'🗑 सर्व क्रियाकलाप साफ करा',
+    'logged_in':'🔑 लॉग इन केले','no_history':'अद्याप इतिहास नाही','no_login_records':'लॉगिन नोंदी नाहीत','no_activity_yet':'अद्याप क्रियाकलाप नाही',
+
+    // ── Weather ──
+    'weather_title':'🌦 हवामान अंदाज',
+    'weather_sub':'तुमचे शहर शोधा आणि थेट हवामान व शेती सल्ला मिळवा',
+    'weather_search_ph':'शहर शोधा उदा. पुणे, नाशिक, मुंबई...',
+    'weather_search_btn':'🔍 शोधा',
+    'rain_alert_heading':'पाऊस इशारा — शेती सल्ला',
+    'farming_advice':'🌱 शेती सल्ला',
+    'wind_direction':'💨 वाऱ्याची दिशा',
+    'wind_speed':'वेग','wind_degrees':'अंश','wind_dir_label':'दिशा',
+    'forecast_label':'🗓️ ५ दिवसांचा अंदाज',
+    'forecast_today':'आज','forecast_tomorrow':'उद्या',
+    'forecast_note':'पाऊस % = त्या दिवशी पावसाची शक्यता',
+    'weather_tip_h':'वरती तुमचे शहर शोधा',
+    'weather_tip_p':'भारतातील कोणत्याही शहरासाठी थेट हवामान, ५ दिवसांचा अंदाज, वाऱ्याचा कंपास आणि पाऊस इशारे मिळवा।',
+    'humidity':'आर्द्रता','wind':'वारा','feels_like':'जाणवते',
+
+    // ── Login ──
+    'login_tagline':'बुद्धिमान शेती, प्रत्येक शेतकऱ्यासाठी.',
+    'feat_weather':'थेट हवामान','feat_weather_p':'रिअल-टाइम अंदाज',
+    'feat_crop':'पीक सल्लागार','feat_crop_p':'AI-आधारित शिफारसी',
+    'feat_disease':'रोग निदान','feat_disease_p':'पीक रोग लवकर ओळखा',
+    'feat_irr':'स्मार्ट सिंचन','feat_irr_p':'पाण्याचा वापर अनुकूल करा',
+    'login_footer':'संपूर्ण भारतातील शेतकऱ्यांचा विश्वास 🇮🇳',
+    'tab_returning':'जुना शेतकरी','tab_new':'नवीन येथे?',
+    'welcome_back':'परत स्वागत आहे 👋','enter_mobile':'पुढे जाण्यासाठी मोबाइल टाका',
+    'mobile_number':'मोबाइल नंबर',
+    'password_label':'पासवर्ड','pwd_hint_login':'(सेट नसेल तर रिकामे सोडा)',
+    'pwd_ph':'पासवर्ड असल्यास टाका',
+    'login_btn':'डॅशबोर्डमध्ये लॉगिन करा',
+    'no_account':'खाते नाही?','create_profile_link':'तुमची प्रोफाइल तयार करा →',
+    'setup_farm':'तुमचे शेत सेट करा 🌾','takes_min':'एक मिनिटापेक्षा कमी',
+    'full_name_label':'पूर्ण नाव',
+    'mobile_required':'मोबाइल नंबर',
+    'village_location':'गाव / स्थान',
+    'farm_size_label':'शेताचा आकार (एकर)',
+    'soil_ph_label':'माती pH',
+    'soil_type_label':'मातीचा प्रकार','select_soil_type':'मातीचा प्रकार निवडा',
+    'set_password':'पासवर्ड सेट करा','pwd_optional':'(पर्यायी — नंतरही सेट करता येईल)',
+    'pwd_min':'किमान ६ अक्षरे',
+    'confirm_password':'पासवर्ड पुष्टी करा','repeat_pwd':'पासवर्ड पुन्हा टाका',
+    'create_enter':'प्रोफाइल तयार करा आणि प्रवेश करा',
+    'already_reg':'आधीच नोंदणी केली?','login_link':'लॉगिन करा →',
+
+    // ── Crop Advisor ──
+    'crop_adv_title':'🌱 AI पीक सल्लागार',
+    'crop_adv_sub':'Claude AI द्वारे वैयक्तिक पीक शिफारसी मिळवा',
+    'response_in':'🌍 उत्तर भाषा:',
+    'farm_conditions':'🧪 तुमच्या शेताची स्थिती',
+    'soil_type_label2':'मातीचा प्रकार','select_soil':'मातीचा प्रकार निवडा',
+    'growing_season':'वाढीचा हंगाम','select_season':'हंगाम निवडा',
+    'state_region':'राज्य / प्रदेश','select_state':'राज्य निवडा',
+    'annual_rainfall':'वार्षिक पाऊस (मिमी)',
+    'water_source':'पाण्याचा स्रोत','select_water':'निवडा',
+    'market_access':'बाजार उपलब्धता','select_market':'निवडा',
+    'get_advice_btn':'🌾 पीक सल्ला मिळवा',
+    'ai_recommendations':'✅ AI पीक शिफारसी',
+    'ask_question':'💬 AI ला त्वरित शेती प्रश्न विचारा',
+    'type_question':'तुमचा शेती प्रश्न टाइप करा...',
+    'ask_ai_btn':'AI ला विचारा →',
+    'qa_govt':'🏛 शासकीय योजना','qa_msp':'💰 MSP किंमती','qa_organic':'🌿 सेंद्रिय शेती',
+    'qa_drip':'💧 ठिबक सिंचन','qa_soil':'🪨 माती आरोग्य','qa_pmkisan':'📋 PM किसान',
+
+    // ── Community Thread ──
+    'back_community':'← समुदायावर परत',
+    'likes':'पसंत','write_reply':'✍️ उत्तर लिहा',
+    'reply_ph':'तुमचा अनुभव किंवा उत्तर सामायिक करा...',
+    'post_reply_btn':'💬 उत्तर पोस्ट करा',
+    'no_replies':'अद्याप कोणतेही उत्तर नाही. पहिले उत्तर द्या!',
+
+    // ── Farmer Profile ──
+    'back_to_community':'← समुदायावर परत',
+    'posts_label':'पोस्ट','followers_label':'अनुयायी','following_label':'फॉलो करत आहे',
+    'follow_btn':'➕ फॉलो करा','following_btn':'✅ फॉलो केले','message_btn':'✉️ संदेश',
+    'farm_size_fp':'🌾 शेताचा आकार:','soil_ph_fp':'🧪 माती pH:','soil_fp':'🪨 माती:',
+    'acres':'एकर',
+    'no_posts_farmer':'या शेतकऱ्याची अद्याप कोणतीही पोस्ट नाही.',
+    'no_location':'स्थान सेट नाही'
   }
 };
 
@@ -325,6 +607,11 @@ function applyLang(lang){
   document.querySelectorAll('[data-k]').forEach(function(el){
     var key = el.getAttribute('data-k');
     if(map[key]) el.textContent = map[key];
+  });
+  // Handle data-ph (placeholder translations)
+  document.querySelectorAll('[data-ph]').forEach(function(el){
+    var key = el.getAttribute('data-ph');
+    if(map[key]) el.placeholder = map[key];
   });
   document.documentElement.setAttribute('lang', lang === 'hi' ? 'hi' : lang === 'mr' ? 'mr' : 'en');
 }

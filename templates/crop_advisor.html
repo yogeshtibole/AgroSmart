@@ -47,11 +47,11 @@
 {% set active = 'crop' %}
 {% include '_sidebar.html' %}
 <div class="main">
-  <p class="page-title">🌱 AI Crop Advisor</p>
-  <p class="page-sub">Get personalized crop recommendations powered by Claude AI — based on your exact soil, season, and location</p>
+  <p class="page-title" data-lang="crop_adv_title">🌱 AI Crop Advisor</p>
+  <p class="page-sub" data-lang="crop_adv_sub">Get personalized crop recommendations powered by Claude AI — based on your exact soil, season, and location</p>
 
   <div class="lang-bar">
-    <span class="lang-label">🌍 Response in:</span>
+    <span class="lang-label" data-lang="response_in">🌍 Response in:</span>
     <button class="lang-btn active" onclick="setLang('en',this)">English</button>
     <button class="lang-btn" onclick="setLang('hi',this)">हिंदी</button>
     <button class="lang-btn" onclick="setLang('mr',this)">मराठी</button>
@@ -60,9 +60,9 @@
   <div class="advisor-grid">
     <div class="card">
       <div class="ai-badge"><div class="ai-dot"></div> Claude AI Powered</div>
-      <div class="card-title">🧪 Your Farm Conditions</div>
+      <div class="card-title" data-lang="farm_conditions">🧪 Your Farm Conditions</div>
 
-      <label class="form-label">Soil Type</label>
+      <label class="form-label" data-lang="soil_type_label2">Soil Type</label>
       <select class="form-select" id="soilType">
         <option value="">Select soil type</option>
         {% for st in ['Black Soil','Red Soil','Alluvial Soil','Laterite Soil','Sandy Soil','Clay Soil'] %}
@@ -70,7 +70,7 @@
         {% endfor %}
       </select>
 
-      <label class="form-label">Growing Season</label>
+      <label class="form-label" data-lang="growing_season">Growing Season</label>
       <select class="form-select" id="season">
         <option value="">Select season</option>
         <option>Kharif (Jun–Oct)</option>
@@ -78,7 +78,7 @@
         <option>Zaid (Mar–Jun)</option>
       </select>
 
-      <label class="form-label">State / Region</label>
+      <label class="form-label" data-lang="state_region">State / Region</label>
       <select class="form-select" id="region">
         <option value="">Select your state</option>
         <option>Maharashtra</option><option>Punjab</option><option>Haryana</option>
@@ -89,21 +89,21 @@
 
       <div class="form-row">
         <div>
-          <label class="form-label">Soil pH</label>
+          <label class="form-label" data-lang="soil_ph_label">Soil pH</label>
           <input class="form-input" type="number" id="ph" step="0.1" min="3" max="11"
                  placeholder="e.g. 6.5" value="{{ user[4] if user and user[4] else '' }}">
         </div>
         <div>
-          <label class="form-label">Annual Rainfall (mm)</label>
+          <label class="form-label" data-lang="annual_rainfall">Annual Rainfall (mm)</label>
           <input class="form-input" type="number" id="rainfall" placeholder="e.g. 800">
         </div>
       </div>
 
-      <label class="form-label">Farm Size (acres)</label>
+      <label class="form-label" data-lang="farm_size_label">Farm Size (acres)</label>
       <input class="form-input" type="number" id="farmSize" step="0.1"
              placeholder="e.g. 2.5" value="{{ user[3] if user and user[3] else '' }}">
 
-      <label class="form-label">Water Source</label>
+      <label class="form-label" data-lang="water_source">Water Source</label>
       <select class="form-select" id="waterSource">
         <option value="">Select water availability</option>
         <option>Rain-fed only</option>
@@ -112,7 +112,7 @@
         <option>River / Tank</option>
       </select>
 
-      <label class="form-label">Market Access</label>
+      <label class="form-label" data-lang="market_access">Market Access</label>
       <select class="form-select" id="marketAccess">
         <option value="local">Local mandi (within 20km)</option>
         <option value="city">City market access</option>
@@ -120,13 +120,13 @@
       </select>
 
       <button class="btn-green" id="adviseBtn" onclick="getAdvice()" style="width:100%">
-        🌾 Get AI Crop Recommendation
+        <span data-lang="get_advice_btn">🌾 Get AI Crop Recommendation</span>
       </button>
     </div>
 
     <!-- Result panel -->
     <div class="card result-panel" id="resultPanel">
-      <div class="card-title">✅ AI Crop Recommendations</div>
+      <div class="card-title" data-lang="ai_recommendations">✅ AI Crop Recommendations</div>
       <div id="cropResult" class="crop-placeholder">
         <div class="placeholder-icon">🌱</div>
         <p style="color:var(--text-light);font-size:14px;text-align:center;line-height:1.7">
@@ -139,22 +139,22 @@
 
   <!-- Quick Ask AI section -->
   <div class="card" style="margin-top:20px">
-    <div class="card-title">💬 Ask AI a Quick Farming Question</div>
+    <div class="card-title" data-lang="ask_question">💬 Ask AI a Quick Farming Question</div>
     <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">Ask anything about farming, crops, pests, markets, or government schemes</p>
 
     <div class="quick-asks">
-      <button class="qa-chip" onclick="quickAsk('What government schemes are available for farmers in India in 2025?')">🏛 Govt Schemes</button>
-      <button class="qa-chip" onclick="quickAsk('What is the current MSP for wheat and rice?')">💰 MSP Prices</button>
-      <button class="qa-chip" onclick="quickAsk('How to do organic farming and what are the benefits?')">🌿 Organic Farming</button>
-      <button class="qa-chip" onclick="quickAsk('Best practices for drip irrigation in small farms')">💧 Drip Irrigation</button>
-      <button class="qa-chip" onclick="quickAsk('How to improve soil fertility naturally without chemical fertilizers?')">🪨 Soil Health</button>
-      <button class="qa-chip" onclick="quickAsk('How to get PM Kisan Samman Nidhi scheme benefits?')">📋 PM Kisan</button>
+      <button class="qa-chip" onclick="quickAsk('What government schemes are available for farmers in India in 2025?')" data-lang="qa_govt">🏛 Govt Schemes</button>
+      <button class="qa-chip" onclick="quickAsk('What is the current MSP for wheat and rice?')" data-lang="qa_msp">💰 MSP Prices</button>
+      <button class="qa-chip" onclick="quickAsk('How to do organic farming and what are the benefits?')" data-lang="qa_organic">🌿 Organic Farming</button>
+      <button class="qa-chip" onclick="quickAsk('Best practices for drip irrigation in small farms')" data-lang="qa_drip">💧 Drip Irrigation</button>
+      <button class="qa-chip" onclick="quickAsk('How to improve soil fertility naturally without chemical fertilizers?')" data-lang="qa_soil">🪨 Soil Health</button>
+      <button class="qa-chip" onclick="quickAsk('How to get PM Kisan Samman Nidhi scheme benefits?')" data-lang="qa_pmkisan">📋 PM Kisan</button>
     </div>
 
     <div style="display:flex;gap:10px;">
-      <input class="form-input" type="text" id="quickQ" placeholder="Type your farming question..."
+      <input class="form-input" type="text" id="quickQ" data-ph="type_question" placeholder="Type your farming question..."
              onkeydown="if(event.key==='Enter') quickAsk()" style="margin-top:0;flex:1">
-      <button class="btn-green" onclick="quickAsk()" style="margin-top:0;white-space:nowrap">Ask AI →</button>
+      <button class="btn-green" onclick="quickAsk()" style="margin-top:0;white-space:nowrap" data-lang="ask_ai_btn">Ask AI →</button>
     </div>
 
     <div id="quickAnswer" style="display:none;margin-top:16px;"></div>

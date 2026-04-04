@@ -196,8 +196,8 @@
   <div class="settings-header">
     <div class="settings-header-icon">⚙️</div>
     <div>
-      <h1>Settings</h1>
-      <p>Manage your profile, appearance, language and account security</p>
+      <h1 data-lang="settings">Settings</h1>
+      <p data-lang="settings_sub">Manage your profile, appearance, language and account security</p>
     </div>
   </div>
 
@@ -209,10 +209,10 @@
 
   <!-- TABS -->
   <div class="settings-tabs">
-    <button class="stab active" onclick="switchTab('appearance',this)">🎨 Appearance</button>
-    <button class="stab" onclick="switchTab('profile',this)">👤 Profile</button>
-    <button class="stab" onclick="switchTab('security',this)">🔐 Security</button>
-    <button class="stab" onclick="switchTab('ai',this)">🤖 AI Settings</button>
+    <button class="stab active" onclick="switchTab('appearance',this)" data-lang="stab_appearance">🎨 Appearance</button>
+    <button class="stab" onclick="switchTab('profile',this)" data-lang="stab_profile">👤 Profile</button>
+    <button class="stab" onclick="switchTab('security',this)" data-lang="stab_security">🔐 Security</button>
+    <button class="stab" onclick="switchTab('ai',this)" data-lang="stab_ai">🤖 AI Settings</button>
   </div>
 
   <!-- ══ TAB: APPEARANCE ══ -->
@@ -223,8 +223,8 @@
       <div class="settings-card-header">
         <div class="icon-box">🎨</div>
         <div>
-          <h3>Theme</h3>
-          <p>Choose how AgroSmart looks across all pages</p>
+          <h3 data-lang="theme_label">Theme</h3>
+          <p data-lang="theme_sub">Choose how AgroSmart looks across all pages</p>
         </div>
       </div>
       <div class="theme-grid">
@@ -270,8 +270,8 @@
       <div class="settings-card-header">
         <div class="icon-box">🌍</div>
         <div>
-          <h3>Language</h3>
-          <p>Select your preferred language — applies to all pages instantly</p>
+          <h3 data-lang="language">Language</h3>
+          <p data-lang="lang_sub">Select your preferred language — applies to all pages instantly</p>
         </div>
       </div>
       <div class="lang-grid">
@@ -295,7 +295,7 @@
       <form id="settingsForm" method="POST" action="{{ url_for('save_settings') }}">
         <input type="hidden" name="theme" id="themeInput" value="{{ user[8] if user and user[8] else 'light' }}">
         <input type="hidden" name="language" id="langInput" value="{{ user[9] if user and user[9] else 'en' }}">
-        <button class="save-btn" type="submit">💾 Save Appearance Settings</button>
+        <button class="save-btn" type="submit" data-lang="save_appearance">💾 Save Appearance Settings</button>
       </form>
     </div>
   </div>
@@ -306,8 +306,8 @@
       <div class="settings-card-header">
         <div class="icon-box">👤</div>
         <div>
-          <h3>Personal Information</h3>
-          <p>Update your name, location, and farm details</p>
+          <h3 data-lang="personal_info">Personal Information</h3>
+          <p data-lang="personal_info_sub">Update your name, location, and farm details</p>
         </div>
       </div>
 
@@ -327,7 +327,7 @@
             <div class="avatar-cam-badge">📷</div>
           </div>
           <div class="avatar-info">
-            <h4>Profile Photo</h4>
+            <h4 data-lang="profile_picture">Profile Photo</h4>
             <p>JPG or PNG — Max 5MB. Click photo to change.</p>
             <button type="button" class="upload-photo-btn" onclick="document.getElementById('picInput').click()">
               📷 Change Photo
@@ -337,30 +337,30 @@
 
         <div class="form-row-2">
           <div>
-            <label class="form-label">Full Name</label>
+            <label class="form-label" data-lang="full_name">Full Name</label>
             <input class="form-input" type="text" name="name" value="{{ user[0] if user and user[0] else '' }}" placeholder="Your full name">
           </div>
           <div>
-            <label class="form-label">Village / Location</label>
+            <label class="form-label" data-lang="village">Village / Location</label>
             <input class="form-input" type="text" name="location" value="{{ user[1] if user and user[1] else '' }}" placeholder="e.g. Nashik, Maharashtra">
           </div>
         </div>
 
-        <label class="form-label">Bio / About Yourself</label>
+        <label class="form-label" data-lang="bio">Bio / About Yourself</label>
         <textarea class="form-input" name="bio" rows="3" placeholder="Tell other farmers about your experience, crops you grow...">{{ user[10] if user and user[10] else '' }}</textarea>
 
         <div class="form-row-2">
           <div>
-            <label class="form-label">Farm Size (acres)</label>
+            <label class="form-label" data-lang="farm_size">Farm Size (acres)</label>
             <input class="form-input" type="number" name="farm_size" step="0.1" value="{{ user[3] if user and user[3] else '' }}" placeholder="e.g. 5.5">
           </div>
           <div>
-            <label class="form-label">Soil pH</label>
+            <label class="form-label" data-lang="soil_ph">Soil pH</label>
             <input class="form-input" type="number" name="soil_ph" step="0.1" min="0" max="14" value="{{ user[4] if user and user[4] else '' }}" placeholder="e.g. 7.0">
           </div>
         </div>
 
-        <label class="form-label">Soil Type</label>
+        <label class="form-label" data-lang="soil_type">Soil Type</label>
         <select class="form-select" name="soil_type">
           <option value="">— Select soil type —</option>
           <option value="Black Soil"    {% if user and user[5]=='Black Soil' %}selected{% endif %}>🌑 Black Soil (Regur)</option>
@@ -381,7 +381,7 @@
       <div class="settings-card-header">
         <div class="icon-box">🔐</div>
         <div>
-          <h3>Password & Security</h3>
+          <h3 data-lang="pwd_security">Password & Security</h3>
           <p>
             {% if user and user[7] %}✅ Password is set — login with phone + password
             {% else %}⚠️ No password set yet — add one for extra security{% endif %}
@@ -391,17 +391,17 @@
 
       <form method="POST" action="{{ url_for('set_password') }}">
         {% if user and user[7] %}
-        <label class="form-label">Current Password</label>
+        <label class="form-label" data-lang="current_pwd">Current Password</label>
         <input class="form-input" type="password" name="current_password" placeholder="Enter your current password">
         {% endif %}
 
-        <label class="form-label">New Password</label>
+        <label class="form-label" data-lang="new_pwd">New Password</label>
         <input class="form-input" type="password" name="new_password" id="newPwd" placeholder="Minimum 6 characters" required
                oninput="checkPwdStrength(this.value)">
         <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwdBar"></div></div>
         <p class="pwd-hint" id="pwdHint">Enter a password to see strength</p>
 
-        <label class="form-label" style="margin-top:14px">Confirm New Password</label>
+        <label class="form-label" style="margin-top:14px" data-lang="confirm_new_pwd">Confirm New Password</label>
         <input class="form-input" type="password" name="confirm_password" placeholder="Repeat new password" required>
 
         <button class="save-btn" type="submit">
@@ -415,12 +415,12 @@
       <div class="settings-card-header">
         <div class="icon-box" style="background:#ffebee">🚨</div>
         <div>
-          <h3 style="color:#c62828">Danger Zone</h3>
-          <p>Irreversible account actions — proceed with caution</p>
+          <h3 style="color:#c62828" data-lang="danger_zone">Danger Zone</h3>
+          <p data-lang="danger_caution">Irreversible account actions — proceed with caution</p>
         </div>
       </div>
       <div class="danger-zone">
-        <h4>Delete Account Data</h4>
+        <h4 data-lang="delete_account">Delete Account Data</h4>
         <p>This will permanently delete your account, posts, follow relationships, messages and all personal data. This cannot be undone.</p>
         <button class="btn-danger" onclick="confirmDeleteAccount()">🗑️ Delete My Account</button>
         <script>
@@ -445,7 +445,7 @@
       <div class="settings-card-header">
         <div class="icon-box">🤖</div>
         <div>
-          <h3>AI Assistant (Groq API)</h3>
+          <h3 data-lang="ai_assistant">AI Assistant (Groq API)</h3>
           <div id="apiStatusPill" class="api-status-pill" style="margin-top:4px">
             <div class="api-dot"></div> <span id="apiStatusText">Not configured</span>
           </div>
@@ -458,7 +458,7 @@
         <a href="https://console.groq.com" target="_blank" style="color:var(--green-mid);font-weight:700">console.groq.com</a>.
       </div>
 
-      <label class="form-label">Groq API Key</label>
+      <label class="form-label" data-lang="groq_api_key">Groq API Key</label>
       <div style="position:relative">
         <input class="form-input" type="password" id="apiKeyInput" placeholder="gsk_..." style="padding-right:90px">
         <button type="button" onclick="toggleApiKeyVisibility()"

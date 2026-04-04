@@ -11,31 +11,31 @@
 {% set active='history' %}
 {% include '_sidebar.html' %}
 <div class="main">
-  <p class="page-title">🕒 Activity History</p>
-  <p class="page-sub">Complete record of all your logins and page activities</p>
+  <p class="page-title">🕒 <span data-lang="activity_history">Activity History</span></p>
+  <p class="page-sub" data-lang="hist_sub">Complete record of all your logins and page activities</p>
 
   <div class="tabs-row">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('all',this)">All</button>
-      <button class="tab" onclick="switchTab('logins',this)">🔑 Logins</button>
-      <button class="tab" onclick="switchTab('actions',this)">⚡ Activity</button>
+      <button class="tab active" onclick="switchTab('all',this)" data-lang="tab_all">All</button>
+      <button class="tab" onclick="switchTab('logins',this)" data-lang="tab_logins">🔑 Logins</button>
+      <button class="tab" onclick="switchTab('actions',this)" data-lang="tab_activity">⚡ Activity</button>
     </div>
-    <button class="del-all-btn" onclick="confirmDeleteAll()">🗑 Clear All</button>
+    <button class="del-all-btn" onclick="confirmDeleteAll()" data-lang="clear_all">🗑 Clear All</button>
   </div>
 
   <!-- ALL TAB -->
   <div id="tab-all" class="tab-content">
     {% if login_history or activity %}
       <div class="section-delete-row">
-        <button class="del-section-btn" onclick="confirmDelete('all_logins')">🗑 Clear Logins</button>
-        <button class="del-section-btn" onclick="confirmDelete('all_activity')">🗑 Clear Activity</button>
+        <button class="del-section-btn" onclick="confirmDelete('all_logins')" data-lang="clear_logins">🗑 Clear Logins</button>
+        <button class="del-section-btn" onclick="confirmDelete('all_activity')" data-lang="clear_activity">🗑 Clear Activity</button>
       </div>
       <div class="timeline">
         {% for log in login_history %}
         <div class="tl-item">
           <div class="tl-dot login"></div>
           <div class="tl-body">
-            <p class="tl-label">🔑 Logged in</p>
+            <p class="tl-label" data-lang="logged_in">🔑 Logged in</p>
             <p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p>
           </div>
           <span class="tl-badge badge-login">login</span>
@@ -55,31 +55,31 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state"><div style="font-size:48px;margin-bottom:12px">📭</div><p>No history yet</p></div>
+      <div class="empty-state"><div style="font-size:48px;margin-bottom:12px">📭</div><p data-lang="no_history">No history yet</p></div>
     {% endif %}
   </div>
 
   <!-- LOGINS TAB -->
   <div id="tab-logins" class="tab-content" style="display:none">
     {% if login_history %}
-      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_logins')">🗑 Clear All Logins</button></div>
+      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_logins')" data-lang="clear_all_logins">🗑 Clear All Logins</button></div>
       <div class="timeline">
         {% for log in login_history %}
         <div class="tl-item">
           <div class="tl-dot login"></div>
-          <div class="tl-body"><p class="tl-label">🔑 Logged in</p><p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p></div>
+          <div class="tl-body"><p class="tl-label" data-lang="logged_in">🔑 Logged in</p><p class="tl-time">{{ log[1].strftime('%d %b %Y, %I:%M %p') }}</p></div>
           <span class="tl-badge badge-login">login</span>
           <button class="del-item-btn" data-id="{{ log[0] }}" data-type="login" title="Delete">✕</button>
         </div>
         {% endfor %}
       </div>
-    {% else %}<div class="empty-state"><p>No login records</p></div>{% endif %}
+    {% else %}<div class="empty-state"><p data-lang="no_login_records">No login records</p></div>{% endif %}
   </div>
 
   <!-- ACTIVITY TAB -->
   <div id="tab-actions" class="tab-content" style="display:none">
     {% if activity %}
-      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_activity')">🗑 Clear All Activity</button></div>
+      <div class="section-delete-row"><button class="del-section-btn" onclick="confirmDelete('all_activity')" data-lang="clear_all_activity">🗑 Clear All Activity</button></div>
       <div class="timeline">
         {% for act in activity %}
         <div class="tl-item">
@@ -93,7 +93,7 @@
         </div>
         {% endfor %}
       </div>
-    {% else %}<div class="empty-state"><p>No activity yet</p></div>{% endif %}
+    {% else %}<div class="empty-state"><p data-lang="no_activity_yet">No activity yet</p></div>{% endif %}
   </div>
 </div>
 

@@ -12,14 +12,14 @@
   <div class="left-inner">
     <div class="logo-mark"><div class="logo-leaf">🌾</div></div>
     <h1 class="brand-name">AgroSmart</h1>
-    <p class="brand-tagline">Intelligent Farming,<br><em>for every farmer.</em></p>
+    <p class="brand-tagline" data-lang="login_tagline">Intelligent Farming,<br><em>for every farmer.</em></p>
     <div class="features-list">
-      <div class="feature-item"><span class="feat-icon">🌦</span><div><strong>Live Weather</strong><p>Real-time forecasts</p></div></div>
-      <div class="feature-item"><span class="feat-icon">🌱</span><div><strong>Crop Advisor</strong><p>AI-powered recommendations</p></div></div>
-      <div class="feature-item"><span class="feat-icon">🧠</span><div><strong>Disease Diagnosis</strong><p>Detect crop disease early</p></div></div>
-      <div class="feature-item"><span class="feat-icon">💧</span><div><strong>Smart Irrigation</strong><p>Optimize water usage</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🌦</span><div><strong data-lang="feat_weather">Live Weather</strong><p data-lang="feat_weather_p">Real-time forecasts</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🌱</span><div><strong data-lang="feat_crop">Crop Advisor</strong><p data-lang="feat_crop_p">AI-powered recommendations</p></div></div>
+      <div class="feature-item"><span class="feat-icon">🧠</span><div><strong data-lang="feat_disease">Disease Diagnosis</strong><p data-lang="feat_disease_p">Detect crop disease early</p></div></div>
+      <div class="feature-item"><span class="feat-icon">💧</span><div><strong data-lang="feat_irr">Smart Irrigation</strong><p data-lang="feat_irr_p">Optimize water usage</p></div></div>
     </div>
-    <div class="left-footer">Trusted by farmers across India 🇮🇳</div>
+    <div class="left-footer" data-lang="login_footer">Trusted by farmers across India 🇮🇳</div>
   </div>
   <div class="deco deco-1"></div><div class="deco deco-2"></div><div class="deco deco-3"></div>
 </div>
@@ -28,19 +28,19 @@
   <div class="right-inner">
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('login',this)">Returning Farmer</button>
-      <button class="tab" onclick="switchTab('register',this)">New Here?</button>
+      <button class="tab active" onclick="switchTab('login',this)" data-lang="tab_returning">Returning Farmer</button>
+      <button class="tab" onclick="switchTab('register',this)" data-lang="tab_new">New Here?</button>
     </div>
 
     <!-- ── RETURNING FARMER TAB ── -->
     <div id="tab-login" class="form-panel active">
       <div class="form-header">
-        <h2>Welcome back 👋</h2>
-        <p>Enter your mobile to continue</p>
+        <h2 data-lang="welcome_back">Welcome back 👋</h2>
+        <p data-lang="enter_mobile">Enter your mobile to continue</p>
       </div>
 
       <div class="input-group">
-        <label>Mobile Number</label>
+        <label data-lang="mobile_number">Mobile Number</label>
         <div class="input-wrap">
           <span class="input-prefix">+91</span>
           <input type="tel" id="login_mobile" placeholder="98765 43210" maxlength="10">
@@ -49,53 +49,53 @@
 
       <!-- Fix 2: Simple always-visible password field, no checkbox -->
       <div class="input-group" style="margin-top:14px">
-        <label>Password <span class="opt-label">(leave blank if not set)</span></label>
-        <input type="password" id="login_password" placeholder="Enter password if you have one">
+        <label data-lang="password_label">Password</label> <span class="opt-label" data-lang="pwd_hint_login">(leave blank if not set)</span>
+        <input type="password" id="login_password" data-ph="pwd_ph" placeholder="Enter password if you have one">
       </div>
 
       <div id="loginError" class="login-error-box" style="display:none"></div>
 
       <button class="btn-primary" onclick="loginUser()">
-        <span>Login to Dashboard</span><span class="btn-arrow">→</span>
+        <span data-lang="login_btn">Login to Dashboard</span><span class="btn-arrow">→</span>
       </button>
-      <p class="form-note">No account? <a href="#" onclick="switchTabByName('register')">Create your profile →</a></p>
+      <p class="form-note"><span data-lang="no_account">No account?</span> <a href="#" onclick="switchTabByName('register')" data-lang="create_profile_link">Create your profile →</a></p>
     </div>
 
     <!-- ── NEW HERE TAB ── -->
     <div id="tab-register" class="form-panel">
       <div class="form-header">
-        <h2>Set up your farm 🌾</h2>
-        <p>Takes less than a minute</p>
+        <h2 data-lang="setup_farm">Set up your farm 🌾</h2>
+        <p data-lang="takes_min">Takes less than a minute</p>
       </div>
 
       <div class="input-grid">
         <div class="input-group full">
-          <label>Full Name</label>
+          <label data-lang="full_name_label">Full Name</label>
           <input type="text" id="name" placeholder="e.g.Yogesh Tibole">
         </div>
         <div class="input-group full">
-          <label>Mobile Number <span class="req">*</span></label>
+          <label><span data-lang="mobile_required">Mobile Number</span> <span class="req">*</span></label>
           <div class="input-wrap">
             <span class="input-prefix">+91</span>
             <input type="tel" id="phone" placeholder="98765 43210" maxlength="10" required>
           </div>
         </div>
         <div class="input-group full">
-          <label>Village / Location</label>
+          <label data-lang="village_location">Village / Location</label>
           <input type="text" id="location" placeholder="e.g. Pune, Maharashtra">
         </div>
         <div class="input-group half">
-          <label>Farm Size (acres)</label>
+          <label data-lang="farm_size_label">Farm Size (acres)</label>
           <input type="number" id="farmSize" placeholder="0" min="0">
         </div>
         <div class="input-group half">
-          <label>Soil pH</label>
+          <label data-lang="soil_ph_label">Soil pH</label>
           <input type="number" id="soilPh" placeholder="7.0" step="0.1" min="0" max="14">
         </div>
         <div class="input-group full">
-          <label>Soil Type</label>
+          <label data-lang="soil_type_label">Soil Type</label>
           <select id="soilType">
-            <option value="">Select soil type</option>
+            <option value="" data-lang="select_soil_type">Select soil type</option>
             <option value="Black Soil">Black Soil</option>
             <option value="Red Soil">Red Soil</option>
             <option value="Alluvial Soil">Alluvial Soil</option>
@@ -105,21 +105,21 @@
 
         <!-- Fix 1: Password in register tab — simple, always visible -->
         <div class="input-group full">
-          <label>Set Password <span class="opt-label">(optional — can set later too)</span></label>
-          <input type="password" id="reg_password" placeholder="Min 6 characters">
+          <label data-lang="set_password">Set Password</label> <span class="opt-label" data-lang="pwd_optional">(optional — can set later too)</span>
+          <input type="password" id="reg_password" data-ph="pwd_min" placeholder="Min 6 characters">
         </div>
         <!-- Confirm only shows when password is typed -->
         <div class="input-group full" id="confirmRow" style="display:none">
-          <label>Confirm Password</label>
-          <input type="password" id="reg_confirm" placeholder="Repeat password">
+          <label data-lang="confirm_password">Confirm Password</label>
+          <input type="password" id="reg_confirm" data-ph="repeat_pwd" placeholder="Repeat password">
         </div>
 
       </div>
 
       <button class="btn-primary" onclick="createProfile()">
-        <span>Create Profile & Enter</span><span class="btn-arrow">→</span>
+        <span data-lang="create_enter">Create Profile & Enter</span><span class="btn-arrow">→</span>
       </button>
-      <p class="form-note">Already registered? <a href="#" onclick="switchTabByName('login')">Login →</a></p>
+      <p class="form-note"><span data-lang="already_reg">Already registered?</span> <a href="#" onclick="switchTabByName('login')" data-lang="login_link">Login →</a></p>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
@@ -129,6 +129,7 @@
   </div>
 </div>
 
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
 <script>
 function switchTab(name, btn){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
@@ -155,6 +156,10 @@ function showLoginError(msg){
 
 // Show confirm field only when user starts typing password
 document.addEventListener('DOMContentLoaded', function(){
+  // Apply saved language
+  var lang = localStorage.getItem('agro_lang') || 'en';
+  if(typeof applyLang === 'function') applyLang(lang);
+
   var pwdInput = document.getElementById('reg_password');
   if(pwdInput){
     pwdInput.addEventListener('input', function(){

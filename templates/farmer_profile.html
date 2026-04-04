@@ -44,7 +44,7 @@
 {% include '_sidebar.html' %}
 
 <div class="main">
-  <a href="{{ url_for('community') }}" style="font-size:13px;font-weight:600;color:var(--green-mid);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:18px">← Back to Community</a>
+  <a href="{{ url_for('community') }}" style="font-size:13px;font-weight:600;color:var(--green-mid);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:18px">← <span data-lang="back_community">Back to Community</span></a>
 
   <div class="fp-hero">
     <div class="fp-top">
@@ -58,25 +58,25 @@
         <p class="fp-loc">📍 {{ farmer[1] or 'Location not set' }}</p>
         {% if farmer[7] %}<p class="fp-bio">{{ farmer[7] }}</p>{% endif %}
         <div class="fp-stats">
-          <div class="fp-stat"><strong>{{ posts|length }}</strong><span>Posts</span></div>
-          <div class="fp-stat fp-stat-clickable" onclick="openModal('followers')"><strong>{{ followers }}</strong><span>Followers</span></div>
-          <div class="fp-stat fp-stat-clickable" onclick="openModal('following')"><strong>{{ following_count }}</strong><span>Following</span></div>
+          <div class="fp-stat"><strong>{{ posts|length }}</strong><span data-lang="posts_label">Posts</span></div>
+          <div class="fp-stat fp-stat-clickable" onclick="openModal('followers')"><strong>{{ followers }}</strong><span data-lang="followers_label">Followers</span></div>
+          <div class="fp-stat fp-stat-clickable" onclick="openModal('following')"><strong>{{ following_count }}</strong><span data-lang="following_label">Following</span></div>
         </div>
         <div class="fp-actions">
           {% if farmer[2] != user[2] %}
           <button class="btn-follow {% if is_following %}following{% endif %}" id="followBtn">
-            {% if is_following %}✅ Following{% else %}➕ Follow{% endif %}
+            <span data-lang="{{ 'following_btn' if is_following else 'follow_btn' }}">{% if is_following %}✅ Following{% else %}➕ Follow{% endif %}</span>
           </button>
-          <button class="btn-msg" id="msgBtn">✉️ Message</button>
+          <button class="btn-msg" id="msgBtn"><span data-lang="message_btn">✉️ Message</span></button>
           {% endif %}
         </div>
       </div>
     </div>
     {% if farmer[3] or farmer[4] or farmer[5] %}
     <div style="display:flex;gap:16px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #f2f2f2">
-      {% if farmer[3] %}<div style="font-size:12px;color:var(--text-mid)">🌾 Farm Size: <strong>{{ farmer[3] }} acres</strong></div>{% endif %}
-      {% if farmer[4] %}<div style="font-size:12px;color:var(--text-mid)">🧪 Soil pH: <strong>{{ farmer[4] }}</strong></div>{% endif %}
-      {% if farmer[5] %}<div style="font-size:12px;color:var(--text-mid)">🪨 Soil: <strong>{{ farmer[5] }}</strong></div>{% endif %}
+      {% if farmer[3] %}<div style="font-size:12px;color:var(--text-mid)"><span data-lang="farm_size_fp">🌾 Farm Size:</span> <strong>{{ farmer[3] }} <span data-lang="acres">acres</span></strong></div>{% endif %}
+      {% if farmer[4] %}<div style="font-size:12px;color:var(--text-mid)"><span data-lang="soil_ph_fp">🧪 Soil pH:</span> <strong>{{ farmer[4] }}</strong></div>{% endif %}
+      {% if farmer[5] %}<div style="font-size:12px;color:var(--text-mid)"><span data-lang="soil_fp">🪨 Soil:</span> <strong>{{ farmer[5] }}</strong></div>{% endif %}
     </div>
     {% endif %}
   </div>
@@ -110,7 +110,7 @@
       </div>
       {% endfor %}
     {% else %}
-      <div class="card empty-comm"><p>No posts yet from this farmer.</p></div>
+      <div class="card empty-comm"><p data-lang="no_posts_farmer">No posts yet from this farmer.</p></div>
     {% endif %}
   </div>
 </div>
