@@ -212,7 +212,6 @@
     <button class="stab active" onclick="switchTab('appearance',this)" data-lang="stab_appearance">🎨 Appearance</button>
     <button class="stab" onclick="switchTab('profile',this)" data-lang="stab_profile">👤 Profile</button>
     <button class="stab" onclick="switchTab('security',this)" data-lang="stab_security">🔐 Security</button>
-    <button class="stab" onclick="switchTab('ai',this)" data-lang="stab_ai">🤖 AI Settings</button>
   </div>
 
   <!-- ══ TAB: APPEARANCE ══ -->
@@ -439,48 +438,7 @@
     </div>
   </div>
 
-  <!-- ══ TAB: AI SETTINGS ══ -->
-  <div class="tab-panel" id="tab-ai">
-    <div class="settings-card">
-      <div class="settings-card-header">
-        <div class="icon-box">🤖</div>
-        <div>
-          <h3 data-lang="ai_assistant">AI Assistant (Groq API)</h3>
-          <div id="apiStatusPill" class="api-status-pill" style="margin-top:4px">
-            <div class="api-dot"></div> <span id="apiStatusText">Not configured</span>
-          </div>
-        </div>
-      </div>
 
-      <div style="background:var(--cream);border-radius:12px;padding:16px;margin-bottom:20px;font-size:13px;line-height:1.7;color:var(--text-mid)">
-        <strong style="color:var(--text)">How it works:</strong><br>
-        The AI Diagnosis and Chat features use Groq AI. Your API key is stored <strong>only in your browser</strong> — never sent to our servers. You can get a free API key from
-        <a href="https://console.groq.com" target="_blank" style="color:var(--green-mid);font-weight:700">console.groq.com</a>.
-      </div>
-
-      <label class="form-label" data-lang="groq_api_key">Groq API Key</label>
-      <div style="position:relative">
-        <input class="form-input" type="password" id="apiKeyInput" placeholder="gsk_..." style="padding-right:90px">
-        <button type="button" onclick="toggleApiKeyVisibility()"
-          style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-mid);font-weight:600"
-          id="showHideBtn">Show</button>
-      </div>
-      <p id="apiKeyStatus" style="font-size:12px;margin-top:6px;color:var(--text-mid)">Your key is stored locally in your browser only.</p>
-
-      <button class="save-btn" type="button" onclick="saveApiKey()" style="margin-top:16px">💾 Save API Key</button>
-
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-        <button type="button" onclick="clearApiKey()"
-          style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-family:inherit;font-size:13px;color:var(--text-mid);cursor:pointer;transition:all .2s"
-          onmouseover="this.style.borderColor='#ef9a9a';this.style.color='#c62828'"
-          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'">
-          🗑️ Remove Saved Key
-        </button>
-      </div>
-    </div>
-  </div>
-
-</div>
 
 <!-- TOAST NOTIFICATION -->
 <div id="toast" class="toast">✅ Saved successfully!</div>
@@ -583,42 +541,6 @@ function checkPwdStrength(v){
 }
 
 // ── API KEY ──
-var apiKeyVisible = false;
-function toggleApiKeyVisibility(){
-  apiKeyVisible = !apiKeyVisible;
-  var inp = document.getElementById('apiKeyInput');
-  inp.type = apiKeyVisible ? 'text' : 'password';
-  document.getElementById('showHideBtn').textContent = apiKeyVisible ? 'Hide' : 'Show';
-}
-function saveApiKey(){
-  var key = document.getElementById('apiKeyInput').value.trim();
-  if(!key){ alert('Please enter a valid API key'); return; }
-  localStorage.setItem('agro_api_key', key);
-  updateApiStatus(true);
-  showToast('✅ API Key saved!');
-}
-function clearApiKey(){
-  if(!confirm('Remove saved API key?')) return;
-  localStorage.removeItem('agro_api_key');
-  document.getElementById('apiKeyInput').value='';
-  updateApiStatus(false);
-  showToast('🗑️ API key removed');
-}
-function updateApiStatus(active){
-  var pill = document.getElementById('apiStatusPill');
-  var txt  = document.getElementById('apiStatusText');
-  if(active){
-    pill.className = 'api-status-pill active';
-    txt.textContent = 'Groq API Key Active — AI features enabled';
-  } else {
-    pill.className = 'api-status-pill';
-    txt.textContent = 'Not configured';
-  }
-  var s = document.getElementById('apiKeyStatus');
-  if(s) s.textContent = active ? '✅ Key saved in browser. AI assistant is active.' : 'Your key is stored locally in your browser only.';
-  if(s) s.style.color = active ? '#2e7d32' : 'var(--text-mid)';
-}
-
 // ── TOAST ──
 function showToast(msg){
   var t = document.getElementById('toast');
@@ -626,15 +548,6 @@ function showToast(msg){
   setTimeout(function(){ t.classList.remove('show'); }, 2800);
 }
 
-// ── ON LOAD ──
-(function(){
-  var savedKey = localStorage.getItem('agro_api_key');
-  if(savedKey){
-    var inp = document.getElementById('apiKeyInput');
-    inp.value = savedKey;
-    inp.type = 'password';
-    updateApiStatus(true);
-  }
   // Sync active theme/lang from localStorage
   var storedTheme = localStorage.getItem('agro_theme') || 'light';
   var storedLang  = localStorage.getItem('agro_lang')  || 'en';
@@ -650,7 +563,6 @@ function showToast(msg){
       el.classList.add('active');
     }
   });
-})();
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ import requests, os, hashlib, re, time
 app = Flask(__name__)
 app.secret_key = "agrosmart_secret_2025"
 API_KEY ="c77ad771da8c51df70707890f376e2d5"
+GROQ_API_KEY = "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" #my groq ai api key
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -1160,6 +1161,37 @@ def create_notification(owner_phone, ntype, actor_phone, actor_name, text, link=
         """, (owner_phone, ntype, actor_phone, actor_name, text, link))
     except Exception:
         pass  # silently ignore if table doesn't exist yet
+
+
+# ── AI CHAT PROXY ────────────────────────────────────────────────────────────
+@app.route("/ai/chat", methods=["POST"])
+def ai_chat():
+    if 'user' not in session:
+        return jsonify({"error": "Not logged in"}), 401
+    data     = request.get_json(silent=True) or {}
+    messages = data.get("messages", [])
+    if not messages:
+        return jsonify({"error": "No messages"}), 400
+    try:
+        resp = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Content-Type":  "application/json",
+                "Authorization": f"Bearer {GROQ_API_KEY}"
+            },
+            json={
+                "model":      "llama-3.1-8b-instant",
+                "max_tokens": 800,
+                "messages": [
+                    {"role": "system", "content": "You are a helpful friendly AI farming assistant for Indian farmers. Keep answers concise (3-5 sentences max). Focus on practical farming advice, crop guidance, pest control, govt schemes, weather, market prices. Use simple language and relevant emojis."},
+                    *messages[-8:]
+                ]
+            },
+            timeout=15
+        )
+        return jsonify(resp.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     ensure_tables()

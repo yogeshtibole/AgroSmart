@@ -217,7 +217,7 @@ var LANG_MAP = {
 
     // ── Crop Advisor ──
     'crop_adv_title':'🌱 AI Crop Advisor',
-    'crop_adv_sub':'Get personalized crop recommendations powered by Claude AI',
+    'crop_adv_sub':'Get personalized crop recommendations powered by Groq AI',
     'response_in':'🌍 Response in:',
     'farm_conditions':'🧪 Your Farm Conditions',
     'soil_type_label2':'Soil Type','select_soil':'Select soil type',
@@ -388,7 +388,7 @@ var LANG_MAP = {
 
     // ── Crop Advisor ──
     'crop_adv_title':'🌱 AI फसल सलाहकार',
-    'crop_adv_sub':'Claude AI द्वारा व्यक्तिगत फसल सिफारिशें पाएं',
+    'crop_adv_sub':'Groq AI द्वारा व्यक्तिगत फसल सिफारिशें पाएं',
     'response_in':'🌍 जवाब भाषा:',
     'farm_conditions':'🧪 आपकी खेत की स्थिति',
     'soil_type_label2':'मिट्टी का प्रकार','select_soil':'मिट्टी का प्रकार चुनें',
@@ -559,7 +559,7 @@ var LANG_MAP = {
 
     // ── Crop Advisor ──
     'crop_adv_title':'🌱 AI पीक सल्लागार',
-    'crop_adv_sub':'Claude AI द्वारे वैयक्तिक पीक शिफारसी मिळवा',
+    'crop_adv_sub':'Groq AI द्वारे वैयक्तिक पीक शिफारसी मिळवा',
     'response_in':'🌍 उत्तर भाषा:',
     'farm_conditions':'🧪 तुमच्या शेताची स्थिती',
     'soil_type_label2':'मातीचा प्रकार','select_soil':'मातीचा प्रकार निवडा',

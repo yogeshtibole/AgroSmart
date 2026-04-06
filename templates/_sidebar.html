@@ -164,29 +164,10 @@ async function sendAiMsg(){
   aiConversation.push({role:"user", content: q});
 
   try {
-    var apiKey = localStorage.getItem('agro_api_key') || '';
-    if(!apiKey){
-      var el = document.getElementById(thinkId);
-      if(el) el.innerHTML = '<span style="color:#e65100">⚙️ Please set your Groq API key in <a href="/settings" style="color:#1a3d22;font-weight:700">Settings</a> to use AI assistant.</span>';
-      document.getElementById('aiSendBtn').disabled = false;
-      document.getElementById('aiChatMsgs').scrollTop = 9999;
-      return;
-    }
-
-    var resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    var resp = await fetch("/ai/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        max_tokens: 800,
-        messages: [
-          { role: "system", content: "You are a helpful friendly AI farming assistant for Indian farmers. Keep answers concise (3-5 sentences max). Focus on practical farming advice, crop guidance, pest control, govt schemes, weather, market prices. Use simple language and relevant emojis." },
-          ...aiConversation.slice(-8)
-        ]
-      })
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({messages: aiConversation.slice(-8)})
     });
     var data = await resp.json();
     if(data.error) throw new Error(data.error.message || data.error.type);
