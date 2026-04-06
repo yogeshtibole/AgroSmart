@@ -68,6 +68,7 @@ def ensure_tables():
     db_exec("ALTER TABLE farmers ADD COLUMN IF NOT EXISTS language VARCHAR(10) DEFAULT 'en'")
     db_exec("ALTER TABLE farmers ADD COLUMN IF NOT EXISTS bio TEXT")
     db_exec("ALTER TABLE farmers ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    db_exec("ALTER TABLE farmers ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE")
     db_exec("""
         CREATE TABLE IF NOT EXISTS login_history (
             id SERIAL PRIMARY KEY, phone TEXT NOT NULL,
@@ -168,9 +169,15 @@ def farmer_exists(phone):
 
 def get_user(phone):
     r = db_exec(
-        "SELECT name, location, phone, farm_size, soil_ph, soil_type, profile_pic, password, theme, language, bio FROM farmers WHERE phone=%s",
+        "SELECT name, location, phone, farm_size, soil_ph, soil_type, profile_pic, password, theme, language, bio, is_admin FROM farmers WHERE phone=%s",
         (phone,), fetch='one')
-    return r
+    if r:
+        # Wrap in a namedtuple-like object so templates can use user.is_admin
+        from collections import namedtuple
+        User = namedtuple('User', ['name','location','phone','farm_size','soil_ph','soil_type',
+                                   'profile_pic','password','theme','language','bio','is_admin'])
+        return User(*r)
+    return None
 
 def log_activity(phone, action, page='general'):
     db_exec("INSERT INTO activity_log (phone, action, page) VALUES (%s,%s,%s)", (phone, action, page))
@@ -208,6 +215,173 @@ def get_weather_advice(temp, humidity, desc):
     if humidity < 20: return "🏜️ Very dry air. Increase irrigation.", "warning"
     return "✅ Ideal farming conditions! Good time for sowing or fertilizer.", "success"
 
+# ── ADMIN ───────────────────────────────────────────────────────────────────
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user' not in session:
+            return redirect("/login")
+        if not session.get('is_admin'):
+            flash("⛔ Admin access only.", "danger")
+            return redirect("/dashboard")
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/mgmt")
+@admin_required
+def admin_dashboard():
+    total_farmers  = (db_exec("SELECT COUNT(*) FROM farmers", fetch='one') or [0])[0]
+    total_posts    = (db_exec("SELECT COUNT(*) FROM community_posts", fetch='one') or [0])[0]
+    logins_today   = (db_exec("SELECT COUNT(*) FROM login_history WHERE login_time::date = CURRENT_DATE", fetch='one') or [0])[0]
+    active_week    = (db_exec("SELECT COUNT(DISTINCT phone) FROM activity_log WHERE action_time >= NOW() - INTERVAL '7 days'", fetch='one') or [0])[0]
+    total_diary    = (db_exec("SELECT COUNT(*) FROM crop_diary", fetch='one') or [0])[0]
+    log_activity(session['user'], "Visited Admin Dashboard", "admin")
+    return render_template("admin_dashboard.html",
+        user=get_user(session['user']), active='admin',
+        total_farmers=total_farmers, total_posts=total_posts,
+        logins_today=logins_today, active_week=active_week, total_diary=total_diary)
+
+@app.route("/mgmt/farmers")
+@admin_required
+def admin_farmers():
+    q      = request.args.get('q', '').strip()
+    if q:
+        farmers = db_exec(
+            "SELECT name, phone, location, farm_size, created_at, is_admin FROM farmers WHERE name ILIKE %s OR phone ILIKE %s ORDER BY created_at DESC",
+            (f'%{q}%', f'%{q}%'), fetch='all') or []
+    else:
+        farmers = db_exec(
+            "SELECT name, phone, location, farm_size, created_at, is_admin FROM farmers ORDER BY created_at DESC",
+            fetch='all') or []
+    log_activity(session['user'], "Viewed all farmers list", "admin")
+    return render_template("admin_farmers.html",
+        user=get_user(session['user']), active='admin',
+        farmers=farmers, q=q)
+
+@app.route("/mgmt/delete_farmer", methods=["POST"])
+@admin_required
+def admin_delete_farmer():
+    data  = request.get_json(silent=True) or {}
+    phone = data.get('phone', '').strip()
+    if not phone:
+        return jsonify({"status": "fail", "msg": "No phone provided"})
+    if phone == session['user']:
+        return jsonify({"status": "fail", "msg": "Cannot delete your own admin account"})
+    # Delete all farmer data in correct order
+    db_exec("DELETE FROM community_follows  WHERE follower_phone=%s OR following_phone=%s", (phone, phone))
+    db_exec("DELETE FROM community_likes    WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_replies  WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_shares   WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM community_messages WHERE sender_phone=%s OR receiver_phone=%s", (phone, phone))
+    db_exec("DELETE FROM notifications      WHERE owner_phone=%s OR actor_phone=%s", (phone, phone))
+    db_exec("DELETE FROM community_posts    WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM login_history      WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM activity_log       WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM crop_calendar_entries WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM crop_diary         WHERE phone=%s", (phone,))
+    db_exec("DELETE FROM farmers            WHERE phone=%s", (phone,))
+    log_activity(session['user'], f"Admin deleted farmer: {phone}", "admin")
+    return jsonify({"status": "success"})
+
+@app.route("/mgmt/toggle_admin", methods=["POST"])
+@admin_required
+def admin_toggle_admin():
+    data  = request.get_json(silent=True) or {}
+    phone = data.get('phone', '').strip()
+    if not phone:
+        return jsonify({"status": "fail", "msg": "No phone provided"})
+    if phone == session['user']:
+        return jsonify({"status": "fail", "msg": "Cannot change your own admin status"})
+    row = db_exec("SELECT is_admin FROM farmers WHERE phone=%s", (phone,), fetch='one')
+    if not row:
+        return jsonify({"status": "fail", "msg": "Farmer not found"})
+    new_status = not bool(row[0])
+    db_exec("UPDATE farmers SET is_admin=%s WHERE phone=%s", (new_status, phone))
+    log_activity(session['user'], f"Admin toggled admin for {phone} → {new_status}", "admin")
+    return jsonify({"status": "success", "is_admin": new_status})
+
+@app.route("/mgmt/posts")
+@admin_required
+def admin_posts():
+    cat = request.args.get('cat', '').strip()
+    if cat:
+        posts = db_exec(
+            "SELECT cp.id, cp.title, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
+            "(SELECT COUNT(*) FROM community_replies r WHERE r.post_id=cp.id) AS reply_count "
+            "FROM community_posts cp LEFT JOIN farmers f ON f.phone=cp.phone "
+            "WHERE cp.category=%s ORDER BY cp.created_at DESC",
+            (cat,), fetch='all') or []
+    else:
+        posts = db_exec(
+            "SELECT cp.id, cp.title, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
+            "(SELECT COUNT(*) FROM community_replies r WHERE r.post_id=cp.id) AS reply_count "
+            "FROM community_posts cp LEFT JOIN farmers f ON f.phone=cp.phone "
+            "ORDER BY cp.created_at DESC",
+            fetch='all') or []
+    log_activity(session['user'], "Viewed all community posts (admin)", "admin")
+    return render_template("admin_posts.html",
+        user=get_user(session['user']), active='admin',
+        posts=posts, cat=cat)
+
+@app.route("/mgmt/delete_post", methods=["POST"])
+@admin_required
+def admin_delete_post():
+    data = request.get_json(silent=True) or {}
+    pid  = data.get('post_id')
+    if not pid:
+        return jsonify({"status": "fail"})
+    db_exec("DELETE FROM community_posts WHERE id=%s", (pid,))
+    log_activity(session['user'], f"Admin deleted post id={pid}", "admin")
+    return jsonify({"status": "success"})
+
+@app.route("/mgmt/delete_reply", methods=["POST"])
+@admin_required
+def admin_delete_reply():
+    data = request.get_json(silent=True) or {}
+    rid  = data.get('reply_id')
+    if not rid:
+        return jsonify({"status": "fail"})
+    db_exec("DELETE FROM community_replies WHERE id=%s", (rid,))
+    log_activity(session['user'], f"Admin deleted reply id={rid}", "admin")
+    return jsonify({"status": "success"})
+
+@app.route("/mgmt/logs")
+@admin_required
+def admin_logs():
+    filter_phone = request.args.get('phone', '').strip()
+    filter_page  = request.args.get('page_filter', '').strip()
+    q, params = "SELECT phone, action, page, action_time FROM activity_log WHERE 1=1", []
+    if filter_phone:
+        q += " AND phone ILIKE %s"; params.append(f'%{filter_phone}%')
+    if filter_page:
+        q += " AND page=%s"; params.append(filter_page)
+    q += " ORDER BY action_time DESC LIMIT 200"
+    logs = db_exec(q, tuple(params), fetch='all') or []
+    logins = db_exec(
+        "SELECT phone, login_time FROM login_history ORDER BY login_time DESC LIMIT 100",
+        fetch='all') or []
+    log_activity(session['user'], "Viewed activity logs (admin)", "admin")
+    return render_template("admin_logs.html",
+        user=get_user(session['user']), active='admin',
+        logs=logs, logins=logins,
+        filter_phone=filter_phone, filter_page=filter_page)
+
+@app.route("/mgmt/crop_stats")
+@admin_required
+def admin_crop_stats():
+    cal_crops = db_exec(
+        "SELECT crop, COUNT(*) as cnt FROM crop_calendar_entries GROUP BY crop ORDER BY cnt DESC LIMIT 20",
+        fetch='all') or []
+    diary_crops = db_exec(
+        "SELECT crop, COUNT(*) as cnt FROM crop_diary WHERE crop IS NOT NULL GROUP BY crop ORDER BY cnt DESC LIMIT 20",
+        fetch='all') or []
+    log_activity(session['user'], "Viewed crop stats (admin)", "admin")
+    return render_template("admin_crop_stats.html",
+        user=get_user(session['user']), active='admin',
+        cal_crops=cal_crops, diary_crops=diary_crops)
+
 # ── ROUTES ──────────────────────────────────────────────────────────────────
 @app.route("/")
 def home(): return redirect("/login")
@@ -227,11 +401,12 @@ def simple_login():
         return jsonify({"status":"fail","msg":"Invalid mobile number format"})
 
     if mode == 'with_password':
-        user = db_exec("SELECT name,location,phone,farm_size,soil_ph,soil_type,profile_pic,password FROM farmers WHERE phone=%s",(mobile,),fetch='one')
+        user = db_exec("SELECT name,location,phone,farm_size,soil_ph,soil_type,profile_pic,password,is_admin FROM farmers WHERE phone=%s",(mobile,),fetch='one')
         if not user: return jsonify({"status":"fail","msg":"Phone not registered. Please register first."})
         if not user[7]: return jsonify({"status":"fail","msg":"No password set. Use phone login."})
         if user[7] != hash_pwd(password): return jsonify({"status":"fail","msg":"Wrong password."})
         session['user'] = mobile
+        session['is_admin'] = bool(user[8])
         db_exec("INSERT INTO login_history (phone) VALUES (%s)",(mobile,))
         log_activity(mobile,"Logged in with password","login")
         return jsonify({"status":"success","name":user[0] or "","phone":mobile,
@@ -243,6 +418,7 @@ def simple_login():
     db_exec("INSERT INTO login_history (phone) VALUES (%s)",(mobile,))
     log_activity(mobile,"Logged in","login")
     user = get_user(mobile)
+    session['is_admin'] = bool(user.is_admin) if user else False
     return jsonify({"status":"success","name":user[0] if user and user[0] else "",
                     "phone":mobile,"location":user[1] if user and user[1] else "",
                     "farm_size":str(user[3]) if user and user[3] else "",
@@ -693,7 +869,10 @@ def delete_community_post():
     data  = request.get_json(silent=True) or {}
     pid   = data.get('post_id')
     if not pid: return jsonify({"status":"fail"})
-    db_exec("DELETE FROM community_posts WHERE id=%s AND phone=%s",(pid,phone))
+    if session.get('is_admin'):
+        db_exec("DELETE FROM community_posts WHERE id=%s", (pid,))
+    else:
+        db_exec("DELETE FROM community_posts WHERE id=%s AND phone=%s", (pid, phone))
     return jsonify({"status":"success"})
 
 @app.route("/community/reply", methods=["POST"])

@@ -1,0 +1,130 @@
+{% include '_sidebar.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Community Posts – AgroSmart Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--gd:#1a3d22;--gm:#2d6a3f;--g:#4caf50;--gl:#e6f4ea;--cream:#f4f7f4;--white:#fff;--text:#1a1a1a;--tm:#4a5568;--tl:#9aab9e;--border:#dde8df;--sh:0 2px 8px rgba(0,0,0,.07);--orange:#e65c00;}
+    body{font-family:'DM Sans','Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+    .adm-topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--sh);position:sticky;top:0;z-index:100;}
+    .adm-brand{font-size:16px;font-weight:700;color:var(--gd);}
+    .adm-topbar-right{display:flex;align-items:center;gap:10px;}
+    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;}
+    .adm-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
+    .adm-avatar{width:24px;height:24px;border-radius:50%;background:#c8e6c9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gd);}
+    .adm-shell{display:flex;min-height:calc(100vh - 52px);}
+    .adm-sidebar{width:210px;background:var(--gd);flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;display:flex;flex-direction:column;}
+    .adm-sb-head{padding:16px 18px 8px;color:rgba(255,255,255,.45);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+    .adm-sb-nav{list-style:none;padding:4px 0 16px;}
+    .adm-sb-nav li a{display:flex;align-items:center;gap:9px;padding:10px 18px;color:rgba(255,255,255,.68);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+    .adm-sb-nav li a:hover{background:rgba(255,255,255,.1);color:#fff;}
+    .adm-sb-nav li a.active{background:rgba(255,255,255,.16);color:#fff;font-weight:700;}
+    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.1);margin:4px 18px 8px;}
+    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 18px 16px;color:rgba(255,255,255,.5);text-decoration:none;font-size:12px;}
+    .adm-sb-back:hover{color:rgba(255,255,255,.8);}
+    .adm-main{flex:1;padding:24px;overflow:auto;}
+    .adm-page-header{margin-bottom:16px;}
+    .adm-page-header h1{font-size:20px;font-weight:700;color:var(--gd);margin-bottom:3px;}
+    .adm-page-header p{font-size:12px;color:var(--tm);}
+    .adm-filter-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+    .adm-ftab{padding:5px 13px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);color:#555;text-decoration:none;display:inline-block;background:var(--white);}
+    .adm-ftab.active,.adm-ftab:hover{background:var(--gd);color:#fff;border-color:var(--gd);}
+    .adm-table-wrap{background:var(--white);border-radius:12px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--border);}
+    .adm-table-wrap table{width:100%;border-collapse:collapse;}
+    .adm-table-wrap th{background:var(--gd);color:#fff;padding:10px 12px;text-align:left;font-size:11px;font-weight:600;}
+    .adm-table-wrap td{padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f4f0;color:var(--text);vertical-align:middle;}
+    .adm-table-wrap tr:last-child td{border-bottom:none;}
+    .adm-table-wrap tr:hover td{background:#f7fbf7;}
+    .badge-cat{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--gl);color:var(--gm);}
+    .badge-warn{background:#ffebee;color:#c62828;}
+    .post-title{font-weight:600;color:var(--gd);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .btn-del{font-size:11px;padding:4px 10px;background:#fdecea;color:#c62828;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+    .btn-del:hover{background:#c62828;color:#fff;}
+    .adm-empty{color:#888;font-size:13px;padding:2rem;text-align:center;}
+  </style>
+</head>
+<body>
+<div class="adm-topbar">
+  <span class="adm-brand">🌾 AgroSmart</span>
+  <div class="adm-topbar-right">
+    <span class="adm-badge">ADMIN</span>
+    <a href="{{ url_for('profile') }}" class="adm-pill">
+      <div class="adm-avatar">{{ session.get('name','A')[0]|upper }}</div>
+      <span>{{ session.get('name','Admin') }}</span>
+      <span>▾</span>
+    </a>
+  </div>
+</div>
+<div class="adm-shell">
+  <div class="adm-sidebar">
+    <div class="adm-sb-head">Admin Panel</div>
+    <ul class="adm-sb-nav">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_farmers') }}">👨‍🌾 Farmers</a></li>
+      <li><a href="{{ url_for('admin_posts') }}" class="active">🤝 Posts</a></li>
+      <li><a href="{{ url_for('admin_logs') }}">📋 Activity Logs</a></li>
+      <li><a href="{{ url_for('admin_crop_stats') }}">🌾 Crop Stats</a></li>
+    </ul>
+    <hr class="adm-sb-divider">
+    <a href="{{ url_for('dashboard') }}" class="adm-sb-back">← Back to App</a>
+  </div>
+  <div class="adm-main">
+    <div class="adm-page-header">
+      <h1>🤝 Community Posts</h1>
+      <p>{{ posts|length }} post(s) across all categories</p>
+    </div>
+
+    <div class="adm-filter-tabs">
+      <a href="{{ url_for('admin_posts') }}" class="adm-ftab {{ 'active' if not cat }}">All</a>
+      {% for c in ['general','crop','weather','market','advice'] %}
+      <a href="{{ url_for('admin_posts', cat=c) }}" class="adm-ftab {{ 'active' if cat==c }}">{{ c|capitalize }}</a>
+      {% endfor %}
+    </div>
+
+    {% if posts %}
+    <div class="adm-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Title</th><th>Farmer</th><th>Category</th><th>Likes</th><th>Replies</th><th>Date</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for p in posts %}
+          <tr id="post-{{ p[0] }}">
+            <td><div class="post-title" title="{{ p[1] }}">{{ p[1] }}</div></td>
+            <td>{{ p[3] or p[2] }}</td>
+            <td><span class="badge-cat">{{ p[4] }}</span></td>
+            <td>{{ p[5] }}</td>
+            <td>{{ p[7] }}</td>
+            <td>{{ p[6].strftime('%d %b %Y') if p[6] else '—' }}</td>
+            <td><button class="btn-del" data-post-id="{{ p[0] }}">Delete</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="adm-empty">No posts found{% if cat %} in category "{{ cat }}"{% endif %}.</div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+async function deletePost(id) {
+  if (!confirm('Delete this post and all its replies/likes?')) return;
+  const r = await fetch('/mgmt/delete_post', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:id})});
+  const d = await r.json();
+  if (d.status === 'success') {
+    const row = document.getElementById('post-' + id);
+    if (row) row.remove();
+  } else { alert('❌ Error deleting post.'); }
+}
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-del[data-post-id]');
+  if (btn) deletePost(Number(btn.getAttribute('data-post-id')));
+});
+</script>
+</body>
+</html>

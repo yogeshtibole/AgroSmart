@@ -87,6 +87,9 @@
     <li><a href="{{ url_for('history') }}" {% if active=='history' %}class="active"{% endif %}>🕒 <span data-lang="history">History</span></a></li>
     <li><a href="{{ url_for('profile') }}" {% if active=='profile' %}class="active"{% endif %}>👨‍🌾 <span data-lang="profile">Profile</span></a></li>
     <li><a href="{{ url_for('settings') }}" {% if active=='settings' %}class="active"{% endif %}>⚙️ <span data-lang="settings">Settings</span></a></li>
+    {% if user and user.is_admin %}
+    <li><a href="{{ url_for('admin_dashboard') }}" {% if active=='admin' %}class="active"{% endif %} style="color:#e65c00;font-weight:600;">🛡️ <span>Admin Panel</span></a></li>
+    {% endif %}
   </ul>
 </div>
 <div id="sbOverlay" class="sb-overlay" onclick="toggleSidebar()"></div>

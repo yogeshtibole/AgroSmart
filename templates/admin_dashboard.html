@@ -1,0 +1,108 @@
+{% include '_sidebar.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard – AgroSmart</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='shared.css') }}">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--gd:#1a3d22;--gm:#2d6a3f;--g:#4caf50;--gl:#e6f4ea;--cream:#f4f7f4;--white:#fff;--text:#1a1a1a;--tm:#4a5568;--tl:#9aab9e;--border:#dde8df;--sh:0 2px 8px rgba(0,0,0,.07);--orange:#e65c00;}
+    body{font-family:'DM Sans','Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+    .adm-topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--sh);position:sticky;top:0;z-index:100;}
+    .adm-brand{font-size:16px;font-weight:700;color:var(--gd);}
+    .adm-topbar-right{display:flex;align-items:center;gap:10px;}
+    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;letter-spacing:.5px;}
+    .adm-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
+    .adm-avatar{width:24px;height:24px;border-radius:50%;background:#c8e6c9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gd);}
+    .adm-shell{display:flex;min-height:calc(100vh - 52px);}
+    .adm-sidebar{width:210px;background:var(--gd);flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;display:flex;flex-direction:column;}
+    .adm-sb-head{padding:16px 18px 8px;color:rgba(255,255,255,.45);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+    .adm-sb-nav{list-style:none;padding:4px 0 16px;}
+    .adm-sb-nav li a{display:flex;align-items:center;gap:9px;padding:10px 18px;color:rgba(255,255,255,.68);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+    .adm-sb-nav li a:hover{background:rgba(255,255,255,.1);color:#fff;}
+    .adm-sb-nav li a.active{background:rgba(255,255,255,.16);color:#fff;font-weight:700;}
+    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.1);margin:4px 18px 8px;}
+    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 18px 16px;color:rgba(255,255,255,.5);text-decoration:none;font-size:12px;}
+    .adm-sb-back:hover{color:rgba(255,255,255,.8);}
+    .adm-main{flex:1;padding:24px;overflow:auto;}
+    .adm-page-header{margin-bottom:20px;}
+    .adm-page-header h1{font-size:20px;font-weight:700;color:var(--gd);margin-bottom:3px;}
+    .adm-page-header p{font-size:12px;color:var(--tm);}
+    .adm-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
+    .adm-stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 12px;text-align:center;box-shadow:var(--sh);}
+    .adm-stat-num{font-size:26px;font-weight:700;color:var(--gd);line-height:1;}
+    .adm-stat-lbl{font-size:10px;color:var(--tl);margin-top:5px;font-weight:600;}
+    .adm-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin-bottom:10px;}
+    .adm-nav-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .adm-nav-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;text-decoration:none;color:var(--gd);transition:box-shadow .2s,transform .2s;display:block;}
+    .adm-nav-card:hover{box-shadow:0 4px 16px rgba(26,61,34,.15);transform:translateY(-2px);}
+    .adm-nc-icon{font-size:24px;margin-bottom:7px;}
+    .adm-nc-title{font-size:13px;font-weight:700;margin-bottom:2px;color:var(--text);}
+    .adm-nc-desc{font-size:11px;color:var(--tl);}
+  </style>
+</head>
+<body>
+<div class="adm-topbar">
+  <span class="adm-brand">🌾 AgroSmart</span>
+  <div class="adm-topbar-right">
+    <span class="adm-badge">ADMIN</span>
+    <a href="{{ url_for('profile') }}" class="adm-pill">
+      <div class="adm-avatar">{{ session.get('name','A')[0]|upper }}</div>
+      <span>{{ session.get('name','Admin') }}</span>
+      <span>▾</span>
+    </a>
+  </div>
+</div>
+<div class="adm-shell">
+  <div class="adm-sidebar">
+    <div class="adm-sb-head">Admin Panel</div>
+    <ul class="adm-sb-nav">
+      <li><a href="{{ url_for('admin_dashboard') }}" class="active">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_farmers') }}">👨‍🌾 Farmers</a></li>
+      <li><a href="{{ url_for('admin_posts') }}">🤝 Posts</a></li>
+      <li><a href="{{ url_for('admin_logs') }}">📋 Activity Logs</a></li>
+      <li><a href="{{ url_for('admin_crop_stats') }}">🌾 Crop Stats</a></li>
+    </ul>
+    <hr class="adm-sb-divider">
+    <a href="{{ url_for('dashboard') }}" class="adm-sb-back">← Back to App</a>
+  </div>
+  <div class="adm-main">
+    <div class="adm-page-header">
+      <h1>🛡️ Admin Panel</h1>
+      <p>Welcome back, {{ session.get('name','Admin') }} — full platform overview</p>
+    </div>
+    <div class="adm-stat-grid">
+      <div class="adm-stat-card"><div class="adm-stat-num">{{ total_farmers }}</div><div class="adm-stat-lbl">👨‍🌾 Farmers</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num">{{ total_posts }}</div><div class="adm-stat-lbl">📝 Posts</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num">{{ logins_today }}</div><div class="adm-stat-lbl">🔑 Logins Today</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num">{{ active_week }}</div><div class="adm-stat-lbl">⚡ Active/Week</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num">{{ total_diary }}</div><div class="adm-stat-lbl">📖 Diary Entries</div></div>
+    </div>
+    <div class="adm-section-lbl">Manage</div>
+    <div class="adm-nav-cards">
+      <a href="{{ url_for('admin_farmers') }}" class="adm-nav-card">
+        <div class="adm-nc-icon">👨‍🌾</div>
+        <div class="adm-nc-title">Farmer Management</div>
+        <div class="adm-nc-desc">View, search, delete, promote admins</div>
+      </a>
+      <a href="{{ url_for('admin_posts') }}" class="adm-nav-card">
+        <div class="adm-nc-icon">🤝</div>
+        <div class="adm-nc-title">Community Posts</div>
+        <div class="adm-nc-desc">View and moderate all posts</div>
+      </a>
+      <a href="{{ url_for('admin_logs') }}" class="adm-nav-card">
+        <div class="adm-nc-icon">📋</div>
+        <div class="adm-nc-title">Activity Logs</div>
+        <div class="adm-nc-desc">Farmer logins and page activity</div>
+      </a>
+      <a href="{{ url_for('admin_crop_stats') }}" class="adm-nav-card">
+        <div class="adm-nc-icon">🌾</div>
+        <div class="adm-nc-title">Crop Statistics</div>
+        <div class="adm-nc-desc">Most popular crops across platform</div>
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
