@@ -1,3 +1,20 @@
+How to add and see admin
+-- Make someone admin by phone
+UPDATE farmers SET is_admin = TRUE WHERE phone = '9876543210';
+
+-- Make multiple at once
+UPDATE farmers SET is_admin = TRUE WHERE phone IN ('9876543210', '9823456780', '9012345678');
+
+-- See all current admins
+SELECT name, phone, is_admin FROM farmers WHERE is_admin = TRUE;
+
+
+
+
+
+
+
+
 AGROSMART — LOCAL SETUP GUIDE
 ==============================
 
