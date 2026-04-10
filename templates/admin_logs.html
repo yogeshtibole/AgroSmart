@@ -1,4 +1,3 @@
-{% include '_sidebar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,43 +8,47 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--gd:#1a3d22;--gm:#2d6a3f;--g:#4caf50;--gl:#e6f4ea;--cream:#f4f7f4;--white:#fff;--text:#1a1a1a;--tm:#4a5568;--tl:#9aab9e;--border:#dde8df;--sh:0 2px 8px rgba(0,0,0,.07);--orange:#e65c00;}
     body{font-family:'DM Sans','Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
-    .adm-topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--sh);position:sticky;top:0;z-index:100;}
+    .adm-topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:100;}
     .adm-brand{font-size:16px;font-weight:700;color:var(--gd);}
     .adm-topbar-right{display:flex;align-items:center;gap:10px;}
-    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;}
-    .adm-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
-    .adm-avatar{width:24px;height:24px;border-radius:50%;background:#c8e6c9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gd);}
-    .adm-shell{display:flex;min-height:calc(100vh - 52px);}
-    .adm-sidebar{width:210px;background:var(--gd);flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;display:flex;flex-direction:column;}
-    .adm-sb-head{padding:16px 18px 8px;color:rgba(255,255,255,.45);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
-    .adm-sb-nav{list-style:none;padding:4px 0 16px;}
-    .adm-sb-nav li a{display:flex;align-items:center;gap:9px;padding:10px 18px;color:rgba(255,255,255,.68);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:3px 8px;border-radius:99px;font-weight:700;}
+    .adm-pill{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
+    .adm-pill:hover{border-color:var(--g);}
+    .adm-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gm),var(--g));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+    .adm-shell{display:flex;min-height:calc(100vh - 56px);}
+    .adm-sidebar{width:220px;background:var(--gd);flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
+    .adm-sb-head{padding:20px 18px 8px;color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
+    .adm-sb-nav{list-style:none;padding:4px 10px 16px;}
+    .adm-sb-nav li a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;font-weight:500;border-radius:8px;transition:background .15s,color .15s;margin-bottom:2px;}
     .adm-sb-nav li a:hover{background:rgba(255,255,255,.1);color:#fff;}
-    .adm-sb-nav li a.active{background:rgba(255,255,255,.16);color:#fff;font-weight:700;}
-    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.1);margin:4px 18px 8px;}
-    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 18px 16px;color:rgba(255,255,255,.5);text-decoration:none;font-size:12px;}
+    .adm-sb-nav li a.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700;}
+    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:4px 18px 12px;}
+    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 22px 18px;color:rgba(255,255,255,.45);text-decoration:none;font-size:12px;}
     .adm-sb-back:hover{color:rgba(255,255,255,.8);}
     .adm-main{flex:1;padding:24px;overflow:auto;}
     .adm-page-header{margin-bottom:16px;}
-    .adm-page-header h1{font-size:20px;font-weight:700;color:var(--gd);margin-bottom:3px;}
+    .adm-page-header h1{font-size:20px;font-weight:800;color:var(--gd);margin-bottom:3px;}
     .adm-page-header p{font-size:12px;color:var(--tm);}
-    .adm-search-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    .adm-search-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
     .adm-search-row input,.adm-search-row select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;outline:none;font-family:inherit;background:var(--white);}
     .adm-search-row input{flex:1;min-width:160px;}
     .adm-search-row input:focus,.adm-search-row select:focus{border-color:var(--g);}
     .adm-search-row button{padding:8px 16px;background:var(--gd);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;}
     .adm-search-row a.clear{padding:8px 12px;background:#eee;border-radius:8px;text-decoration:none;font-size:12px;color:#333;}
-    .adm-log-tabs{display:flex;margin-bottom:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;}
-    .adm-ltab{padding:7px 18px;border:none;background:var(--white);cursor:pointer;font-size:12px;font-weight:600;color:var(--tm);}
+    .adm-log-tabs{display:flex;margin-bottom:14px;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content;background:var(--white);}
+    .adm-ltab{padding:8px 20px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--tm);transition:background .15s,color .15s;}
     .adm-ltab.active{background:var(--gd);color:#fff;}
-    .adm-table-wrap{background:var(--white);border-radius:12px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:20px;}
+    .adm-table-wrap{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:20px;}
     .adm-table-wrap table{width:100%;border-collapse:collapse;}
-    .adm-table-wrap th{background:var(--gd);color:#fff;padding:10px 12px;text-align:left;font-size:11px;font-weight:600;}
-    .adm-table-wrap td{padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f4f0;color:var(--text);}
+    .adm-table-wrap th{background:var(--gd);color:#fff;padding:11px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+    .adm-table-wrap td{padding:10px 14px;font-size:12px;border-bottom:1px solid #f0f4f0;color:var(--text);vertical-align:middle;}
     .adm-table-wrap tr:last-child td{border-bottom:none;}
     .adm-table-wrap tr:hover td{background:#f7fbf7;}
-    .badge-page{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--gl);color:var(--gm);}
+    .badge-page{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--gl);color:var(--gm);}
+    .btn-del{font-size:11px;padding:4px 10px;background:#fdecea;color:#c62828;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:background .15s,color .15s;}
+    .btn-del:hover{background:#c62828;color:#fff;}
     .adm-empty{color:#888;font-size:13px;padding:2rem;text-align:center;}
+    .phone-mono{font-family:monospace;font-size:12px;color:var(--gd);font-weight:600;}
   </style>
 </head>
 <body>
@@ -54,9 +57,9 @@
   <div class="adm-topbar-right">
     <span class="adm-badge">ADMIN</span>
     <a href="{{ url_for('profile') }}" class="adm-pill">
-      <div class="adm-avatar">{{ session.get('name','A')[0]|upper }}</div>
-      <span>{{ session.get('name','Admin') }}</span>
-      <span>▾</span>
+      <div class="adm-avatar">{{ user.name[0]|upper if user and user.name else 'A' }}</div>
+      <span>{{ user.name if user and user.name else 'Admin' }}</span>
+      <span style="color:#bbb">▾</span>
     </a>
   </div>
 </div>
@@ -76,11 +79,11 @@
   <div class="adm-main">
     <div class="adm-page-header">
       <h1>📋 Activity Logs</h1>
-      <p>All farmer logins and page visits</p>
+      <p>All farmer logins and page visits — {{ logs|length }} activity records</p>
     </div>
 
     <form class="adm-search-row" method="GET">
-      <input type="text" name="phone" placeholder="Filter by phone..." value="{{ filter_phone }}">
+      <input type="text" name="phone" placeholder="🔍 Filter by phone..." value="{{ filter_phone }}">
       <select name="page_filter">
         <option value="">All pages</option>
         {% for pg in ['dashboard','weather','crop_advisor','irrigation','yield_calculator','ai_diagnosis','profile','history','login','settings','admin','community'] %}
@@ -88,7 +91,7 @@
         {% endfor %}
       </select>
       <button type="submit">Filter</button>
-      {% if filter_phone or filter_page %}<a href="{{ url_for('admin_logs') }}" class="clear">Clear</a>{% endif %}
+      {% if filter_phone or filter_page %}<a href="{{ url_for('admin_logs') }}" class="clear">✕ Clear</a>{% endif %}
     </form>
 
     <div class="adm-log-tabs">
@@ -96,18 +99,22 @@
       <button class="adm-ltab" onclick="showTab('logins',this)">Login History ({{ logins|length }})</button>
     </div>
 
+    <!-- ACTIVITY TAB -->
     <div id="tab-activity">
       {% if logs %}
       <div class="adm-table-wrap">
         <table>
-          <thead><tr><th>Phone</th><th>Action</th><th>Page</th><th>Time</th></tr></thead>
+          <thead><tr><th>#</th><th>Phone</th><th>Action</th><th>Page</th><th>Time</th><th>Delete</th></tr></thead>
           <tbody>
             {% for l in logs %}
-            <tr>
-              <td>{{ l[0] }}</td>
-              <td>{{ l[1] }}</td>
-              <td><span class="badge-page">{{ l[2] or 'general' }}</span></td>
-              <td>{{ l[3].strftime('%d %b %Y %H:%M') if l[3] else '—' }}</td>
+            {# l: id[0] phone[1] action[2] page[3] action_time[4] #}
+            <tr id="log-{{ l[0] }}">
+              <td style="color:var(--tl);font-size:11px;">{{ loop.index }}</td>
+              <td><span class="phone-mono">{{ l[1] }}</span></td>
+              <td>{{ l[2] }}</td>
+              <td><span class="badge-page">{{ l[3] or 'general' }}</span></td>
+              <td style="color:var(--tm);white-space:nowrap;">{{ l[4].strftime('%d %b %Y %H:%M') if l[4] else '—' }}</td>
+              <td><button class="btn-del" data-id="{{ l[0] }}" onclick="deleteLog(this.dataset.id)">🗑</button></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -116,16 +123,20 @@
       {% else %}<div class="adm-empty">No activity logs found.</div>{% endif %}
     </div>
 
+    <!-- LOGINS TAB -->
     <div id="tab-logins" style="display:none">
       {% if logins %}
       <div class="adm-table-wrap">
         <table>
-          <thead><tr><th>Phone</th><th>Login Time</th></tr></thead>
+          <thead><tr><th>#</th><th>Phone</th><th>Login Time</th><th>Delete</th></tr></thead>
           <tbody>
             {% for l in logins %}
-            <tr>
-              <td>{{ l[0] }}</td>
-              <td>{{ l[1].strftime('%d %b %Y %H:%M') if l[1] else '—' }}</td>
+            {# l: id[0] phone[1] login_time[2] #}
+            <tr id="login-{{ l[0] }}">
+              <td style="color:var(--tl);font-size:11px;">{{ loop.index }}</td>
+              <td><span class="phone-mono">{{ l[1] }}</span></td>
+              <td style="color:var(--tm);white-space:nowrap;">{{ l[2].strftime('%d %b %Y %H:%M') if l[2] else '—' }}</td>
+              <td><button class="btn-del" data-id="{{ l[0] }}" onclick="deleteLogin(this.dataset.id)">🗑</button></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -135,7 +146,6 @@
     </div>
   </div>
 </div>
-
 <script>
 function showTab(name, btn) {
   document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
@@ -143,6 +153,132 @@ function showTab(name, btn) {
   document.getElementById('tab-' + name).style.display = 'block';
   btn.classList.add('active');
 }
+
+async function deleteLog(id) {
+  if (!confirm('Delete this activity log entry?')) return;
+  const r = await fetch('/mgmt/delete_log', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({log_id:id})});
+  const d = await r.json();
+  if (d.status === 'success') {
+    const row = document.getElementById('log-' + id);
+    if (row) { row.style.opacity='0'; row.style.transition='opacity .3s'; setTimeout(()=>row.remove(),300); }
+  } else { alert('Error deleting log entry.'); }
+}
+
+async function deleteLogin(id) {
+  if (!confirm('Delete this login record?')) return;
+  const r = await fetch('/mgmt/delete_login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login_id:id})});
+  const d = await r.json();
+  if (d.status === 'success') {
+    const row = document.getElementById('login-' + id);
+    if (row) { row.style.opacity='0'; row.style.transition='opacity .3s'; setTimeout(()=>row.remove(),300); }
+  } else { alert('Error deleting login record.'); }
+}
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var serverName  = "{{ user.name if user and user.name else '' }}";
+  var serverPhone = "{{ user.phone if user else '' }}";
+  var serverPic   = "{{ url_for('static', filename=user.profile_pic) if user and user.profile_pic else '' }}";
+  if (typeof setNavUser === 'function') setNavUser(serverName, serverPhone);
+  if (serverPic && typeof setNavPic === 'function') setNavPic(serverPic);
+  // Also update the admin topbar pill name directly
+  var adminPillName = document.querySelector('.adm-pill span:not([style])');
+  if (adminPillName && serverName) adminPillName.textContent = serverName;
+});
+</script>
+<!-- ═══ FLOATING AI ASSISTANT ════════════════════════════════════════════ -->
+<div id="aiChatBtn" onclick="toggleAiChat()" title="Ask AI Farming Assistant"
+  style="position:fixed;bottom:24px;right:24px;z-index:1100;
+         width:54px;height:54px;border-radius:50%;
+         background:linear-gradient(135deg,#1a3d22,#4caf50);
+         box-shadow:0 4px 18px rgba(26,61,34,.4);
+         display:flex;align-items:center;justify-content:center;
+         cursor:pointer;font-size:24px;transition:transform .2s;">🌾</div>
+
+<div id="aiChatBox" style="display:none;position:fixed;bottom:88px;right:24px;
+  width:340px;max-height:480px;background:#fff;border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:1099;
+  flex-direction:column;overflow:hidden;border:1px solid #e0e9e0;">
+
+  <div style="background:linear-gradient(135deg,#1a3d22,#2d6a3f);padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="color:#fff;font-size:14px;font-weight:700">🌾 AgroSmart AI</div>
+      <div style="color:rgba(255,255,255,.7);font-size:11px">Powered by Groq · Ask anything about farming</div>
+    </div>
+    <button onclick="toggleAiChat()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1">×</button>
+  </div>
+
+  <div id="aiChatMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;">
+    <div class="ai-msg bot" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;color:#333;max-width:90%;line-height:1.6">
+      👋 Namaste! I'm your AI farming assistant.<br>Ask me anything — crop advice, pest help, govt schemes, market prices, or anything about farming!
+    </div>
+  </div>
+
+  <div style="padding:10px 12px;border-top:1px solid #eee;display:flex;gap:8px;">
+    <input id="aiChatInput" type="text" placeholder="Ask about farming..."
+      style="flex:1;padding:9px 12px;border:1.5px solid #dde8df;border-radius:8px;
+             font-family:inherit;font-size:13px;outline:none;"
+      onkeydown="if(event.key==='Enter')sendAiMsg()"
+      onfocus="this.style.borderColor='#4caf50'" onblur="this.style.borderColor='#dde8df'">
+    <button onclick="sendAiMsg()" id="aiSendBtn"
+      style="background:#1a3d22;color:#fff;border:none;border-radius:8px;
+             padding:9px 14px;font-size:16px;cursor:pointer;">➤</button>
+  </div>
+</div>
+
+<script>
+var aiOpen = false;
+var aiConversation = [];
+
+function toggleAiChat(){
+  aiOpen = !aiOpen;
+  var box = document.getElementById('aiChatBox');
+  box.style.display = aiOpen ? 'flex' : 'none';
+  document.getElementById('aiChatBtn').style.transform = aiOpen ? 'rotate(20deg) scale(1.1)' : '';
+  if(aiOpen) document.getElementById('aiChatInput').focus();
+}
+
+async function sendAiMsg(){
+  var input = document.getElementById('aiChatInput');
+  var q = input.value.trim();
+  if(!q) return;
+  input.value = '';
+
+  var msgs = document.getElementById('aiChatMsgs');
+  msgs.innerHTML += '<div style="background:#1a3d22;color:#fff;border-radius:10px 10px 3px 10px;padding:9px 13px;font-size:13px;max-width:85%;align-self:flex-end;margin-left:auto;line-height:1.5">'+escHtml(q)+'</div>';
+
+  var thinkId = 'think-'+Date.now();
+  msgs.innerHTML += '<div id="'+thinkId+'" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;max-width:80%;"><span style="color:#aaa">●●●</span></div>';
+  msgs.scrollTop = msgs.scrollHeight;
+
+  document.getElementById('aiSendBtn').disabled = true;
+  aiConversation.push({role:"user", content: q});
+
+  try {
+    var resp = await fetch("/ai/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({messages: aiConversation.slice(-8)})
+    });
+    var data = await resp.json();
+    if(data.error) throw new Error(data.error.message || data.error.type);
+    var reply = data.choices[0].message.content;
+    aiConversation.push({role:"assistant", content: reply});
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = reply.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  } catch(err){
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = '<span style="color:#c62828">❌ Error: '+err.message+'</span>';
+  }
+
+  document.getElementById('aiSendBtn').disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
 </body>
 </html>

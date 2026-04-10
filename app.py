@@ -5,7 +5,7 @@ import requests, os, hashlib, re, time
 app = Flask(__name__)
 app.secret_key = "agrosmart_secret_2025"
 API_KEY ="c77ad771da8c51df70707890f376e2d5"
-GROQ_API_KEY = "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" #my groq ai api key
+GROQ_API_KEY = "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"  # Get a new key at console.groq.com
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -309,14 +309,14 @@ def admin_posts():
     cat = request.args.get('cat', '').strip()
     if cat:
         posts = db_exec(
-            "SELECT cp.id, cp.title, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
+            "SELECT cp.id, cp.title, cp.body, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
             "(SELECT COUNT(*) FROM community_replies r WHERE r.post_id=cp.id) AS reply_count "
             "FROM community_posts cp LEFT JOIN farmers f ON f.phone=cp.phone "
             "WHERE cp.category=%s ORDER BY cp.created_at DESC",
             (cat,), fetch='all') or []
     else:
         posts = db_exec(
-            "SELECT cp.id, cp.title, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
+            "SELECT cp.id, cp.title, cp.body, cp.phone, f.name, cp.category, cp.likes, cp.created_at, "
             "(SELECT COUNT(*) FROM community_replies r WHERE r.post_id=cp.id) AS reply_count "
             "FROM community_posts cp LEFT JOIN farmers f ON f.phone=cp.phone "
             "ORDER BY cp.created_at DESC",
@@ -353,7 +353,7 @@ def admin_delete_reply():
 def admin_logs():
     filter_phone = request.args.get('phone', '').strip()
     filter_page  = request.args.get('page_filter', '').strip()
-    q, params = "SELECT phone, action, page, action_time FROM activity_log WHERE 1=1", []
+    q, params = "SELECT id, phone, action, page, action_time FROM activity_log WHERE 1=1", []
     if filter_phone:
         q += " AND phone ILIKE %s"; params.append(f'%{filter_phone}%')
     if filter_page:
@@ -361,13 +361,36 @@ def admin_logs():
     q += " ORDER BY action_time DESC LIMIT 200"
     logs = db_exec(q, tuple(params), fetch='all') or []
     logins = db_exec(
-        "SELECT phone, login_time FROM login_history ORDER BY login_time DESC LIMIT 100",
+        "SELECT id, phone, login_time FROM login_history ORDER BY login_time DESC LIMIT 100",
         fetch='all') or []
     log_activity(session['user'], "Viewed activity logs (admin)", "admin")
     return render_template("admin_logs.html",
         user=get_user(session['user']), active='admin',
         logs=logs, logins=logins,
         filter_phone=filter_phone, filter_page=filter_page)
+
+
+@app.route("/mgmt/delete_log", methods=["POST"])
+@admin_required
+def admin_delete_log():
+    data = request.get_json() or {}
+    log_id = data.get('log_id')
+    if log_id:
+        db_exec("DELETE FROM activity_log WHERE id=%s", (log_id,))
+        log_activity(session['user'], f"Admin deleted activity log id={log_id}", "admin")
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
+
+@app.route("/mgmt/delete_login", methods=["POST"])
+@admin_required
+def admin_delete_login():
+    data = request.get_json() or {}
+    login_id = data.get('login_id')
+    if login_id:
+        db_exec("DELETE FROM login_history WHERE id=%s", (login_id,))
+        log_activity(session['user'], f"Admin deleted login record id={login_id}", "admin")
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
 
 @app.route("/mgmt/crop_stats")
 @admin_required
@@ -408,6 +431,7 @@ def simple_login():
         if user[7] != hash_pwd(password): return jsonify({"status":"fail","msg":"Wrong password."})
         session['user'] = mobile
         session['is_admin'] = bool(user[8])
+        session['name'] = user[0] or ''
         db_exec("INSERT INTO login_history (phone) VALUES (%s)",(mobile,))
         log_activity(mobile,"Logged in with password","login")
         return jsonify({"status":"success","name":user[0] or "","phone":mobile,
@@ -420,6 +444,7 @@ def simple_login():
     log_activity(mobile,"Logged in","login")
     user = get_user(mobile)
     session['is_admin'] = bool(user.is_admin) if user else False
+    session['name'] = user.name or '' if user else ''
     return jsonify({"status":"success","name":user[0] if user and user[0] else "",
                     "phone":mobile,"location":user[1] if user and user[1] else "",
                     "farm_size":str(user[3]) if user and user[3] else "",

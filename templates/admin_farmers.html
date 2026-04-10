@@ -1,4 +1,3 @@
-{% include '_sidebar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,8 +57,8 @@
   <div class="adm-topbar-right">
     <span class="adm-badge">ADMIN</span>
     <a href="{{ url_for('profile') }}" class="adm-pill">
-      <div class="adm-avatar">{{ session.get('name','A')[0]|upper }}</div>
-      <span>{{ session.get('name','Admin') }}</span>
+      <div class="adm-avatar">{{ user.name[0]|upper if user and user.name else 'A' }}</div>
+      <span>{{ user.name if user and user.name else 'Admin' }}</span>
       <span>▾</span>
     </a>
   </div>
@@ -145,5 +144,111 @@ async function toggleAdmin(phone, btn) {
   } else { alert('❌ ' + (d.msg || 'Error.')); }
 }
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var serverName  = "{{ user.name if user and user.name else '' }}";
+  var serverPhone = "{{ user.phone if user else '' }}";
+  var serverPic   = "{{ url_for('static', filename=user.profile_pic) if user and user.profile_pic else '' }}";
+  if (typeof setNavUser === 'function') setNavUser(serverName, serverPhone);
+  if (serverPic && typeof setNavPic === 'function') setNavPic(serverPic);
+  // Also update the admin topbar pill name directly
+  var adminPillName = document.querySelector('.adm-pill span:not([style])');
+  if (adminPillName && serverName) adminPillName.textContent = serverName;
+});
+</script>
+<!-- ═══ FLOATING AI ASSISTANT ════════════════════════════════════════════ -->
+<div id="aiChatBtn" onclick="toggleAiChat()" title="Ask AI Farming Assistant"
+  style="position:fixed;bottom:24px;right:24px;z-index:1100;
+         width:54px;height:54px;border-radius:50%;
+         background:linear-gradient(135deg,#1a3d22,#4caf50);
+         box-shadow:0 4px 18px rgba(26,61,34,.4);
+         display:flex;align-items:center;justify-content:center;
+         cursor:pointer;font-size:24px;transition:transform .2s;">🌾</div>
+
+<div id="aiChatBox" style="display:none;position:fixed;bottom:88px;right:24px;
+  width:340px;max-height:480px;background:#fff;border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:1099;
+  flex-direction:column;overflow:hidden;border:1px solid #e0e9e0;">
+
+  <div style="background:linear-gradient(135deg,#1a3d22,#2d6a3f);padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="color:#fff;font-size:14px;font-weight:700">🌾 AgroSmart AI</div>
+      <div style="color:rgba(255,255,255,.7);font-size:11px">Powered by Groq · Ask anything about farming</div>
+    </div>
+    <button onclick="toggleAiChat()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1">×</button>
+  </div>
+
+  <div id="aiChatMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;">
+    <div class="ai-msg bot" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;color:#333;max-width:90%;line-height:1.6">
+      👋 Namaste! I'm your AI farming assistant.<br>Ask me anything — crop advice, pest help, govt schemes, market prices, or anything about farming!
+    </div>
+  </div>
+
+  <div style="padding:10px 12px;border-top:1px solid #eee;display:flex;gap:8px;">
+    <input id="aiChatInput" type="text" placeholder="Ask about farming..."
+      style="flex:1;padding:9px 12px;border:1.5px solid #dde8df;border-radius:8px;
+             font-family:inherit;font-size:13px;outline:none;"
+      onkeydown="if(event.key==='Enter')sendAiMsg()"
+      onfocus="this.style.borderColor='#4caf50'" onblur="this.style.borderColor='#dde8df'">
+    <button onclick="sendAiMsg()" id="aiSendBtn"
+      style="background:#1a3d22;color:#fff;border:none;border-radius:8px;
+             padding:9px 14px;font-size:16px;cursor:pointer;">➤</button>
+  </div>
+</div>
+
+<script>
+var aiOpen = false;
+var aiConversation = [];
+
+function toggleAiChat(){
+  aiOpen = !aiOpen;
+  var box = document.getElementById('aiChatBox');
+  box.style.display = aiOpen ? 'flex' : 'none';
+  document.getElementById('aiChatBtn').style.transform = aiOpen ? 'rotate(20deg) scale(1.1)' : '';
+  if(aiOpen) document.getElementById('aiChatInput').focus();
+}
+
+async function sendAiMsg(){
+  var input = document.getElementById('aiChatInput');
+  var q = input.value.trim();
+  if(!q) return;
+  input.value = '';
+
+  var msgs = document.getElementById('aiChatMsgs');
+  msgs.innerHTML += '<div style="background:#1a3d22;color:#fff;border-radius:10px 10px 3px 10px;padding:9px 13px;font-size:13px;max-width:85%;align-self:flex-end;margin-left:auto;line-height:1.5">'+escHtml(q)+'</div>';
+
+  var thinkId = 'think-'+Date.now();
+  msgs.innerHTML += '<div id="'+thinkId+'" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;max-width:80%;"><span style="color:#aaa">●●●</span></div>';
+  msgs.scrollTop = msgs.scrollHeight;
+
+  document.getElementById('aiSendBtn').disabled = true;
+  aiConversation.push({role:"user", content: q});
+
+  try {
+    var resp = await fetch("/ai/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({messages: aiConversation.slice(-8)})
+    });
+    var data = await resp.json();
+    if(data.error) throw new Error(data.error.message || data.error.type);
+    var reply = data.choices[0].message.content;
+    aiConversation.push({role:"assistant", content: reply});
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = reply.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  } catch(err){
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = '<span style="color:#c62828">❌ Error: '+err.message+'</span>';
+  }
+
+  document.getElementById('aiSendBtn').disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
 </body>
 </html>

@@ -1,4 +1,3 @@
-{% include '_sidebar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,37 +8,67 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--gd:#1a3d22;--gm:#2d6a3f;--g:#4caf50;--gl:#e6f4ea;--cream:#f4f7f4;--white:#fff;--text:#1a1a1a;--tm:#4a5568;--tl:#9aab9e;--border:#dde8df;--sh:0 2px 8px rgba(0,0,0,.07);--orange:#e65c00;}
     body{font-family:'DM Sans','Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
-    .adm-topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--sh);position:sticky;top:0;z-index:100;}
+    .adm-topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:100;}
     .adm-brand{font-size:16px;font-weight:700;color:var(--gd);}
     .adm-topbar-right{display:flex;align-items:center;gap:10px;}
-    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;}
-    .adm-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
-    .adm-avatar{width:24px;height:24px;border-radius:50%;background:#c8e6c9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gd);}
-    .adm-shell{display:flex;min-height:calc(100vh - 52px);}
-    .adm-sidebar{width:210px;background:var(--gd);flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;display:flex;flex-direction:column;}
-    .adm-sb-head{padding:16px 18px 8px;color:rgba(255,255,255,.45);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
-    .adm-sb-nav{list-style:none;padding:4px 0 16px;}
-    .adm-sb-nav li a{display:flex;align-items:center;gap:9px;padding:10px 18px;color:rgba(255,255,255,.68);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+    .adm-badge{background:var(--orange);color:#fff;font-size:10px;padding:3px 8px;border-radius:99px;font-weight:700;}
+    .adm-pill{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;color:#333;text-decoration:none;}
+    .adm-pill:hover{border-color:var(--g);}
+    .adm-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gm),var(--g));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+    .adm-shell{display:flex;min-height:calc(100vh - 56px);}
+    .adm-sidebar{width:220px;background:var(--gd);flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
+    .adm-sb-head{padding:20px 18px 8px;color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
+    .adm-sb-nav{list-style:none;padding:4px 10px 16px;}
+    .adm-sb-nav li a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;font-weight:500;border-radius:8px;transition:background .15s,color .15s;margin-bottom:2px;}
     .adm-sb-nav li a:hover{background:rgba(255,255,255,.1);color:#fff;}
-    .adm-sb-nav li a.active{background:rgba(255,255,255,.16);color:#fff;font-weight:700;}
-    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.1);margin:4px 18px 8px;}
-    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 18px 16px;color:rgba(255,255,255,.5);text-decoration:none;font-size:12px;}
+    .adm-sb-nav li a.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700;}
+    .adm-sb-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:4px 18px 12px;}
+    .adm-sb-back{display:flex;align-items:center;gap:7px;padding:10px 22px 18px;color:rgba(255,255,255,.45);text-decoration:none;font-size:12px;}
     .adm-sb-back:hover{color:rgba(255,255,255,.8);}
-    .adm-main{flex:1;padding:24px;overflow:auto;}
-    .adm-page-header{margin-bottom:20px;}
-    .adm-page-header h1{font-size:20px;font-weight:700;color:var(--gd);margin-bottom:3px;}
-    .adm-page-header p{font-size:12px;color:var(--tm);}
-    .adm-bar-section{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .adm-bar-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--sh);}
-    .adm-bar-card h3{font-size:12px;font-weight:700;color:var(--gd);margin-bottom:14px;}
-    .adm-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-    .adm-bar-label{font-size:11px;color:#333;min-width:80px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .adm-bar-track{flex:1;background:#f0f4f0;border-radius:99px;height:12px;overflow:hidden;}
-    .adm-bar-fill{height:12px;border-radius:99px;}
-    .adm-bar-fill-1{background:linear-gradient(90deg,#1a3d22,#4caf50);}
-    .adm-bar-fill-2{background:linear-gradient(90deg,#1a5536,#81c784);}
-    .adm-bar-cnt{font-size:11px;color:var(--tl);min-width:24px;text-align:right;}
-    .adm-empty{color:#888;font-size:13px;padding:1rem 0;}
+    .adm-main{flex:1;padding:28px;overflow:auto;}
+    .adm-page-header{margin-bottom:24px;}
+    .adm-page-header h1{font-size:22px;font-weight:800;color:var(--gd);margin-bottom:4px;}
+    .adm-page-header p{font-size:13px;color:var(--tm);}
+
+    /* SUMMARY CHIPS */
+    .adm-summary-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+    .adm-sum-chip{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 20px;flex:1;min-width:160px;box-shadow:var(--sh);}
+    .adm-sum-chip-icon{font-size:20px;margin-bottom:6px;}
+    .adm-sum-chip-val{font-size:22px;font-weight:800;color:var(--gd);line-height:1;}
+    .adm-sum-chip-lbl{font-size:11px;color:var(--tl);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+
+    /* TWO-COL */
+    .adm-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+    /* STAT PANEL */
+    .adm-stat-panel{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--sh);overflow:hidden;}
+    .adm-panel-head{padding:18px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .adm-panel-head-left h3{font-size:14px;font-weight:700;color:var(--gd);margin-bottom:2px;}
+    .adm-panel-head-left p{font-size:11px;color:var(--tl);}
+    .adm-panel-total{background:var(--gl);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--gm);}
+    .adm-panel-body{padding:16px 22px;}
+
+    /* CROP ROW */
+    .adm-crop-row{margin-bottom:14px;}
+    .adm-crop-row:last-child{margin-bottom:0;}
+    .adm-crop-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .adm-rank-badge{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+    .rank-1{background:#ffd700;color:#7a4f00;}
+    .rank-2{background:#c0c0c0;color:#444;}
+    .rank-3{background:#cd7f32;color:#fff;}
+    .rank-other{background:#f0f4f0;color:var(--tl);}
+    .adm-crop-name{font-size:13px;font-weight:700;color:var(--text);flex:1;text-transform:capitalize;}
+    .adm-crop-pct{font-size:12px;font-weight:700;color:var(--gm);}
+    .adm-crop-count{font-size:11px;color:var(--tl);margin-left:4px;}
+    .adm-bar-track{height:8px;background:#eef2ee;border-radius:99px;overflow:hidden;}
+    .adm-bar-fill{height:8px;border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+    .fill-cal{background:linear-gradient(90deg,#1a3d22,#4caf50);}
+    .fill-diary{background:linear-gradient(90deg,#1a5536,#66bb6a);}
+
+    /* EMPTY */
+    .adm-empty{text-align:center;padding:40px 20px;color:#aaa;}
+    .adm-empty-icon{font-size:36px;margin-bottom:10px;}
+    .adm-empty p{font-size:13px;}
   </style>
 </head>
 <body>
@@ -48,9 +77,9 @@
   <div class="adm-topbar-right">
     <span class="adm-badge">ADMIN</span>
     <a href="{{ url_for('profile') }}" class="adm-pill">
-      <div class="adm-avatar">{{ session.get('name','A')[0]|upper }}</div>
-      <span>{{ session.get('name','Admin') }}</span>
-      <span>▾</span>
+      <div class="adm-avatar">{{ user.name[0]|upper if user and user.name else 'A' }}</div>
+      <span>{{ user.name if user and user.name else 'Admin' }}</span>
+      <span style="color:#bbb">▾</span>
     </a>
   </div>
 </div>
@@ -70,53 +99,225 @@
   <div class="adm-main">
     <div class="adm-page-header">
       <h1>🌾 Crop Statistics</h1>
-      <p>Most popular crops across calendar and diary</p>
+      <p>Most popular crops tracked across calendar and diary — ranked by usage</p>
     </div>
 
-    <div class="adm-bar-section">
-      <div class="adm-bar-card">
-        <h3>📅 Crop Calendar — Top Crops</h3>
-        {% if cal_crops %}
-          {% set max_cal = cal_crops[0][1] %}
-          {% for crop, cnt in cal_crops %}
-          <div class="adm-bar-row">
-            <div class="adm-bar-label" title="{{ crop }}">{{ crop }}</div>
-            <div class="adm-bar-track">
-              <div class="adm-bar-fill adm-bar-fill-1" data-width="{{ (cnt / max_cal * 100)|int }}"></div>
-            </div>
-            <div class="adm-bar-cnt">{{ cnt }}</div>
+    {% set cal_total = namespace(n=0) %}
+    {% for crop, cnt in cal_crops %}{% set cal_total.n = cal_total.n + cnt %}{% endfor %}
+    {% set diary_total = namespace(n=0) %}
+    {% for crop, cnt in diary_crops %}{% set diary_total.n = diary_total.n + cnt %}{% endfor %}
+
+    <div class="adm-summary-row">
+      <div class="adm-sum-chip">
+        <div class="adm-sum-chip-icon">📅</div>
+        <div class="adm-sum-chip-val">{{ cal_crops|length }}</div>
+        <div class="adm-sum-chip-lbl">Unique Crops in Calendar</div>
+      </div>
+      <div class="adm-sum-chip">
+        <div class="adm-sum-chip-icon">📝</div>
+        <div class="adm-sum-chip-val">{{ diary_crops|length }}</div>
+        <div class="adm-sum-chip-lbl">Unique Crops in Diary</div>
+      </div>
+      <div class="adm-sum-chip">
+        <div class="adm-sum-chip-icon">🌱</div>
+        <div class="adm-sum-chip-val">{{ cal_total.n }}</div>
+        <div class="adm-sum-chip-lbl">Calendar Entries Total</div>
+      </div>
+      <div class="adm-sum-chip">
+        <div class="adm-sum-chip-icon">✍️</div>
+        <div class="adm-sum-chip-val">{{ diary_total.n }}</div>
+        <div class="adm-sum-chip-lbl">Diary Entries Total</div>
+      </div>
+    </div>
+
+    <div class="adm-stats-grid">
+      <!-- CALENDAR PANEL -->
+      <div class="adm-stat-panel">
+        <div class="adm-panel-head">
+          <div class="adm-panel-head-left">
+            <h3>📅 Crop Calendar</h3>
+            <p>Top crops farmers are scheduling</p>
           </div>
-          {% endfor %}
-        {% else %}
-          <div class="adm-empty">No crop calendar data yet.</div>
-        {% endif %}
+          <div class="adm-panel-total">{{ cal_total.n }} entries</div>
+        </div>
+        <div class="adm-panel-body">
+          {% if cal_crops %}
+            {% set max_cal = cal_crops[0][1] %}
+            {% for crop, cnt in cal_crops %}
+            <div class="adm-crop-row">
+              <div class="adm-crop-meta">
+                <div class="adm-rank-badge {{ 'rank-1' if loop.index==1 else 'rank-2' if loop.index==2 else 'rank-3' if loop.index==3 else 'rank-other' }}">
+                  {{ loop.index }}
+                </div>
+                <div class="adm-crop-name">{{ crop }}</div>
+                <span class="adm-crop-pct">{{ ((cnt / cal_total.n) * 100)|round(1) if cal_total.n > 0 else 0 }}%</span>
+                <span class="adm-crop-count">({{ cnt }})</span>
+              </div>
+              <div class="adm-bar-track">
+                <div class="adm-bar-fill fill-cal" data-w="{{ (cnt / max_cal * 100)|int }}" style="width:0%"></div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="adm-empty">
+            <div class="adm-empty-icon">📅</div>
+            <p>No crop calendar data yet.</p>
+          </div>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="adm-bar-card">
-        <h3>📝 Crop Diary — Top Crops</h3>
-        {% if diary_crops %}
-          {% set max_diary = diary_crops[0][1] %}
-          {% for crop, cnt in diary_crops %}
-          <div class="adm-bar-row">
-            <div class="adm-bar-label" title="{{ crop }}">{{ crop }}</div>
-            <div class="adm-bar-track">
-              <div class="adm-bar-fill adm-bar-fill-2" data-width="{{ (cnt / max_diary * 100)|int }}"></div>
-            </div>
-            <div class="adm-bar-cnt">{{ cnt }}</div>
+      <!-- DIARY PANEL -->
+      <div class="adm-stat-panel">
+        <div class="adm-panel-head">
+          <div class="adm-panel-head-left">
+            <h3>📝 Crop Diary</h3>
+            <p>Top crops farmers are journaling</p>
           </div>
-          {% endfor %}
-        {% else %}
-          <div class="adm-empty">No crop diary data yet.</div>
-        {% endif %}
+          <div class="adm-panel-total">{{ diary_total.n }} entries</div>
+        </div>
+        <div class="adm-panel-body">
+          {% if diary_crops %}
+            {% set max_diary = diary_crops[0][1] %}
+            {% for crop, cnt in diary_crops %}
+            <div class="adm-crop-row">
+              <div class="adm-crop-meta">
+                <div class="adm-rank-badge {{ 'rank-1' if loop.index==1 else 'rank-2' if loop.index==2 else 'rank-3' if loop.index==3 else 'rank-other' }}">
+                  {{ loop.index }}
+                </div>
+                <div class="adm-crop-name">{{ crop }}</div>
+                <span class="adm-crop-pct">{{ ((cnt / diary_total.n) * 100)|round(1) if diary_total.n > 0 else 0 }}%</span>
+                <span class="adm-crop-count">({{ cnt }})</span>
+              </div>
+              <div class="adm-bar-track">
+                <div class="adm-bar-fill fill-diary" data-w="{{ (cnt / max_diary * 100)|int }}" style="width:0%"></div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="adm-empty">
+            <div class="adm-empty-icon">📝</div>
+            <p>No crop diary data yet.</p>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </div>
+<script>
+// Animate bars on load
+setTimeout(() => {
+  document.querySelectorAll('.adm-bar-fill[data-w]').forEach(el => {
+    el.style.width = el.getAttribute('data-w') + '%';
+  });
+}, 120);
+</script>
 
 <script>
-document.querySelectorAll('.adm-bar-fill[data-width]').forEach(function(el) {
-  el.style.width = el.getAttribute('data-width') + '%';
+document.addEventListener('DOMContentLoaded', function() {
+  var serverName  = "{{ user.name if user and user.name else '' }}";
+  var serverPhone = "{{ user.phone if user else '' }}";
+  var serverPic   = "{{ url_for('static', filename=user.profile_pic) if user and user.profile_pic else '' }}";
+  if (typeof setNavUser === 'function') setNavUser(serverName, serverPhone);
+  if (serverPic && typeof setNavPic === 'function') setNavPic(serverPic);
+  // Also update the admin topbar pill name directly
+  var adminPillName = document.querySelector('.adm-pill span:not([style])');
+  if (adminPillName && serverName) adminPillName.textContent = serverName;
 });
 </script>
+<!-- ═══ FLOATING AI ASSISTANT ════════════════════════════════════════════ -->
+<div id="aiChatBtn" onclick="toggleAiChat()" title="Ask AI Farming Assistant"
+  style="position:fixed;bottom:24px;right:24px;z-index:1100;
+         width:54px;height:54px;border-radius:50%;
+         background:linear-gradient(135deg,#1a3d22,#4caf50);
+         box-shadow:0 4px 18px rgba(26,61,34,.4);
+         display:flex;align-items:center;justify-content:center;
+         cursor:pointer;font-size:24px;transition:transform .2s;">🌾</div>
+
+<div id="aiChatBox" style="display:none;position:fixed;bottom:88px;right:24px;
+  width:340px;max-height:480px;background:#fff;border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:1099;
+  flex-direction:column;overflow:hidden;border:1px solid #e0e9e0;">
+
+  <div style="background:linear-gradient(135deg,#1a3d22,#2d6a3f);padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="color:#fff;font-size:14px;font-weight:700">🌾 AgroSmart AI</div>
+      <div style="color:rgba(255,255,255,.7);font-size:11px">Powered by Groq · Ask anything about farming</div>
+    </div>
+    <button onclick="toggleAiChat()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1">×</button>
+  </div>
+
+  <div id="aiChatMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;">
+    <div class="ai-msg bot" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;color:#333;max-width:90%;line-height:1.6">
+      👋 Namaste! I'm your AI farming assistant.<br>Ask me anything — crop advice, pest help, govt schemes, market prices, or anything about farming!
+    </div>
+  </div>
+
+  <div style="padding:10px 12px;border-top:1px solid #eee;display:flex;gap:8px;">
+    <input id="aiChatInput" type="text" placeholder="Ask about farming..."
+      style="flex:1;padding:9px 12px;border:1.5px solid #dde8df;border-radius:8px;
+             font-family:inherit;font-size:13px;outline:none;"
+      onkeydown="if(event.key==='Enter')sendAiMsg()"
+      onfocus="this.style.borderColor='#4caf50'" onblur="this.style.borderColor='#dde8df'">
+    <button onclick="sendAiMsg()" id="aiSendBtn"
+      style="background:#1a3d22;color:#fff;border:none;border-radius:8px;
+             padding:9px 14px;font-size:16px;cursor:pointer;">➤</button>
+  </div>
+</div>
+
+<script>
+var aiOpen = false;
+var aiConversation = [];
+
+function toggleAiChat(){
+  aiOpen = !aiOpen;
+  var box = document.getElementById('aiChatBox');
+  box.style.display = aiOpen ? 'flex' : 'none';
+  document.getElementById('aiChatBtn').style.transform = aiOpen ? 'rotate(20deg) scale(1.1)' : '';
+  if(aiOpen) document.getElementById('aiChatInput').focus();
+}
+
+async function sendAiMsg(){
+  var input = document.getElementById('aiChatInput');
+  var q = input.value.trim();
+  if(!q) return;
+  input.value = '';
+
+  var msgs = document.getElementById('aiChatMsgs');
+  msgs.innerHTML += '<div style="background:#1a3d22;color:#fff;border-radius:10px 10px 3px 10px;padding:9px 13px;font-size:13px;max-width:85%;align-self:flex-end;margin-left:auto;line-height:1.5">'+escHtml(q)+'</div>';
+
+  var thinkId = 'think-'+Date.now();
+  msgs.innerHTML += '<div id="'+thinkId+'" style="background:#f4f7f4;border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:13px;max-width:80%;"><span style="color:#aaa">●●●</span></div>';
+  msgs.scrollTop = msgs.scrollHeight;
+
+  document.getElementById('aiSendBtn').disabled = true;
+  aiConversation.push({role:"user", content: q});
+
+  try {
+    var resp = await fetch("/ai/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({messages: aiConversation.slice(-8)})
+    });
+    var data = await resp.json();
+    if(data.error) throw new Error(data.error.message || data.error.type);
+    var reply = data.choices[0].message.content;
+    aiConversation.push({role:"assistant", content: reply});
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = reply.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  } catch(err){
+    var el = document.getElementById(thinkId);
+    if(el) el.innerHTML = '<span style="color:#c62828">❌ Error: '+err.message+'</span>';
+  }
+
+  document.getElementById('aiSendBtn').disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
 </body>
 </html>
